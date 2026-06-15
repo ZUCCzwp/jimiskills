@@ -1,0 +1,5 @@
+interface:
+  display_name: "JimmyAI Image & Video API"
+  short_description: "Generate images and videos via JimmyAI"
+  icon_small: "./assets/jimmyai-small.svg"
+  default_prompt: "Use $jimmyai to help me set up JimmyAI and generate my first image or video."
