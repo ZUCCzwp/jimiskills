@@ -41,13 +41,13 @@ Result fields: `data.status`, `data.progress`, `data.result.video_url`, `data.er
 
 | Field | Required | Notes |
 |-------|----------|-------|
-| model | yes | `Gemini-Omini`, `Omni-Flash-Ext`, `gemini-omni` |
+| model | yes | `Gemini-Omini`, `Omni-Flash-Ext`, `gemini-omni`, or `omni-10s` (fixed 10s / 720p, up to 7 refs) |
 | prompt | yes | text description |
 | duration | no | default 6 seconds |
 | resolution | no | `720p`, `1080p`, `4k` |
 | aspect_ratio | no | e.g. `16:9`, `9:16` (overrides orientation) |
 | orientation | no | `landscape` / `portrait` when aspect_ratio empty |
-| image_urls / images | no | reference images |
+| image_urls / images | no | reference images; `omni-10s` supports up to 7 |
 
 Poll via same `GET /api/open-api/v1/videos/{taskId}`.
 

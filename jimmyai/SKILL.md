@@ -49,6 +49,7 @@ If `JIMMYAI_API_KEY` is missing, guide the user to set it locally and confirm wh
 | Image with more model options | `create-image` → poll `GET /images/{taskId}` |
 | Sora video | `create-video` → poll `GET /videos/{taskId}` |
 | Gemini Omni video | `create-gemini-video` → poll `GET /videos/{taskId}` |
+| Gemini Omni 10s (`omni-10s`) | same endpoint with `--model omni-10s` |
 | Just check task status | `poll --task-id <id> --type video\|image` |
 | Create + wait in one step | `create-and-poll` |
 
