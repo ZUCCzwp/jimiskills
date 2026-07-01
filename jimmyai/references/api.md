@@ -61,7 +61,33 @@ Poll via same `GET /api/open-api/v1/videos/{taskId}`.
 
 `POST /api/open-api/v1/seedance/videos` — see https://docs.jimmyai.cn/zh/api-reference/seedance/create.md
 
-Asset audit required for some inputs:
+Poll via `GET /api/open-api/v1/videos/{taskId}` (same as Sora / Gemini Omni).
+
+| Route | `model` | Billing | Duration | Notes |
+|-------|---------|---------|----------|-------|
+| Manxue | `sd2_mx_*`, `sd2_mx_fast_*`, `sd2_mx_video_*` | per second | 4–12 s | assets need `asset://` audit |
+| SP economy | `seedance2.0-sp`, `seedance2.0-fast-sp` | per second × resolution | 4–15 s | see SP doc |
+| SP official | `seedance2.0-of-sp`, `seedance2.0-of-fast-sp` | per second × resolution | 4–15 s | see SP doc |
+| Mini | `seedance2.0-mini`, `seedance2.0-mini-video` | per second × resolution | 4–15 s | |
+| MD standard | `seedance2.0-md` | per task | 4–15 s | direct `https://` URLs; max 4 images |
+| MD fast | `seedance2.0-fast-md` | per task | 4–15 s | same as MD |
+| **Fast I2V** | `seedance2.0-fast-i2v` | per task | 1–15 s | image refs only, max 9; no video/audio refs |
+| STD | `seedance2.0-std` | per task | 4–15 s | max 9 images, max 3 audio refs |
+
+Fast I2V detail: https://docs.jimmyai.cn/zh/api-reference/seedance/md/fast-i2v.md
+
+| Field | Required | Notes |
+|-------|----------|-------|
+| model | yes | e.g. `seedance2.0-fast-i2v` (request model = billing model) |
+| prompt | yes | max 5000 chars for MD / Fast I2V |
+| duration | yes | Fast I2V: 1–15; MD: 4–15 |
+| ratio | no | Fast I2V / MD: `16:9`, `9:16`, `1:1` |
+| images | no | reference image URLs |
+| first_image / last_image | no | frame mode; mutually exclusive with `images` |
+| reference_videos | no | not supported on `seedance2.0-fast-i2v` |
+| reference_audios | no | not supported on MD / Fast I2V |
+
+Asset audit (Manxue routes only):
 - `POST /api/open-api/v1/seedance/assets/audit`
 - `GET /api/open-api/v1/seedance/assets/status`
 

@@ -50,10 +50,11 @@ If `JIMMYAI_API_KEY` is missing, guide the user to set it locally and confirm wh
 | Sora video | `create-video` → poll `GET /videos/{taskId}` |
 | Gemini Omni video | `create-gemini-video` → poll `GET /videos/{taskId}` |
 | Gemini Omni 10s (`omni-10s`) | same endpoint with `--model omni-10s` |
+| Seedance video (MD / Fast I2V / etc.) | `create-seedance-video` → poll `GET /videos/{taskId}` |
 | Just check task status | `poll --task-id <id> --type video\|image` |
 | Create + wait in one step | `create-and-poll` |
 
-For VEO, Seedance, image edits, or image understanding, fetch the specific page from https://docs.jimmyai.cn/llms.txt before calling.
+For VEO, other Seedance routes (SP / Manxue / STD), image edits, or image understanding, fetch the specific page from https://docs.jimmyai.cn/llms.txt before calling.
 
 ## Workflow
 
@@ -114,6 +115,18 @@ python "$JIMMYAI_CLI" create-and-poll \
 python "$JIMMYAI_CLI" generate-image \
   --prompt "Cyberpunk city at night, neon signs" \
   --quality high
+```
+
+### Fast I2V video (Seedance, async)
+
+```bash
+python "$JIMMYAI_CLI" create-and-poll \
+  --type seedance-video \
+  --model seedance2.0-fast-i2v \
+  --prompt "Subject turns slowly, cinematic lighting" \
+  --duration 8 \
+  --ratio "16:9" \
+  --image "https://example.com/ref.jpg"
 ```
 
 ### Poll existing task

@@ -187,6 +187,42 @@ def cmd_create_video(args: argparse.Namespace) -> None:
         print(task_id)
 
 
+def cmd_create_seedance_video(args: argparse.Namespace) -> None:
+    api_key = _api_key(args.dry_run)
+    base = _base_url(args.base_url)
+    prompt = _read_prompt(args.prompt, args.prompt_file)
+    body: Dict[str, Any] = {
+        "model": args.model,
+        "prompt": prompt,
+        "duration": args.duration,
+    }
+    if args.ratio:
+        body["ratio"] = args.ratio
+    if args.image:
+        body["images"] = args.image
+    if args.first_image:
+        body["first_image"] = args.first_image
+    if args.last_image:
+        body["last_image"] = args.last_image
+
+    payload = _request(
+        "POST",
+        f"{base}/api/open-api/v1/seedance/videos",
+        api_key,
+        body,
+        dry_run=args.dry_run,
+    )
+    if args.dry_run:
+        return
+    _check_code(payload)
+    if args.json_out:
+        Path(args.json_out).write_text(json.dumps(payload, indent=2), encoding="utf-8")
+    print(json.dumps(payload, indent=2, ensure_ascii=False))
+    task_id = (payload.get("data") or {}).get("task_id")
+    if task_id:
+        print(task_id)
+
+
 def cmd_create_gemini_video(args: argparse.Namespace) -> None:
     api_key = _api_key(args.dry_run)
     base = _base_url(args.base_url)
@@ -315,7 +351,7 @@ def cmd_create_and_poll(args: argparse.Namespace) -> None:
         if args.orientation:
             body["orientation"] = args.orientation
         if args.image:
-            body["images"] = [args.image]
+            body["images"] = args.image
         url = f"{base}/api/open-api/v1/videos"
         poll_type = "video"
     elif args.type == "gemini-video":
@@ -329,8 +365,24 @@ def cmd_create_and_poll(args: argparse.Namespace) -> None:
         elif args.orientation:
             body["orientation"] = args.orientation
         if args.image:
-            body["image_urls"] = [args.image]
+            body["image_urls"] = args.image
         url = f"{base}/api/open-api/v1/gemini/omni/videos"
+        poll_type = "video"
+    elif args.type == "seedance-video":
+        body = {
+            "model": args.model,
+            "prompt": prompt,
+            "duration": args.duration,
+        }
+        if args.ratio:
+            body["ratio"] = args.ratio
+        if args.image:
+            body["images"] = args.image
+        if getattr(args, "first_image", None):
+            body["first_image"] = args.first_image
+        if getattr(args, "last_image", None):
+            body["last_image"] = args.last_image
+        url = f"{base}/api/open-api/v1/seedance/videos"
         poll_type = "video"
     elif args.type == "image":
         body = {"model": args.model, "prompt": prompt}
@@ -389,6 +441,17 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--image", help="Reference image URL")
     p.set_defaults(func=cmd_create_video)
 
+    p = sub.add_parser("create-seedance-video", help="Create Seedance video task")
+    _add_common_flags(p)
+    _add_prompt_flags(p)
+    p.add_argument("--model", default="seedance2.0-fast-i2v")
+    p.add_argument("--duration", type=int, default=5)
+    p.add_argument("--ratio", default="16:9")
+    p.add_argument("--image", action="append", help="Reference image URL (repeatable)")
+    p.add_argument("--first-image", dest="first_image", help="First frame image URL")
+    p.add_argument("--last-image", dest="last_image", help="Last frame image URL")
+    p.set_defaults(func=cmd_create_seedance_video)
+
     p = sub.add_parser("create-gemini-video", help="Create Gemini Omni video task")
     _add_common_flags(p)
     _add_prompt_flags(p)
@@ -431,7 +494,7 @@ def build_parser() -> argparse.ArgumentParser:
     p = sub.add_parser("create-and-poll", help="Create task and poll until done")
     _add_common_flags(p)
     _add_prompt_flags(p)
-    p.add_argument("--type", choices=["video", "gemini-video", "image"], default="video")
+    p.add_argument("--type", choices=["video", "gemini-video", "seedance-video", "image"], default="video")
     p.add_argument("--model", default="sora2-12s")
     p.add_argument("--duration", type=int, default=12)
     p.add_argument("--orientation", choices=["landscape", "portrait"])
@@ -439,7 +502,9 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--resolution", default="720p")
     p.add_argument("--ratio", default="auto")
     p.add_argument("--quality", default="low")
-    p.add_argument("--image", help="Reference image URL")
+    p.add_argument("--image", action="append", help="Reference image URL (repeatable)")
+    p.add_argument("--first-image", dest="first_image", help="Seedance first frame URL")
+    p.add_argument("--last-image", dest="last_image", help="Seedance last frame URL")
     p.add_argument("--interval", type=float, default=DEFAULT_POLL_INTERVAL)
     p.add_argument("--timeout", type=float, default=DEFAULT_POLL_TIMEOUT)
     p.add_argument("--download", help="Download result media to path")

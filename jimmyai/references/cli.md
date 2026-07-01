@@ -28,6 +28,7 @@ export JIMMYAI_BASE_URL="https://www.jimmyai.cn"
 | Command | Purpose |
 |---------|---------|
 | `create-video` | Create Sora video task (async) |
+| `create-seedance-video` | Create Seedance video task (async) |
 | `create-gemini-video` | Create Gemini Omni video task |
 | `create-image` | Create async image task |
 | `generate-image` | Sync text-to-image (OpenAI-compatible) |
@@ -52,6 +53,30 @@ python "$JIMMYAI_CLI" create-video \
   --duration 12 \
   --image "https://example.com/ref.jpg"
 ```
+
+## create-seedance-video
+
+`POST /api/open-api/v1/seedance/videos` — poll with `poll --type video`.
+
+```bash
+# Fast I2V (image-to-video, per-task billing)
+python "$JIMMYAI_CLI" create-seedance-video \
+  --model seedance2.0-fast-i2v \
+  --prompt "Subject turns slowly, cinematic lighting" \
+  --duration 8 \
+  --ratio "16:9" \
+  --image "https://example.com/ref-1.jpg" \
+  --image "https://example.com/ref-2.jpg"
+
+# MD fast
+python "$JIMMYAI_CLI" create-seedance-video \
+  --model seedance2.0-fast-md \
+  --prompt "Rainy street at night" \
+  --duration 5 \
+  --ratio "9:16"
+```
+
+`seedance2.0-fast-i2v`: image refs only (max 9), no `reference_videos` / `reference_audios`, duration 1–15 s. Docs: https://docs.jimmyai.cn/zh/api-reference/seedance/md/fast-i2v.md
 
 ## create-gemini-video
 
@@ -107,7 +132,20 @@ python "$JIMMYAI_CLI" create-and-poll \
   --download output.mp4
 ```
 
-`--type` values: `video`, `gemini-video`, `image`
+`--type` values: `video`, `gemini-video`, `seedance-video`, `image`
+
+Seedance example:
+
+```bash
+python "$JIMMYAI_CLI" create-and-poll \
+  --type seedance-video \
+  --model seedance2.0-fast-i2v \
+  --prompt "A cat walking in a garden" \
+  --duration 8 \
+  --ratio "16:9" \
+  --image "https://example.com/ref.jpg" \
+  --download output.mp4
+```
 
 ## Global flags
 
