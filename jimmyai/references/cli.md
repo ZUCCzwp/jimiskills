@@ -74,7 +74,18 @@ python "$JIMMYAI_CLI" create-seedance-video \
   --prompt "Rainy street at night" \
   --duration 5 \
   --ratio "9:16"
+
+# Mini 特价版 (economy Mini SP)
+python "$JIMMYAI_CLI" create-seedance-video \
+  --model seedance2.0-mini-sp \
+  --prompt "A cat walking in a garden, cinematic" \
+  --duration 8 \
+  --resolution 720p \
+  --ratio "16:9" \
+  --image "https://example.com/ref.jpg"
 ```
+
+`seedance2.0-mini-sp`: unified `POST /api/open-api/v1/seedance/videos`, `resolution` `480p` or `720p`, duration 4–15 s.
 
 `seedance2.0-fast-i2v`: image refs only (max 9), no `reference_videos` / `reference_audios`, duration 1–15 s. Docs: https://docs.jimmyai.cn/zh/api-reference/seedance/md/fast-i2v.md
 

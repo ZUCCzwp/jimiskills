@@ -69,6 +69,7 @@ Poll via `GET /api/open-api/v1/videos/{taskId}` (same as Sora / Gemini Omni).
 | SP economy | `seedance2.0-sp`, `seedance2.0-fast-sp` | per second × resolution | 4–15 s | see SP doc |
 | SP official | `seedance2.0-of-sp`, `seedance2.0-of-fast-sp` | per second × resolution | 4–15 s | see SP doc |
 | Mini | `seedance2.0-mini`, `seedance2.0-mini-video` | per second × resolution | 4–15 s | |
+| **Mini 特价版** | `seedance2.0-mini-sp` | per second × resolution | 4–15 s | `480p` / `720p` only; same endpoint as other Seedance routes |
 | MD standard | `seedance2.0-md` | per task | 4–15 s | direct `https://` URLs; max 4 images |
 | MD fast | `seedance2.0-fast-md` | per task | 4–15 s | same as MD |
 | **Fast I2V** | `seedance2.0-fast-i2v` | per task | 1–15 s | image refs only, max 9; no video/audio refs |
@@ -78,14 +79,28 @@ Fast I2V detail: https://docs.jimmyai.cn/zh/api-reference/seedance/md/fast-i2v.m
 
 | Field | Required | Notes |
 |-------|----------|-------|
-| model | yes | e.g. `seedance2.0-fast-i2v` (request model = billing model) |
+| model | yes | e.g. `seedance2.0-fast-i2v`, `seedance2.0-mini-sp` (request model = billing model) |
 | prompt | yes | max 5000 chars for MD / Fast I2V |
-| duration | yes | Fast I2V: 1–15; MD: 4–15 |
+| duration | yes | Fast I2V: 1–15; MD / Mini 特价版: 4–15 |
+| resolution | no | Mini 特价版: `480p` or `720p` (default `720p`); SP / Mini: affects billing |
 | ratio | no | Fast I2V / MD: `16:9`, `9:16`, `1:1` |
 | images | no | reference image URLs |
 | first_image / last_image | no | frame mode; mutually exclusive with `images` |
 | reference_videos | no | not supported on `seedance2.0-fast-i2v` |
 | reference_audios | no | not supported on MD / Fast I2V |
+
+**Mini 特价版** (`seedance2.0-mini-sp`): use `POST /api/open-api/v1/seedance/videos` (not a separate mini-sp path). Poll via `GET /api/open-api/v1/videos/{taskId}`. Supports `images`, `first_image` / `last_image`, `reference_videos`, and `reference_audios` (audio requires image or video refs).
+
+```json
+{
+  "model": "seedance2.0-mini-sp",
+  "prompt": "A cat walking in a garden, cinematic",
+  "duration": 8,
+  "resolution": "720p",
+  "ratio": "16:9",
+  "images": ["https://example.com/ref.jpg"]
+}
+```
 
 Asset audit (Manxue routes only):
 - `POST /api/open-api/v1/seedance/assets/audit`
@@ -145,7 +160,8 @@ Route is configured in the开放平台 per model.
 ## Best practices
 
 1. Copy `video_url` / `image_url` within 3 days
-2. Use exponential backoff on `-1` errors
+2. `video_url` is always a full HTTPS URL (signed when OSS is private); custom OSS users get URLs on their configured domain
+3. Use exponential backoff on `-1` errors
 3. Sync image: client timeout ≥ 180 s
 4. Async: poll every 5–15 s, cap total wait (e.g. 30 min)
 5. Store API keys in env vars, never in source code

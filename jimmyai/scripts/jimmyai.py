@@ -198,6 +198,8 @@ def cmd_create_seedance_video(args: argparse.Namespace) -> None:
     }
     if args.ratio:
         body["ratio"] = args.ratio
+    if args.resolution:
+        body["resolution"] = args.resolution
     if args.image:
         body["images"] = args.image
     if args.first_image:
@@ -376,6 +378,8 @@ def cmd_create_and_poll(args: argparse.Namespace) -> None:
         }
         if args.ratio:
             body["ratio"] = args.ratio
+        if args.resolution:
+            body["resolution"] = args.resolution
         if args.image:
             body["images"] = args.image
         if getattr(args, "first_image", None):
@@ -447,6 +451,7 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--model", default="seedance2.0-fast-i2v")
     p.add_argument("--duration", type=int, default=5)
     p.add_argument("--ratio", default="16:9")
+    p.add_argument("--resolution", default="720p", help="480p or 720p (Mini 特价版 / SP / Mini routes)")
     p.add_argument("--image", action="append", help="Reference image URL (repeatable)")
     p.add_argument("--first-image", dest="first_image", help="First frame image URL")
     p.add_argument("--last-image", dest="last_image", help="Last frame image URL")

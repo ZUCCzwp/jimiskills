@@ -1,6 +1,6 @@
 ---
 name: "jimmyai"
-description: "Integrate JimmyAI image and video generation APIs (Sora, VEO, Gemini Omni, Seedance, GPT Image) via the bundled CLI (`scripts/jimmyai.py`). Use when the user asks to connect JimmyAI, generate AI images/videos, poll async tasks, set up API keys, or integrate https://www.jimmyai.cn — including zero-experience onboarding. Requires `JIMMYAI_API_KEY`."
+description: "Integrate JimmyAI image and video generation APIs (Sora, VEO, Gemini Omni, Seedance including Mini 特价版, GPT Image) via the bundled CLI (`scripts/jimmyai.py`). Use when the user asks to connect JimmyAI, generate AI images/videos, poll async tasks, set up API keys, or integrate https://www.jimmyai.cn — including zero-experience onboarding. Requires `JIMMYAI_API_KEY`."
 ---
 
 # JimmyAI API Skill
@@ -50,11 +50,11 @@ If `JIMMYAI_API_KEY` is missing, guide the user to set it locally and confirm wh
 | Sora video | `create-video` → poll `GET /videos/{taskId}` |
 | Gemini Omni video | `create-gemini-video` → poll `GET /videos/{taskId}` |
 | Gemini Omni 10s (`omni-10s`) | same endpoint with `--model omni-10s` |
-| Seedance video (MD / Fast I2V / etc.) | `create-seedance-video` → poll `GET /videos/{taskId}` |
+| Seedance video (MD / Fast I2V / Mini 特价版 / etc.) | `create-seedance-video` → poll `GET /videos/{taskId}` |
 | Just check task status | `poll --task-id <id> --type video\|image` |
 | Create + wait in one step | `create-and-poll` |
 
-For VEO, other Seedance routes (SP / Manxue / STD), image edits, or image understanding, fetch the specific page from https://docs.jimmyai.cn/llms.txt before calling.
+For VEO, other Seedance routes (SP / Manxue / STD / Mini 特价版), image edits, or image understanding, fetch the specific page from https://docs.jimmyai.cn/llms.txt before calling.
 
 ## Workflow
 
@@ -125,6 +125,19 @@ python "$JIMMYAI_CLI" create-and-poll \
   --model seedance2.0-fast-i2v \
   --prompt "Subject turns slowly, cinematic lighting" \
   --duration 8 \
+  --ratio "16:9" \
+  --image "https://example.com/ref.jpg"
+```
+
+### Mini 特价版 video (Seedance, async)
+
+```bash
+python "$JIMMYAI_CLI" create-and-poll \
+  --type seedance-video \
+  --model seedance2.0-mini-sp \
+  --prompt "A cat walking in a garden, cinematic" \
+  --duration 8 \
+  --resolution 720p \
   --ratio "16:9" \
   --image "https://example.com/ref.jpg"
 ```

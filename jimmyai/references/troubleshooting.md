@@ -60,6 +60,18 @@
 - Cause: reference assets need platform audit first.
 - Fix: submit via assets audit endpoint; poll audit status before video create.
 
+## Seedance Mini 特价版 (`seedance2.0-mini-sp`)
+
+- Use `POST /api/open-api/v1/seedance/videos` with `"model": "seedance2.0-mini-sp"` — there is no separate `/seedance/mini-sp/videos` path.
+- `resolution` must be `480p` or `720p` (default `720p`).
+- `duration` must be 4–15 seconds.
+- Poll with `GET /api/open-api/v1/videos/{taskId}` like other async video tasks.
+
+## video_url is a relative path (custom OSS)
+
+- Cause: older API responses could return OSS object keys like `seedance/mini-sp/video/xxx.mp4` instead of a full URL.
+- Fix: ensure you query the latest API; completed tasks should return a full `https://` URL (signed when OSS is private). Download within 3 days.
+
 ## More help
 
 - Docs: https://docs.jimmyai.cn/llms.txt
