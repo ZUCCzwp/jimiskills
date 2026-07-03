@@ -17,7 +17,7 @@ import urllib.request
 from pathlib import Path
 from typing import Any, Dict, Optional
 
-DEFAULT_BASE_URL = "https://www.jimmyai.cn"
+DEFAULT_BASE_URL = "https://api.viraltok.ai"
 DEFAULT_POLL_INTERVAL = 10.0
 DEFAULT_POLL_TIMEOUT = 1800.0
 DEFAULT_SYNC_TIMEOUT = 180.0

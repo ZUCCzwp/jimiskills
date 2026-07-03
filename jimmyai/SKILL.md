@@ -1,11 +1,11 @@
 ---
 name: "jimmyai"
-description: "Integrate JimmyAI image and video generation APIs (Sora, VEO, Gemini Omni, Seedance including Mini 特价版, GPT Image) via the bundled CLI (`scripts/jimmyai.py`). Use when the user asks to connect JimmyAI, generate AI images/videos, poll async tasks, set up API keys, or integrate https://www.jimmyai.cn — including zero-experience onboarding. Requires `JIMMYAI_API_KEY`."
+description: "Integrate JimmyAI image and video generation APIs (Sora, VEO, Gemini Omni, Seedance including Mini 特价版, GPT Image) via the bundled CLI (`scripts/jimmyai.py`). Use when the user asks to connect JimmyAI, generate AI images/videos, poll async tasks, set up API keys, or integrate https://api.viraltok.ai — including zero-experience onboarding. Requires `JIMMYAI_API_KEY`."
 ---
 
 # JimmyAI API Skill
 
-JimmyAI is an OpenAI-compatible gateway for image and video generation. Base URL: `https://www.jimmyai.cn`. Docs index: https://docs.jimmyai.cn/llms.txt
+JimmyAI is an OpenAI-compatible gateway for image and video generation. Base URL: `https://api.viraltok.ai`. Docs index: https://docs.jimmyai.cn/llms.txt
 
 This skill helps users integrate JimmyAI from zero — register, get a key, send the first request, and poll async tasks. Prefer the bundled CLI for deterministic runs. `$jimmyai` is a skill tag in prompts, not a shell command.
 
@@ -22,7 +22,7 @@ This skill helps users integrate JimmyAI from zero — register, get a key, send
 
 When the user has no API key or has never used JimmyAI, walk through these steps in order. Do not skip steps.
 
-1. **Register** at https://www.jimmyai.cn
+1. **Register** at https://api.viraltok.ai
 2. **Create API key** in the console (shown once — save it locally)
 3. **Recharge** account (minimum ~$1; Alipay / WeChat supported)
 4. **Set environment variable** (never paste the full key in chat):
@@ -71,7 +71,7 @@ For VEO, other Seedance routes (SP / Manxue / STD / Mini 特价版), image edits
 | Variable | Default | Purpose |
 |----------|---------|---------|
 | `JIMMYAI_API_KEY` | — | Bearer token (required for live calls) |
-| `JIMMYAI_BASE_URL` | `https://www.jimmyai.cn` | API base URL |
+| `JIMMYAI_BASE_URL` | `https://api.viraltok.ai` | API base URL |
 
 Header: `Authorization: Bearer <JIMMYAI_API_KEY>`
 

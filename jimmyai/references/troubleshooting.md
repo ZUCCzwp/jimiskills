@@ -3,7 +3,7 @@
 ## code 20001 — auth failure
 
 - Cause: missing, wrong, or expired API key.
-- Fix: recreate key at https://www.jimmyai.cn, set `JIMMYAI_API_KEY`, confirm no extra spaces.
+- Fix: recreate key at https://api.viraltok.ai, set `JIMMYAI_API_KEY`, confirm no extra spaces.
 
 ## code 20002 — bad parameters
 
@@ -18,7 +18,7 @@
 ## Insufficient balance
 
 - Cause: account not recharged.
-- Fix: recharge at https://www.jimmyai.cn (minimum ~$1).
+- Fix: recharge at https://api.viraltok.ai (minimum ~$1).
 
 ## Sync image timeout
 
@@ -76,4 +76,4 @@
 
 - Docs: https://docs.jimmyai.cn/llms.txt
 - Email: 2114272829@qq.com
-- Online chat on https://www.jimmyai.cn
+- Online chat on https://api.viraltok.ai

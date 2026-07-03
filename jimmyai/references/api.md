@@ -3,7 +3,7 @@
 Full docs: https://docs.jimmyai.cn/llms.txt  
 OpenAPI: https://docs.jimmyai.cn/zh/api-reference/openapi.json
 
-Base URL: `https://www.jimmyai.cn`  
+Base URL: `https://api.viraltok.ai`  
 Auth: `Authorization: Bearer <JIMMYAI_API_KEY>`
 
 ## Response codes

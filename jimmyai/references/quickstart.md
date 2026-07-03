@@ -4,7 +4,7 @@ Complete guide for users who have never used JimmyAI or any AI API.
 
 ## Step 1: Create account
 
-1. Open https://www.jimmyai.cn
+1. Open https://api.viraltok.ai
 2. Register and log in
 
 ## Step 2: Get API key
@@ -42,7 +42,7 @@ Never share the full key in chat or commit it to git. Use `.env` files listed in
 
 ```bash
 curl --request POST \
-  --url https://www.jimmyai.cn/api/open-api/v1/images/generations \
+  --url https://api.viraltok.ai/api/open-api/v1/images/generations \
   --header "Authorization: Bearer $JIMMYAI_API_KEY" \
   --header "Content-Type: application/json" \
   --max-time 180 \
@@ -61,7 +61,7 @@ Success: `"code": 20000` and `data.data[0].b64_json` or URL in response.
 ```bash
 # Create task
 curl --request POST \
-  --url https://www.jimmyai.cn/api/open-api/v1/videos \
+  --url https://api.viraltok.ai/api/open-api/v1/videos \
   --header "Authorization: Bearer $JIMMYAI_API_KEY" \
   --header "Content-Type: application/json" \
   --data '{
@@ -73,7 +73,7 @@ curl --request POST \
 
 # Poll (replace TASK_ID)
 curl --request GET \
-  --url "https://www.jimmyai.cn/api/open-api/v1/videos/TASK_ID" \
+  --url "https://api.viraltok.ai/api/open-api/v1/videos/TASK_ID" \
   --header "Authorization: Bearer $JIMMYAI_API_KEY"
 ```
 
@@ -105,7 +105,7 @@ python "$JIMMYAI_CLI" create-and-poll \
 import os, time, requests
 
 API_KEY = os.environ["JIMMYAI_API_KEY"]
-BASE = "https://www.jimmyai.cn"
+BASE = "https://api.viraltok.ai"
 headers = {"Authorization": f"Bearer {API_KEY}"}
 
 # Sync image
@@ -144,7 +144,7 @@ while True:
 
 ```javascript
 const API_KEY = process.env.JIMMYAI_API_KEY;
-const BASE = "https://www.jimmyai.cn";
+const BASE = "https://api.viraltok.ai";
 const headers = { Authorization: `Bearer ${API_KEY}`, "Content-Type": "application/json" };
 
 const res = await fetch(`${BASE}/api/open-api/v1/images/generations`, {

@@ -1,6 +1,6 @@
 # Codex network approvals / sandbox notes
 
-JimmyAI API calls need outbound HTTPS to `www.jimmyai.cn`. In Codex, network may be disabled by default.
+JimmyAI API calls need outbound HTTPS to `api.viraltok.ai`. In Codex, network may be disabled by default.
 
 ## Reduce approval prompts
 

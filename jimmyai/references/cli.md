@@ -20,7 +20,7 @@ Required env for live calls:
 ```bash
 export JIMMYAI_API_KEY="sk-..."
 # Optional override:
-export JIMMYAI_BASE_URL="https://www.jimmyai.cn"
+export JIMMYAI_BASE_URL="https://api.viraltok.ai"
 ```
 
 ## Commands

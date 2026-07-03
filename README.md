@@ -1,6 +1,6 @@
 # jimiskills
 
-Cursor / Codex Agent Skills for [JimmyAI](https://www.jimmyai.cn) services.
+Cursor / Codex Agent Skills for [JimmyAI](https://api.viraltok.ai) services.
 
 ## Skills
 
@@ -38,7 +38,7 @@ python "$JIMMYAI_CLI" generate-image --prompt "test" --dry-run
 python "$JIMMYAI_CLI" generate-image --prompt "A red apple on white background" --output apple.png
 ```
 
-Get your API key at https://www.jimmyai.cn. Docs: https://docs.jimmyai.cn/llms.txt
+Get your API key at https://api.viraltok.ai. Docs: https://docs.jimmyai.cn/llms.txt
 
 ## Usage in Codex
 
