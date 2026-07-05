@@ -421,6 +421,26 @@ def cmd_create_and_poll(args: argparse.Namespace) -> None:
     )
 
 
+def _cmd_balance(args: argparse.Namespace, path: str) -> None:
+    api_key = _api_key(args.dry_run)
+    base = _base_url(args.base_url)
+    payload = _request("GET", f"{base}{path}", api_key, dry_run=args.dry_run)
+    if args.dry_run:
+        return
+    _check_code(payload)
+    if args.json_out:
+        Path(args.json_out).write_text(json.dumps(payload, indent=2), encoding="utf-8")
+    print(json.dumps(payload, indent=2, ensure_ascii=False))
+
+
+def cmd_user_balance(args: argparse.Namespace) -> None:
+    _cmd_balance(args, "/api/open-api/v1/user/balance")
+
+
+def cmd_key_balance(args: argparse.Namespace) -> None:
+    _cmd_balance(args, "/api/open-api/v1/key/balance")
+
+
 def _add_common_flags(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--dry-run", action="store_true", help="Print request without calling API")
     parser.add_argument("--json-out", help="Write JSON response to file")
@@ -495,6 +515,14 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--timeout", type=float, default=DEFAULT_POLL_TIMEOUT)
     p.add_argument("--download", help="Download result media to path")
     p.set_defaults(func=cmd_poll)
+
+    p = sub.add_parser("user-balance", help="Query user JimiCoin account balance")
+    _add_common_flags(p)
+    p.set_defaults(func=cmd_user_balance)
+
+    p = sub.add_parser("key-balance", help="Query API key quota balance")
+    _add_common_flags(p)
+    p.set_defaults(func=cmd_key_balance)
 
     p = sub.add_parser("create-and-poll", help="Create task and poll until done")
     _add_common_flags(p)

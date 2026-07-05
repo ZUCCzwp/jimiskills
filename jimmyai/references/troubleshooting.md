@@ -17,8 +17,15 @@
 
 ## Insufficient balance
 
-- Cause: account not recharged.
+- Cause: account not recharged or `available` balance too low.
 - Fix: recharge at https://api.viraltok.ai (minimum ~$1).
+- Check: `GET /api/open-api/v1/user/balance` or `python "$JIMMYAI_CLI" user-balance`.
+
+## API key quota exhausted
+
+- Cause: `total_quota` set on the key and `used_quota` reached the cap.
+- Fix: raise quota in console or use another key.
+- Check: `GET /api/open-api/v1/key/balance` or `python "$JIMMYAI_CLI" key-balance`.
 
 ## Sync image timeout
 

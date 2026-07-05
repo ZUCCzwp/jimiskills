@@ -52,6 +52,8 @@ If `JIMMYAI_API_KEY` is missing, guide the user to set it locally and confirm wh
 | Gemini Omni 10s (`omni-10s`) | same endpoint with `--model omni-10s` |
 | Seedance video (MD / Fast I2V / Mini 特价版 / etc.) | `create-seedance-video` → poll `GET /videos/{taskId}` |
 | Just check task status | `poll --task-id <id> --type video\|image` |
+| Check user account balance | `user-balance` → `GET /user/balance` |
+| Check API key quota | `key-balance` → `GET /key/balance` |
 | Create + wait in one step | `create-and-poll` |
 
 For VEO, other Seedance routes (SP / Manxue / STD / Mini 特价版), image edits, or image understanding, fetch the specific page from https://docs.jimmyai.cn/llms.txt before calling.
@@ -146,6 +148,13 @@ python "$JIMMYAI_CLI" create-and-poll \
 
 ```bash
 python "$JIMMYAI_CLI" poll --task-id "abc123" --type video
+```
+
+### Check balances
+
+```bash
+python "$JIMMYAI_CLI" user-balance
+python "$JIMMYAI_CLI" key-balance
 ```
 
 ## Reference map

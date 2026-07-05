@@ -33,6 +33,8 @@ export JIMMYAI_BASE_URL="https://api.viraltok.ai"
 | `create-image` | Create async image task |
 | `generate-image` | Sync text-to-image (OpenAI-compatible) |
 | `poll` | Query task status by ID |
+| `user-balance` | Query user JimiCoin account balance |
+| `key-balance` | Query API key quota balance |
 | `create-and-poll` | Create task and wait for completion |
 
 All commands support `--dry-run` (prints request, no network).
@@ -181,6 +183,32 @@ python "$JIMMYAI_CLI" create-video \
   --model sora2-12s \
   --duration 12
 ```
+
+## poll
+
+```bash
+python "$JIMMYAI_CLI" poll --task-id TASK_ID --type video
+```
+
+## user-balance
+
+Query JimiCoin account balance for the API key owner.
+
+```bash
+python "$JIMMYAI_CLI" user-balance
+```
+
+`GET /api/open-api/v1/user/balance` — fields: `balance`, `used_coin`, `available`.
+
+## key-balance
+
+Query per-key quota usage.
+
+```bash
+python "$JIMMYAI_CLI" key-balance
+```
+
+`GET /api/open-api/v1/key/balance` — fields: `name`, `total_quota`, `used_quota`, `available_quota`, `unlimited`.
 
 ## Output
 

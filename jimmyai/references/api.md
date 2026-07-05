@@ -15,6 +15,36 @@ Auth: `Authorization: Bearer <JIMMYAI_API_KEY>`
 | 20002 | bad request — check params |
 | -1 | server error — retry later |
 
+## Balance endpoints
+
+### User account balance
+
+`GET /api/open-api/v1/user/balance`
+
+Returns JimiCoin balance for the user who owns the API key. OpenAPI usage is billed against this account.
+
+| Field | Description |
+|-------|-------------|
+| `balance` | Total balance (includes active subscription credits) |
+| `used_coin` | Cumulative consumption |
+| `available` | `balance` - `used_coin` |
+
+### API key quota balance
+
+`GET /api/open-api/v1/key/balance`
+
+Returns per-key quota (separate from account balance).
+
+| Field | Description |
+|-------|-------------|
+| `name` | Key display name |
+| `total_quota` | Total quota; `0` = unlimited |
+| `used_quota` | Quota used |
+| `available_quota` | Remaining quota |
+| `unlimited` | `true` when no quota cap |
+
+Docs: https://docs.jimmyai.cn/zh/api-reference/common/user-balance.md
+
 ## Video endpoints
 
 ### Sora — create

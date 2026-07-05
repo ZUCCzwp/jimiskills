@@ -36,6 +36,16 @@ $env:JIMMYAI_API_KEY = "your-key-here"
 
 Never share the full key in chat or commit it to git. Use `.env` files listed in `.gitignore`.
 
+### Check balance (optional)
+
+```bash
+curl --request GET \
+  --url https://api.viraltok.ai/api/open-api/v1/user/balance \
+  --header "Authorization: Bearer $JIMMYAI_API_KEY"
+```
+
+Or with the CLI: `python "$JIMMYAI_CLI" user-balance`
+
 ## Step 5: Verify with curl
 
 ### Sync image (easiest first test)
