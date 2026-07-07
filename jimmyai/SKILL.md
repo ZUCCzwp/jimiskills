@@ -54,9 +54,10 @@ If `JIMMYAI_API_KEY` is missing, guide the user to set it locally and confirm wh
 | Just check task status | `poll --task-id <id> --type video\|image` |
 | Check user account balance | `user-balance` → `GET /user/balance` |
 | Check API key quota | `key-balance` → `GET /key/balance` |
+| Upload reference media (image/video/audio) | `upload-file` → `POST /files/upload` |
 | Create + wait in one step | `create-and-poll` |
 
-For VEO, other Seedance routes (SP / Manxue / STD / Mini 特价版), image edits, or image understanding, fetch the specific page from https://docs.jimmyai.cn/llms.txt before calling.
+For VEO, other Seedance routes (SP / Manxue / STD / Mini 特价版), image edits, image understanding, or **local file upload** (`POST /files/upload`), fetch the specific page from https://docs.jimmyai.cn/llms.txt before calling.
 
 ## Workflow
 
@@ -155,6 +156,13 @@ python "$JIMMYAI_CLI" poll --task-id "abc123" --type video
 ```bash
 python "$JIMMYAI_CLI" user-balance
 python "$JIMMYAI_CLI" key-balance
+```
+
+### Upload reference file
+
+```bash
+python "$JIMMYAI_CLI" upload-file --file ./ref.jpg
+# Use returned data.url in --image or API images[] field
 ```
 
 ## Reference map

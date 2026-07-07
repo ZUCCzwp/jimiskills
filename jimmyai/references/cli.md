@@ -35,6 +35,7 @@ export JIMMYAI_BASE_URL="https://api.viraltok.ai"
 | `poll` | Query task status by ID |
 | `user-balance` | Query user JimiCoin account balance |
 | `key-balance` | Query API key quota balance |
+| `upload-file` | Upload image/video/audio; returns URL |
 | `create-and-poll` | Create task and wait for completion |
 
 All commands support `--dry-run` (prints request, no network).
@@ -209,6 +210,21 @@ python "$JIMMYAI_CLI" key-balance
 ```
 
 `GET /api/open-api/v1/key/balance` — fields: `name`, `total_quota`, `used_quota`, `available_quota`, `unlimited`.
+
+## upload-file
+
+Upload a local file and get a URL for downstream APIs (`images`, `reference_videos`, etc.).
+
+```bash
+python "$JIMMYAI_CLI" upload-file --file ./photo.jpg
+python "$JIMMYAI_CLI" upload-file --file ./clip.mp4 --json-out upload.json
+```
+
+`POST /api/open-api/v1/files/upload` — multipart field `file`, max 100 MB.
+
+Supported: common image (jpg/png/webp/…), video (mp4/mov/webm/…), audio (mp3/wav/…). See `references/api.md` for the full extension list.
+
+Default timeout 300 s (`--timeout`). Use the returned `data.url` in create-video / create-seedance-video `--image` or API `images` arrays.
 
 ## Output
 

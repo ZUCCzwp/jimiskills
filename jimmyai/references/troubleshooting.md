@@ -47,6 +47,12 @@
 - Cause: `duration` not equal to 12 on route1.
 - Fix: always pass `--duration 12` for `sora2-12s`.
 
+## File upload failed (unsupported format / too large)
+
+- Cause: extension not in allowlist, or file > 100 MB.
+- Fix: convert to a supported format (jpg/png/mp4/mp3, etc.) or compress; field name must be `file`.
+- Endpoint: `POST /api/open-api/v1/files/upload` or `python "$JIMMYAI_CLI" upload-file --file PATH`.
+
 ## Large b64_json response
 
 - Cause: sync image returns multi-MB base64.

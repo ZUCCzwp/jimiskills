@@ -9,11 +9,13 @@ from __future__ import annotations
 import argparse
 import base64
 import json
+import mimetypes
 import os
 import sys
 import time
 import urllib.error
 import urllib.request
+import uuid
 from pathlib import Path
 from typing import Any, Dict, Optional
 
@@ -21,6 +23,7 @@ DEFAULT_BASE_URL = "https://api.viraltok.ai"
 DEFAULT_POLL_INTERVAL = 10.0
 DEFAULT_POLL_TIMEOUT = 1800.0
 DEFAULT_SYNC_TIMEOUT = 180.0
+DEFAULT_UPLOAD_TIMEOUT = 300.0
 TERMINAL_STATUSES = {"completed", "failed", "canceled", "cancelled"}
 SUCCESS_CODE = "20000"
 
@@ -99,11 +102,134 @@ def _request(
         _die(f"Invalid JSON response: {raw[:500]}")
 
 
+def _multipart_upload(
+    url: str,
+    api_key: str,
+    file_path: Path,
+    timeout: float = DEFAULT_UPLOAD_TIMEOUT,
+    dry_run: bool = False,
+) -> Dict[str, Any]:
+    if not file_path.is_file():
+        _die(f"File not found: {file_path}")
+
+    filename = file_path.name
+    mime_type = mimetypes.guess_type(filename)[0] or "application/octet-stream"
+    file_data = file_path.read_bytes()
+    boundary = f"----JimmyAI{uuid.uuid4().hex}"
+    body = b"".join(
+        [
+            f"--{boundary}\r\n".encode(),
+            f'Content-Disposition: form-data; name="file"; filename="{filename}"\r\n'.encode(),
+            f"Content-Type: {mime_type}\r\n\r\n".encode(),
+            file_data,
+            b"\r\n",
+            f"--{boundary}--\r\n".encode(),
+        ]
+    )
+    headers = {
+        "Authorization": f"Bearer {api_key}",
+        "Content-Type": f"multipart/form-data; boundary={boundary}",
+        "Accept": "application/json",
+    }
+    if dry_run:
+        print(
+            json.dumps(
+                {
+                    "method": "POST",
+                    "url": url,
+                    "headers": headers,
+                    "file": str(file_path),
+                    "size_bytes": len(file_data),
+                    "mime_type": mime_type,
+                },
+                indent=2,
+            )
+        )
+        return {
+            "code": SUCCESS_CODE,
+            "msg": "dry-run",
+            "data": {"url": "https://example.com/uploads/dry-run.jpg", "filename": filename, "size": len(file_data), "mime_type": mime_type},
+        }
+
+    req = urllib.request.Request(url, data=body, headers=headers, method="POST")
+    try:
+        with urllib.request.urlopen(req, timeout=timeout) as resp:
+            raw = resp.read().decode("utf-8")
+    except urllib.error.HTTPError as exc:
+        raw = exc.read().decode("utf-8", errors="replace")
+        _die(f"HTTP {exc.code}: {raw}")
+    except urllib.error.URLError as exc:
+        _die(f"Network error: {exc.reason}")
+
+    try:
+        return json.loads(raw)
+    except json.JSONDecodeError:
+        _die(f"Invalid JSON response: {raw[:500]}")
+
+
 def _check_code(payload: Dict[str, Any]) -> Dict[str, Any]:
     code = str(payload.get("code", ""))
     if code != SUCCESS_CODE:
         _die(f"API error code={code} msg={payload.get('msg', '')} payload={json.dumps(payload)}")
     return payload
+
+
+def _upload_file(
+    path: Path,
+    api_key: str,
+    base: str,
+    timeout: float = 300.0,
+    dry_run: bool = False,
+) -> Dict[str, Any]:
+    url = f"{base}/api/open-api/v1/files/upload"
+    if dry_run:
+        print(
+            json.dumps(
+                {"method": "POST", "url": url, "field": "file", "path": str(path)},
+                indent=2,
+            )
+        )
+        return {
+            "code": SUCCESS_CODE,
+            "msg": "dry-run",
+            "data": {"url": "https://example.com/uploads/dry-run.jpg", "filename": path.name},
+        }
+
+    if not path.is_file():
+        _die(f"File not found: {path}")
+
+    boundary = f"----jimmyai{uuid.uuid4().hex}"
+    filename = path.name
+    mime_type = mimetypes.guess_type(filename)[0] or "application/octet-stream"
+    file_data = path.read_bytes()
+    body = b"".join(
+        [
+            f"--{boundary}\r\n".encode(),
+            f'Content-Disposition: form-data; name="file"; filename="{filename}"\r\n'.encode(),
+            f"Content-Type: {mime_type}\r\n\r\n".encode(),
+            file_data,
+            f"\r\n--{boundary}--\r\n".encode(),
+        ]
+    )
+    headers = {
+        "Authorization": f"Bearer {api_key}",
+        "Content-Type": f"multipart/form-data; boundary={boundary}",
+        "Accept": "application/json",
+    }
+    req = urllib.request.Request(url, data=body, headers=headers, method="POST")
+    try:
+        with urllib.request.urlopen(req, timeout=timeout) as resp:
+            raw = resp.read().decode("utf-8")
+    except urllib.error.HTTPError as exc:
+        raw = exc.read().decode("utf-8", errors="replace")
+        _die(f"HTTP {exc.code}: {raw}")
+    except urllib.error.URLError as exc:
+        _die(f"Network error: {exc.reason}")
+
+    try:
+        return json.loads(raw)
+    except json.JSONDecodeError:
+        _die(f"Invalid JSON response: {raw[:500]}")
 
 
 def _download_url(url: str, dest: Path, timeout: float = 120.0) -> None:
@@ -441,6 +567,25 @@ def cmd_key_balance(args: argparse.Namespace) -> None:
     _cmd_balance(args, "/api/open-api/v1/key/balance")
 
 
+def cmd_upload_file(args: argparse.Namespace) -> None:
+    api_key = _api_key(args.dry_run)
+    base = _base_url(args.base_url)
+    file_path = Path(args.file)
+    payload = _multipart_upload(
+        f"{base}/api/open-api/v1/files/upload",
+        api_key,
+        file_path,
+        timeout=args.timeout,
+        dry_run=args.dry_run,
+    )
+    if args.dry_run:
+        return
+    _check_code(payload)
+    if args.json_out:
+        Path(args.json_out).write_text(json.dumps(payload, indent=2), encoding="utf-8")
+    print(json.dumps(payload, indent=2, ensure_ascii=False))
+
+
 def _add_common_flags(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--dry-run", action="store_true", help="Print request without calling API")
     parser.add_argument("--json-out", help="Write JSON response to file")
@@ -523,6 +668,12 @@ def build_parser() -> argparse.ArgumentParser:
     p = sub.add_parser("key-balance", help="Query API key quota balance")
     _add_common_flags(p)
     p.set_defaults(func=cmd_key_balance)
+
+    p = sub.add_parser("upload-file", help="Upload image/video/audio file")
+    _add_common_flags(p)
+    p.add_argument("--file", required=True, help="Local file path to upload")
+    p.add_argument("--timeout", type=float, default=DEFAULT_UPLOAD_TIMEOUT)
+    p.set_defaults(func=cmd_upload_file)
 
     p = sub.add_parser("create-and-poll", help="Create task and poll until done")
     _add_common_flags(p)

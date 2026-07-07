@@ -46,6 +46,21 @@ curl --request GET \
 
 Or with the CLI: `python "$JIMMYAI_CLI" user-balance`
 
+### Upload a reference file (optional)
+
+When you have a local image/video/audio instead of a public URL:
+
+```bash
+curl --request POST \
+  --url https://api.viraltok.ai/api/open-api/v1/files/upload \
+  --header "Authorization: Bearer $JIMMYAI_API_KEY" \
+  --form "file=@/path/to/photo.jpg"
+```
+
+Success: `"code": 20000` and `data.url` — use that URL in video/image create requests.
+
+CLI: `python "$JIMMYAI_CLI" upload-file --file /path/to/photo.jpg`
+
 ## Step 5: Verify with curl
 
 ### Sync image (easiest first test)

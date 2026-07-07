@@ -45,6 +45,54 @@ Returns per-key quota (separate from account balance).
 
 Docs: https://docs.jimmyai.cn/zh/api-reference/common/user-balance.md
 
+## File upload
+
+`POST /api/open-api/v1/files/upload` (multipart/form-data)
+
+Upload a local image, video, or audio file; returns a URL for use in `images`, `reference_videos`, `reference_audios`, image edits, etc.
+
+| Item | Notes |
+|------|-------|
+| Field name | `file` (required) |
+| Max size | 100 MB |
+| Auth | `Authorization: Bearer <JIMMYAI_API_KEY>` |
+
+**Supported formats**
+
+| Type | Extensions |
+|------|------------|
+| Images | `.jpg` `.jpeg` `.png` `.gif` `.webp` `.bmp` `.svg` |
+| Video | `.mp4` `.mov` `.avi` `.webm` `.mkv` `.m4v` `.flv` |
+| Audio | `.mp3` `.wav` `.aac` `.m4a` `.flac` `.ogg` |
+
+**Response** (`code: 20000`):
+
+```json
+{
+  "code": 20000,
+  "msg": "ok",
+  "data": {
+    "url": "https://cdn.example.com/uploads/photo.jpg",
+    "filename": "photo.jpg",
+    "size": 102400,
+    "mime_type": "image/jpeg"
+  }
+}
+```
+
+`data.url` may be a signed URL when object storage is private. Copy URLs within ~3 days.
+
+Docs: https://docs.jimmyai.cn/zh/api-reference/common/files-upload.mdx
+
+```bash
+curl --request POST \
+  --url https://api.viraltok.ai/api/open-api/v1/files/upload \
+  --header "Authorization: Bearer $JIMMYAI_API_KEY" \
+  --form "file=@/path/to/photo.jpg"
+```
+
+CLI: `python "$JIMMYAI_CLI" upload-file --file /path/to/photo.jpg`
+
 ## Video endpoints
 
 ### Sora — create
