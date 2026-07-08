@@ -93,6 +93,7 @@ Response `code`: `20000` = success, `20001` = auth failure, `20002` = bad params
 - Default video model: `sora2-12s` (route1; `duration` must be `12`)
 - Default Gemini Omni model: `Gemini-Omini`
 - Default sync image model: `gpt-image-2`, size `1024x1024`, quality `low`
+- Sync image response: default `response_format=url` (returns `data[].url`); use `b64_json` for base64
 - Sync image timeout: set client timeout ≥ 180 s (generation takes 30–120 s)
 - Generated URLs valid ~3 days — copy to own storage
 - Prefer bundled CLI; do not modify `scripts/jimmyai.py` unless the user asks

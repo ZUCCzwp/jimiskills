@@ -207,7 +207,7 @@ Asset audit (Manxue routes only):
 
 `POST /api/open-api/v1/images/generations`
 
-OpenAI-compatible. Returns image in `data.data[0].b64_json` immediately. Timeout ≥ 180 s.
+OpenAI-compatible. Default returns `data.data[0].url` (image uploaded to storage). Set `response_format=b64_json` to return base64 instead. Timeout ≥ 180 s.
 
 | Field | Required | Notes |
 |-------|----------|-------|
@@ -216,10 +216,13 @@ OpenAI-compatible. Returns image in `data.data[0].b64_json` immediately. Timeout
 | size | no | default `1024x1024` |
 | quality | no | `low`, `medium`, `high`, `auto` |
 | n | no | max 1 |
+| response_format | no | `url` (default) or `b64_json` |
 
 ### Sync — edit
 
 `POST /api/open-api/v1/images/edits` (multipart/form-data)
+
+Same `response_format` as generations: default `url`, optional `b64_json`. Form field name: `response_format`.
 
 ### Image understanding
 
