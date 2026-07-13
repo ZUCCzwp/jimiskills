@@ -207,12 +207,23 @@ Asset audit (Manxue routes only):
 
 | Field | Required | Notes |
 |-------|----------|-------|
-| model | yes | `gpt-image-2`, `nano-banana`, `nano-banana-2`, `nano-banana-pro` |
+| model | yes | `gpt-image-2`, `nano-banana`, `nano-banana-2`, `nano-banana-pro`, `doubao-seedream-5-0-pro` |
 | prompt | yes | text description |
 | ratio | no | `auto`, `1:1`, `16:9`, `9:16`, etc. |
-| resolution | no | `1k`, `2k`, `4k` |
+| resolution | no | `1k`, `2k`, `4k` (Seedream 5.0 Pro: `1k`/`2k` only) |
 | quality | no | `low`, `medium`, `high` (gpt-image-2) |
-| images | no | reference URLs or base64 |
+| images | no | reference URLs or base64 (Seedream: max 10; per image: jpeg/png/webp/bmp/tiff/gif/heic/heif, aspect [1/16,16], sides >14px, ≤30MB, ≤6000×6000 px) |
+
+**Seedream 5.0 Pro** (`doubao-seedream-5-0-pro`): async `POST /api/open-api/v1/images`, poll `GET /api/open-api/v1/images/{taskId}`. Per-task billing, **1 image per request** (`n > 1` rejected). Resolution `1k`/`2k` (default `2k`). Ratios: `1:1`, `4:3`, `3:4`, `16:9`, `9:16`, `3:2`, `2:3`, `21:9`, `auto`. Docs: https://docs.jimmyai.cn/zh/api-reference/images/seedream-5-0-pro/create.md
+
+```json
+{
+  "model": "doubao-seedream-5-0-pro",
+  "prompt": "Cyberpunk city at night, neon on wet streets",
+  "ratio": "16:9",
+  "resolution": "2k"
+}
+```
 
 ### Async — query
 
