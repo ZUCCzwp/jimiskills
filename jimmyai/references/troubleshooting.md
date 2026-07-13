@@ -73,6 +73,17 @@
 - Cause: reference assets need platform audit first.
 - Fix: submit via assets audit endpoint; poll audit status before video create.
 
+## Seedance SP economy (`seedance2.0-sp`, `seedance2.0-fast-sp`)
+
+- Use `POST /api/open-api/v1/seedance/videos` with `"model": "seedance2.0-sp"` or `"seedance2.0-fast-sp"`.
+- `resolution` must be `720p` (default) or `1080p` — **`480p` is not supported** on SP economy (use Mini / Mini 特价版 for `480p`).
+- `duration` must be 4–15 seconds.
+- `seedance2.0-fast-sp` does not support `reference_videos`.
+- Reference audio requires paired images, videos, or frame refs.
+- Upload assets via `POST /api/open-api/v1/seedance/sp/assets/upload`, then reference `asset://{asset_id}`.
+- Poll with `GET /api/open-api/v1/videos/{taskId}` like other async video tasks.
+- Docs: https://docs.jimmyai.cn/zh/api-reference/seedance/sp/create.md
+
 ## Seedance Mini 特价版 (`seedance2.0-mini-sp`)
 
 - Use `POST /api/open-api/v1/seedance/videos` with `"model": "seedance2.0-mini-sp"` — there is no separate `/seedance/mini-sp/videos` path.

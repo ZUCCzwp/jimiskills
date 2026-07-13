@@ -78,6 +78,15 @@ python "$JIMMYAI_CLI" create-seedance-video \
   --duration 5 \
   --ratio "9:16"
 
+# SP economy (720p / 1080p only — not 480p)
+python "$JIMMYAI_CLI" create-seedance-video \
+  --model seedance2.0-sp \
+  --prompt "Rainy street at night, cinematic push-in" \
+  --duration 8 \
+  --resolution 720p \
+  --ratio "16:9" \
+  --first-image "https://example.com/start.png"
+
 # Mini 特价版 (economy Mini SP)
 python "$JIMMYAI_CLI" create-seedance-video \
   --model seedance2.0-mini-sp \
@@ -87,6 +96,8 @@ python "$JIMMYAI_CLI" create-seedance-video \
   --ratio "16:9" \
   --image "https://example.com/ref.jpg"
 ```
+
+`seedance2.0-sp` / `seedance2.0-fast-sp`: unified `POST /api/open-api/v1/seedance/videos`, `resolution` `720p` or `1080p` only (default `720p`), duration 4–15 s. `seedance2.0-fast-sp` does not support `reference_videos`. Docs: https://docs.jimmyai.cn/zh/api-reference/seedance/sp/create.md
 
 `seedance2.0-mini-sp`: unified `POST /api/open-api/v1/seedance/videos`, `resolution` `480p` or `720p`, duration 4–15 s.
 

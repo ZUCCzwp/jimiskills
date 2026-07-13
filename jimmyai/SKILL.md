@@ -1,6 +1,6 @@
 ---
 name: "jimmyai"
-description: "Integrate JimmyAI image and video generation APIs (Sora, VEO, Gemini Omni, Seedance including Mini 特价版, GPT Image) via the bundled CLI (`scripts/jimmyai.py`). Use when the user asks to connect JimmyAI, generate AI images/videos, poll async tasks, set up API keys, or integrate https://api.viraltok.ai — including zero-experience onboarding. Requires `JIMMYAI_API_KEY`."
+description: "Integrate JimmyAI image and video generation APIs (Sora, VEO, Gemini Omni, Seedance including SP economy and Mini 特价版, GPT Image) via the bundled CLI (`scripts/jimmyai.py`). Use when the user asks to connect JimmyAI, generate AI images/videos, poll async tasks, set up API keys, or integrate https://api.viraltok.ai — including zero-experience onboarding. Requires `JIMMYAI_API_KEY`."
 ---
 
 # JimmyAI API Skill
@@ -50,14 +50,14 @@ If `JIMMYAI_API_KEY` is missing, guide the user to set it locally and confirm wh
 | Sora video | `create-video` → poll `GET /videos/{taskId}` |
 | Gemini Omni video | `create-gemini-video` → poll `GET /videos/{taskId}` |
 | Gemini Omni 10s (`omni-10s`) | same endpoint with `--model omni-10s` |
-| Seedance video (MD / Fast I2V / Mini 特价版 / etc.) | `create-seedance-video` → poll `GET /videos/{taskId}` |
+| Seedance video (SP economy / MD / Fast I2V / Mini 特价版 / etc.) | `create-seedance-video` → poll `GET /videos/{taskId}` |
 | Just check task status | `poll --task-id <id> --type video\|image` |
 | Check user account balance | `user-balance` → `GET /user/balance` |
 | Check API key quota | `key-balance` → `GET /key/balance` |
 | Upload reference media (image/video/audio) | `upload-file` → `POST /files/upload` |
 | Create + wait in one step | `create-and-poll` |
 
-For VEO, other Seedance routes (SP / Manxue / STD / Mini 特价版), image edits, image understanding, or **local file upload** (`POST /files/upload`), fetch the specific page from https://docs.jimmyai.cn/llms.txt before calling.
+For VEO, Manxue Seedance, STD, image edits, image understanding, or **local file upload** (`POST /files/upload`), fetch the specific page from https://docs.jimmyai.cn/llms.txt before calling. SP economy detail: https://docs.jimmyai.cn/zh/api-reference/seedance/sp/create.md
 
 ## Workflow
 
@@ -132,6 +132,22 @@ python "$JIMMYAI_CLI" create-and-poll \
   --ratio "16:9" \
   --image "https://example.com/ref.jpg"
 ```
+
+### SP economy video (Seedance, async)
+
+```bash
+python "$JIMMYAI_CLI" create-and-poll \
+  --type seedance-video \
+  --model seedance2.0-sp \
+  --prompt "Rainy street at night, girl turns and smiles, cinematic push-in" \
+  --duration 8 \
+  --resolution 720p \
+  --ratio "16:9" \
+  --first-image "https://example.com/start.png" \
+  --download output.mp4
+```
+
+`seedance2.0-sp` / `seedance2.0-fast-sp`: `resolution` is `720p` (default) or `1080p` only — **not `480p`**. Duration 4–15 s. Docs: https://docs.jimmyai.cn/zh/api-reference/seedance/sp/create.md
 
 ### Mini 特价版 video (Seedance, async)
 

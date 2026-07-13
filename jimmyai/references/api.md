@@ -144,7 +144,7 @@ Poll via `GET /api/open-api/v1/videos/{taskId}` (same as Sora / Gemini Omni).
 | Route | `model` | Billing | Duration | Notes |
 |-------|---------|---------|----------|-------|
 | Manxue | `sd2_mx_*`, `sd2_mx_fast_*`, `sd2_mx_video_*` | per second | 4–12 s | assets need `asset://` audit |
-| SP economy | `seedance2.0-sp`, `seedance2.0-fast-sp` | per second × resolution | 4–15 s | see SP doc |
+| SP economy | `seedance2.0-sp`, `seedance2.0-fast-sp` | per second × resolution | 4–15 s | `resolution`: `720p` / `1080p` only (**not `480p`**); see SP doc |
 | SP official | `seedance2.0-of-sp`, `seedance2.0-of-fast-sp` | per second × resolution | 4–15 s | see SP doc |
 | Mini | `seedance2.0-mini`, `seedance2.0-mini-video` | per second × resolution | 4–15 s | |
 | **Mini 特价版** | `seedance2.0-mini-sp` | per second × resolution | 4–15 s | `480p` / `720p` only; same endpoint as other Seedance routes |
@@ -160,12 +160,27 @@ Fast I2V detail: https://docs.jimmyai.cn/zh/api-reference/seedance/md/fast-i2v.m
 | model | yes | e.g. `seedance2.0-fast-i2v`, `seedance2.0-mini-sp` (request model = billing model) |
 | prompt | yes | max 5000 chars for MD / Fast I2V |
 | duration | yes | Fast I2V: 1–15; MD / Mini 特价版: 4–15 |
-| resolution | no | Mini 特价版: `480p` or `720p` (default `720p`); SP / Mini: affects billing |
+| resolution | no | SP economy: `720p` (default) or `1080p` only; Mini 特价版: `480p` or `720p`; Mini: `480p` / `720p` / `1080p` |
 | ratio | no | Fast I2V / MD: `16:9`, `9:16`, `1:1` |
 | images | no | reference image URLs |
 | first_image / last_image | no | frame mode; mutually exclusive with `images` |
 | reference_videos | no | not supported on `seedance2.0-fast-i2v` |
 | reference_audios | no | not supported on MD / Fast I2V |
+
+**SP economy** (`seedance2.0-sp`, `seedance2.0-fast-sp`): unified `POST /api/open-api/v1/seedance/videos`. Poll via `GET /api/open-api/v1/videos/{taskId}`. `resolution` must be `720p` (default) or `1080p` — **`480p` is not supported**. Duration 4–15 s. Supports `images`, `first_image` / `last_image`, `reference_videos` (not on `seedance2.0-fast-sp`), and `reference_audios` (audio requires image/video/frame refs). Materials: public `https://` URLs or `asset://` after `POST /api/open-api/v1/seedance/sp/assets/upload`. Detail: https://docs.jimmyai.cn/zh/api-reference/seedance/sp/create.md
+
+```json
+{
+  "model": "seedance2.0-sp",
+  "prompt": "Rainy street at night, girl turns and smiles, cinematic push-in",
+  "duration": 8,
+  "resolution": "720p",
+  "ratio": "16:9",
+  "first_image": "https://example.com/start.png"
+}
+```
+
+Catalog billing names (per second): `sd2_sp_720p`, `sd2_sp_1080p`, `sd2_sp_2k`, `sd2_sp_4k`, `sd2_sp_fast_780p`, `sd2_sp_video_*` — request still uses `seedance2.0-sp` + `resolution`.
 
 **Mini 特价版** (`seedance2.0-mini-sp`): use `POST /api/open-api/v1/seedance/videos` (not a separate mini-sp path). Poll via `GET /api/open-api/v1/videos/{taskId}`. Supports `images`, `first_image` / `last_image`, `reference_videos`, and `reference_audios` (audio requires image or video refs).
 
