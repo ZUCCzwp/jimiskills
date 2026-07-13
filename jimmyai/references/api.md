@@ -214,7 +214,7 @@ Asset audit (Manxue routes only):
 | quality | no | `low`, `medium`, `high` (gpt-image-2) |
 | images | no | reference URLs or base64 (Seedream: max 10; per image: jpeg/png/webp/bmp/tiff/gif/heic/heif, aspect [1/16,16], sides >14px, ≤30MB, ≤6000×6000 px) |
 
-**Seedream 5.0 Pro** (`doubao-seedream-5-0-pro`): async `POST /api/open-api/v1/images`, poll `GET /api/open-api/v1/images/{taskId}`. Per-task billing, **1 image per request** (`n > 1` rejected). Resolution `1k`/`2k` (default `2k`). Ratios: `1:1`, `4:3`, `3:4`, `16:9`, `9:16`, `3:2`, `2:3`, `21:9`, `auto`. Docs: https://docs.jimmyai.cn/zh/api-reference/images/seedream-5-0-pro/create.md
+**Seedream 5.0 Pro** (`doubao-seedream-5-0-pro`): async `POST /api/open-api/v1/images`, poll `GET /api/open-api/v1/images/{taskId}`. Billing = resolution base (`doubao-seedream-5-0-pro-1k` / `-2k`) + `max(0, refs - 1) × doubao-seedream-5-0-pro-ref` (first reference free). Resolution `1k`/`2k` (default `2k`). Ratios: `1:1`, `4:3`, `3:4`, `16:9`, `9:16`, `3:2`, `2:3`, `21:9`, `auto`. Docs: https://docs.jimmyai.cn/zh/api-reference/images/seedream-5-0-pro/create.md
 
 ```json
 {
