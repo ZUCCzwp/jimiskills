@@ -254,6 +254,24 @@ Same `response_format` as generations: default `url`, optional `b64_json`. Form 
 
 `POST /api/open-api/v1/images/understand` — Gemini-powered analysis
 
+## Tools — video super-resolution
+
+`POST /api/open-api/v1/super-resolution/videos` — poll `GET /api/open-api/v1/videos/{taskId}`.
+
+| Field | Required | Notes |
+|-------|----------|-------|
+| model | yes | `superResolution-{720p\|1080p\|2k\|4k}-{lowfps\|highfps}` (`lowfps`=30FPS, `highfps`=120FPS) |
+| video_url | yes | public source video URL |
+
+Billing: `per_second`, duration probed from `video_url` and **ceiled** (min 1s). Docs: https://docs.jimmyai.cn/zh/api-reference/super-resolution/create.md
+
+```json
+{
+  "model": "superResolution-1080p-lowfps",
+  "video_url": "https://example.com/input-low-resolution.mp4"
+}
+```
+
 ## Model route notes (Sora)
 
 | route | models | duration |
