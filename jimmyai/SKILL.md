@@ -149,6 +149,20 @@ python "$JIMMYAI_CLI" create-and-poll \
 
 `seedance2.0-sp` / `seedance2.0-fast-sp`: `resolution` is `720p` (default) or `1080p` only — **not `480p`**. Duration 4–15 s. Docs: https://docs.jimmyai.cn/zh/api-reference/seedance/sp/create.md
 
+### Mini video (Seedance, async)
+
+```bash
+python "$JIMMYAI_CLI" create-and-poll \
+  --type seedance-video \
+  --model seedance2.0-mini-720p \
+  --prompt "Subject turns slowly, cinematic lighting" \
+  --duration 6 \
+  --ratio "9:16" \
+  --image "https://example.com/ref.jpg"
+```
+
+`seedance2.0-mini` / `seedance2.0-mini-video`: pass `resolution`, or use billing name as `--model` (e.g. `seedance2.0-mini-720p`). Docs: https://docs.jimmyai.cn/zh/api-reference/seedance/mini/create.md
+
 ### Mini 特价版 video (Seedance, async)
 
 ```bash

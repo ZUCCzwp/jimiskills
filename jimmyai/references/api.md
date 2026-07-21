@@ -146,7 +146,7 @@ Poll via `GET /api/open-api/v1/videos/{taskId}` (same as Sora / Gemini Omni).
 | Manxue | `sd2_mx_*`, `sd2_mx_fast_*`, `sd2_mx_video_*` | per second | 4–12 s | assets need `asset://` audit |
 | SP economy | `seedance2.0-sp`, `seedance2.0-fast-sp` | per second × resolution | 4–15 s | `resolution`: `720p` / `1080p` only (**not `480p`**); see SP doc |
 | SP official | `seedance2.0-of-sp`, `seedance2.0-of-fast-sp` | per second × resolution | 4–15 s | see SP doc |
-| Mini | `seedance2.0-mini`, `seedance2.0-mini-video` | per second × resolution | 4–15 s | |
+| Mini | `seedance2.0-mini`, `seedance2.0-mini-video` | per second × resolution | 4–15 s | billing names `seedance2.0-mini-{resolution}` / `seedance2.0-mini-{resolution}-video` also accepted as `model` (omit `resolution`) |
 | **Mini 特价版** | `seedance2.0-mini-sp` | per second × resolution | 4–15 s | `480p` / `720p` only; same endpoint as other Seedance routes |
 | MD standard | `seedance2.0-md` | per task | 4–15 s | direct `https://` URLs; max 4 images |
 | MD fast | `seedance2.0-fast-md` | per task | 4–15 s | same as MD |
@@ -181,6 +181,18 @@ Fast I2V detail: https://docs.jimmyai.cn/zh/api-reference/seedance/md/fast-i2v.m
 ```
 
 Catalog billing names (per second): `sd2_sp_720p`, `sd2_sp_1080p`, `sd2_sp_2k`, `sd2_sp_4k`, `sd2_sp_fast_780p`, `sd2_sp_video_*` — request still uses `seedance2.0-sp` + `resolution`.
+
+**Mini** (`seedance2.0-mini`, `seedance2.0-mini-video`): same `POST /api/open-api/v1/seedance/videos`. Either pass base `model` + `resolution`, or pass the **billing model name** directly (e.g. `seedance2.0-mini-720p`, `seedance2.0-mini-720p-video`) and omit `resolution`. Does **not** apply to `seedance2.0-mini-sp`. Docs: https://docs.jimmyai.cn/zh/api-reference/seedance/mini/create.md
+
+```json
+{
+  "model": "seedance2.0-mini-720p",
+  "prompt": "Subject turns slowly, cinematic lighting",
+  "duration": 6,
+  "ratio": "9:16",
+  "images": ["https://example.com/ref.jpg"]
+}
+```
 
 **Mini 特价版** (`seedance2.0-mini-sp`): use `POST /api/open-api/v1/seedance/videos` (not a separate mini-sp path). Poll via `GET /api/open-api/v1/videos/{taskId}`. Supports `images`, `first_image` / `last_image`, `reference_videos`, and `reference_audios` (audio requires image or video refs).
 
