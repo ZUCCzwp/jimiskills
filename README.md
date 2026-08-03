@@ -38,7 +38,7 @@ python "$JIMMYAI_CLI" generate-image --prompt "test" --dry-run
 python "$JIMMYAI_CLI" generate-image --prompt "A red apple on white background" --output apple.png
 ```
 
-Get your API key at https://api.viraltok.ai. Docs: https://docs.jimmyai.cn/llms.txt
+Get your API key at https://api.viraltok.ai. Docs: https://docs.viraltok.ai/llms.txt
 
 ## Usage in Codex
 

@@ -183,6 +183,6 @@ console.log(await res.json());
 
 ## Next steps
 
-- Full API index: https://docs.jimmyai.cn/llms.txt
-- OpenAPI spec: https://docs.jimmyai.cn/zh/api-reference/openapi.json
+- Full API index: https://docs.viraltok.ai/llms.txt
+- OpenAPI spec: https://docs.viraltok.ai/zh/api-reference/openapi.json
 - Support: 2114272829@qq.com or online chat on the website

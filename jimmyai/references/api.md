@@ -1,7 +1,7 @@
 # API reference (summary)
 
-Full docs: https://docs.jimmyai.cn/llms.txt  
-OpenAPI: https://docs.jimmyai.cn/zh/api-reference/openapi.json
+Full docs: https://docs.viraltok.ai/llms.txt  
+OpenAPI: https://docs.viraltok.ai/zh/api-reference/openapi.json
 
 Base URL: `https://api.viraltok.ai`  
 Auth: `Authorization: Bearer <JIMMYAI_API_KEY>`
@@ -43,7 +43,7 @@ Returns per-key quota (separate from account balance).
 | `available_quota` | Remaining quota |
 | `unlimited` | `true` when no quota cap |
 
-Docs: https://docs.jimmyai.cn/zh/api-reference/common/user-balance.md
+Docs: https://docs.viraltok.ai/zh/api-reference/common/user-balance.md
 
 ## File upload
 
@@ -82,7 +82,7 @@ Upload a local image, video, or audio file; returns a URL for use in `images`, `
 
 `data.url` may be a signed URL when object storage is private. Copy URLs within ~3 days.
 
-Docs: https://docs.jimmyai.cn/zh/api-reference/common/files-upload.mdx
+Docs: https://docs.viraltok.ai/zh/api-reference/common/files-upload.mdx
 
 ```bash
 curl --request POST \
@@ -131,13 +131,13 @@ Poll via same `GET /api/open-api/v1/videos/{taskId}`.
 
 ### VEO — create
 
-`POST /api/open-api/v1/veo/videos` — see https://docs.jimmyai.cn/zh/api-reference/veo/create-video.md
+`POST /api/open-api/v1/veo/videos` — see https://docs.viraltok.ai/zh/api-reference/veo/create-video.md
 
 `POST /api/open-api/v1/veo/frames` — first/last frame mode
 
 ### Seedance — create
 
-`POST /api/open-api/v1/seedance/videos` — see https://docs.jimmyai.cn/zh/api-reference/seedance/create.md
+`POST /api/open-api/v1/seedance/videos` — see https://docs.viraltok.ai/zh/api-reference/seedance/create.md
 
 Poll via `GET /api/open-api/v1/videos/{taskId}` (same as Sora / Gemini Omni).
 
@@ -153,7 +153,7 @@ Poll via `GET /api/open-api/v1/videos/{taskId}` (same as Sora / Gemini Omni).
 | **Fast I2V** | `seedance2.0-fast-i2v` | per task | 1–15 s | image refs only, max 9; no video/audio refs |
 | STD | `seedance2.0-std` | per task | 4–15 s | max 9 images, max 3 audio refs |
 
-Fast I2V detail: https://docs.jimmyai.cn/zh/api-reference/seedance/md/fast-i2v.md
+Fast I2V detail: https://docs.viraltok.ai/zh/api-reference/seedance/md/fast-i2v.md
 
 | Field | Required | Notes |
 |-------|----------|-------|
@@ -167,7 +167,7 @@ Fast I2V detail: https://docs.jimmyai.cn/zh/api-reference/seedance/md/fast-i2v.m
 | reference_videos | no | not supported on `seedance2.0-fast-i2v` |
 | reference_audios | no | not supported on MD / Fast I2V |
 
-**SP economy** (`seedance2.0-sp`, `seedance2.0-fast-sp`): unified `POST /api/open-api/v1/seedance/videos`. Poll via `GET /api/open-api/v1/videos/{taskId}`. `resolution` must be `720p` (default) or `1080p` — **`480p` is not supported**. Duration 4–15 s. Supports `images`, `first_image` / `last_image`, `reference_videos` (not on `seedance2.0-fast-sp`), and `reference_audios` (audio requires image/video/frame refs). Materials: public `https://` URLs or `asset://` after `POST /api/open-api/v1/seedance/sp/assets/upload`. Detail: https://docs.jimmyai.cn/zh/api-reference/seedance/sp/create.md
+**SP economy** (`seedance2.0-sp`, `seedance2.0-fast-sp`): unified `POST /api/open-api/v1/seedance/videos`. Poll via `GET /api/open-api/v1/videos/{taskId}`. `resolution` must be `720p` (default) or `1080p` — **`480p` is not supported**. Duration 4–15 s. Supports `images`, `first_image` / `last_image`, `reference_videos` (not on `seedance2.0-fast-sp`), and `reference_audios` (audio requires image/video/frame refs). Materials: public `https://` URLs or `asset://` after `POST /api/open-api/v1/seedance/sp/assets/upload`. Detail: https://docs.viraltok.ai/zh/api-reference/seedance/sp/create.md
 
 ```json
 {
@@ -182,7 +182,7 @@ Fast I2V detail: https://docs.jimmyai.cn/zh/api-reference/seedance/md/fast-i2v.m
 
 Catalog billing names (per second): `sd2_sp_720p`, `sd2_sp_1080p`, `sd2_sp_2k`, `sd2_sp_4k`, `sd2_sp_fast_780p`, `sd2_sp_video_*` — request still uses `seedance2.0-sp` + `resolution`.
 
-**Mini** (`seedance2.0-mini`, `seedance2.0-mini-video`): same `POST /api/open-api/v1/seedance/videos`. Either pass base `model` + `resolution`, or pass the **billing model name** directly (e.g. `seedance2.0-mini-720p`, `seedance2.0-mini-720p-video`) and omit `resolution`. Does **not** apply to `seedance2.0-mini-sp`. Docs: https://docs.jimmyai.cn/zh/api-reference/seedance/mini/create.md
+**Mini** (`seedance2.0-mini`, `seedance2.0-mini-video`): same `POST /api/open-api/v1/seedance/videos`. Either pass base `model` + `resolution`, or pass the **billing model name** directly (e.g. `seedance2.0-mini-720p`, `seedance2.0-mini-720p-video`) and omit `resolution`. Does **not** apply to `seedance2.0-mini-sp`. Docs: https://docs.viraltok.ai/zh/api-reference/seedance/mini/create.md
 
 ```json
 {
@@ -226,7 +226,7 @@ Asset audit (Manxue routes only):
 | quality | no | `low`, `medium`, `high` (gpt-image-2) |
 | images | no | reference URLs or base64 (Seedream: max 10; per image: jpeg/png/webp/bmp/tiff/gif/heic/heif, aspect [1/16,16], sides >14px, ≤30MB, ≤6000×6000 px) |
 
-**Seedream 5.0 Pro** (`doubao-seedream-5-0-pro`): async `POST /api/open-api/v1/images`, poll `GET /api/open-api/v1/images/{taskId}`. Billing = resolution base (`doubao-seedream-5-0-pro-1k` / `-2k`) + `max(0, refs - 1) × doubao-seedream-5-0-pro-ref` (first reference free). Resolution `1k`/`2k` (default `2k`). Ratios: `1:1`, `4:3`, `3:4`, `16:9`, `9:16`, `3:2`, `2:3`, `21:9`, `auto`. Docs: https://docs.jimmyai.cn/zh/api-reference/images/seedream-5-0-pro/create.md
+**Seedream 5.0 Pro** (`doubao-seedream-5-0-pro`): async `POST /api/open-api/v1/images`, poll `GET /api/open-api/v1/images/{taskId}`. Billing = resolution base (`doubao-seedream-5-0-pro-1k` / `-2k`) + `max(0, refs - 1) × doubao-seedream-5-0-pro-ref` (first reference free). Resolution `1k`/`2k` (default `2k`). Ratios: `1:1`, `4:3`, `3:4`, `16:9`, `9:16`, `3:2`, `2:3`, `21:9`, `auto`. Docs: https://docs.viraltok.ai/zh/api-reference/images/seedream-5-0-pro/create.md
 
 ```json
 {
@@ -275,7 +275,7 @@ Same `response_format` as generations: default `url`, optional `b64_json`. Form 
 | model | yes | `superResolution-{720p\|1080p\|2k\|4k}-{lowfps\|highfps}` (`lowfps`=30FPS, `highfps`=120FPS) |
 | video_url | yes | public source video URL |
 
-Billing: `per_second`, duration probed from `video_url` and **ceiled** (min 1s). Docs: https://docs.jimmyai.cn/zh/api-reference/super-resolution/create.md
+Billing: `per_second`, duration probed from `video_url` and **ceiled** (min 1s). Docs: https://docs.viraltok.ai/zh/api-reference/super-resolution/create.md
 
 ```json
 {

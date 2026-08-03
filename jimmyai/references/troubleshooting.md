@@ -82,7 +82,7 @@
 - Reference audio requires paired images, videos, or frame refs.
 - Upload assets via `POST /api/open-api/v1/seedance/sp/assets/upload`, then reference `asset://{asset_id}`.
 - Poll with `GET /api/open-api/v1/videos/{taskId}` like other async video tasks.
-- Docs: https://docs.jimmyai.cn/zh/api-reference/seedance/sp/create.md
+- Docs: https://docs.viraltok.ai/zh/api-reference/seedance/sp/create.md
 
 ## Seedance Mini (`seedance2.0-mini`)
 
@@ -90,7 +90,7 @@
 - **Billing model names** are also valid as `model`: e.g. `seedance2.0-mini-720p`, `seedance2.0-mini-1080p-video` — resolution is parsed from `model`; you can omit `resolution`.
 - This alias applies only to **Mini standard / video-ref**, not `seedance2.0-mini-sp`.
 - If you see「配置不存在」with `seedance2.0-mini-720p`, upgrade the API server or use `model: seedance2.0-mini` + `resolution: 720p`.
-- Docs: https://docs.jimmyai.cn/zh/api-reference/seedance/mini/create.md
+- Docs: https://docs.viraltok.ai/zh/api-reference/seedance/mini/create.md
 
 ## Seedance Mini 特价版 (`seedance2.0-mini-sp`)
 
@@ -106,6 +106,6 @@
 
 ## More help
 
-- Docs: https://docs.jimmyai.cn/llms.txt
+- Docs: https://docs.viraltok.ai/llms.txt
 - Email: 2114272829@qq.com
 - Online chat on https://api.viraltok.ai

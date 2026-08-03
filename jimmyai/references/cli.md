@@ -97,11 +97,11 @@ python "$JIMMYAI_CLI" create-seedance-video \
   --image "https://example.com/ref.jpg"
 ```
 
-`seedance2.0-sp` / `seedance2.0-fast-sp`: unified `POST /api/open-api/v1/seedance/videos`, `resolution` `720p` or `1080p` only (default `720p`), duration 4–15 s. `seedance2.0-fast-sp` does not support `reference_videos`. Docs: https://docs.jimmyai.cn/zh/api-reference/seedance/sp/create.md
+`seedance2.0-sp` / `seedance2.0-fast-sp`: unified `POST /api/open-api/v1/seedance/videos`, `resolution` `720p` or `1080p` only (default `720p`), duration 4–15 s. `seedance2.0-fast-sp` does not support `reference_videos`. Docs: https://docs.viraltok.ai/zh/api-reference/seedance/sp/create.md
 
 `seedance2.0-mini-sp`: unified `POST /api/open-api/v1/seedance/videos`, `resolution` `480p` or `720p`, duration 4–15 s.
 
-`seedance2.0-fast-i2v`: image refs only (max 9), no `reference_videos` / `reference_audios`, duration 1–15 s. Docs: https://docs.jimmyai.cn/zh/api-reference/seedance/md/fast-i2v.md
+`seedance2.0-fast-i2v`: image refs only (max 9), no `reference_videos` / `reference_audios`, duration 1–15 s. Docs: https://docs.viraltok.ai/zh/api-reference/seedance/md/fast-i2v.md
 
 ## create-gemini-video
 

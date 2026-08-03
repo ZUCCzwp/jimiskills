@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """JimmyAI image and video API CLI.
 
-Docs: https://docs.jimmyai.cn/llms.txt
+Docs: https://docs.viraltok.ai/llms.txt
 """
 
 from __future__ import annotations

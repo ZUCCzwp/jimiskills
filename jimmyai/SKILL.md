@@ -5,7 +5,7 @@ description: "Integrate JimmyAI image and video generation APIs (Sora, VEO, Gemi
 
 # JimmyAI API Skill
 
-JimmyAI is an OpenAI-compatible gateway for image and video generation. Base URL: `https://api.viraltok.ai`. Docs index: https://docs.jimmyai.cn/llms.txt
+JimmyAI is an OpenAI-compatible gateway for image and video generation. Base URL: `https://api.viraltok.ai`. Docs index: https://docs.viraltok.ai/llms.txt
 
 This skill helps users integrate JimmyAI from zero — register, get a key, send the first request, and poll async tasks. Prefer the bundled CLI for deterministic runs. `$jimmyai` is a skill tag in prompts, not a shell command.
 
@@ -57,7 +57,7 @@ If `JIMMYAI_API_KEY` is missing, guide the user to set it locally and confirm wh
 | Upload reference media (image/video/audio) | `upload-file` → `POST /files/upload` |
 | Create + wait in one step | `create-and-poll` |
 
-For VEO, Manxue Seedance, STD, image edits, image understanding, or **local file upload** (`POST /files/upload`), fetch the specific page from https://docs.jimmyai.cn/llms.txt before calling. SP economy detail: https://docs.jimmyai.cn/zh/api-reference/seedance/sp/create.md
+For VEO, Manxue Seedance, STD, image edits, image understanding, or **local file upload** (`POST /files/upload`), fetch the specific page from https://docs.viraltok.ai/llms.txt before calling. SP economy detail: https://docs.viraltok.ai/zh/api-reference/seedance/sp/create.md
 
 ## Workflow
 
@@ -147,7 +147,7 @@ python "$JIMMYAI_CLI" create-and-poll \
   --download output.mp4
 ```
 
-`seedance2.0-sp` / `seedance2.0-fast-sp`: `resolution` is `720p` (default) or `1080p` only — **not `480p`**. Duration 4–15 s. Docs: https://docs.jimmyai.cn/zh/api-reference/seedance/sp/create.md
+`seedance2.0-sp` / `seedance2.0-fast-sp`: `resolution` is `720p` (default) or `1080p` only — **not `480p`**. Duration 4–15 s. Docs: https://docs.viraltok.ai/zh/api-reference/seedance/sp/create.md
 
 ### Mini video (Seedance, async)
 
@@ -161,7 +161,7 @@ python "$JIMMYAI_CLI" create-and-poll \
   --image "https://example.com/ref.jpg"
 ```
 
-`seedance2.0-mini` / `seedance2.0-mini-video`: pass `resolution`, or use billing name as `--model` (e.g. `seedance2.0-mini-720p`). Docs: https://docs.jimmyai.cn/zh/api-reference/seedance/mini/create.md
+`seedance2.0-mini` / `seedance2.0-mini-video`: pass `resolution`, or use billing name as `--model` (e.g. `seedance2.0-mini-720p`). Docs: https://docs.viraltok.ai/zh/api-reference/seedance/mini/create.md
 
 ### Mini 特价版 video (Seedance, async)
 
@@ -203,4 +203,4 @@ python "$JIMMYAI_CLI" upload-file --file ./ref.jpg
 - **`references/api.md`**: endpoint summary and model notes
 - **`references/troubleshooting.md`**: common errors and fixes
 - **`references/codex-network.md`**: Codex sandbox / network approval tips
-- **Live docs**: https://docs.jimmyai.cn/llms.txt
+- **Live docs**: https://docs.viraltok.ai/llms.txt
