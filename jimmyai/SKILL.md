@@ -1,6 +1,6 @@
 ---
 name: "jimmyai"
-description: "Integrate JimmyAI image and video generation APIs (Sora, VEO, Gemini Omni, Seedance including SP economy and Mini 特价版, GPT Image) via the bundled CLI (`scripts/jimmyai.py`). Use when the user asks to connect JimmyAI, generate AI images/videos, poll async tasks, set up API keys, or integrate https://api.viraltok.ai — including zero-experience onboarding. Requires `JIMMYAI_API_KEY`."
+description: "Integrate JimmyAI image and video generation APIs (Sora, VEO, Gemini Omni, Seedance including SP economy and Mini 特价版, MiniMax H3, GPT Image) via the bundled CLI (`scripts/jimmyai.py`). Use when the user asks to connect JimmyAI, generate AI images/videos, poll async tasks, set up API keys, or integrate https://api.viraltok.ai — including zero-experience onboarding. Requires `JIMMYAI_API_KEY`."
 ---
 
 # JimmyAI API Skill
@@ -12,7 +12,7 @@ This skill helps users integrate JimmyAI from zero — register, get a key, send
 ## When to use
 
 - First-time JimmyAI setup (account, API key, recharge, env var)
-- Generate a video (Sora / Gemini Omni / VEO / Seedance)
+- Generate a video (Sora / Gemini Omni / VEO / Seedance / MiniMax H3)
 - Generate an image (sync or async)
 - Poll task status and download results
 - Debug auth, billing, or network errors
@@ -51,13 +51,14 @@ If `JIMMYAI_API_KEY` is missing, guide the user to set it locally and confirm wh
 | Gemini Omni video | `create-gemini-video` → poll `GET /videos/{taskId}` |
 | Gemini Omni 10s (`omni-10s`) | same endpoint with `--model omni-10s` |
 | Seedance video (SP economy / MD / Fast I2V / Mini 特价版 / etc.) | `create-seedance-video` → poll `GET /videos/{taskId}` |
+| MiniMax H3 video | `create-minimax-video` → poll `GET /videos/{taskId}` |
 | Just check task status | `poll --task-id <id> --type video\|image` |
 | Check user account balance | `user-balance` → `GET /user/balance` |
 | Check API key quota | `key-balance` → `GET /key/balance` |
 | Upload reference media (image/video/audio) | `upload-file` → `POST /files/upload` |
 | Create + wait in one step | `create-and-poll` |
 
-For VEO, Manxue Seedance, STD, image edits, image understanding, or **local file upload** (`POST /files/upload`), fetch the specific page from https://docs.viraltok.ai/llms.txt before calling. SP economy detail: https://docs.viraltok.ai/zh/api-reference/seedance/sp/create.md
+For VEO, Manxue Seedance, STD, image edits, image understanding, or **local file upload** (`POST /files/upload`), fetch the specific page from https://docs.viraltok.ai/llms.txt before calling. SP economy detail: https://docs.viraltok.ai/zh/api-reference/seedance/sp/create.md · MiniMax H3: https://docs.viraltok.ai/zh/api-reference/minimax/create.md
 
 ## Workflow
 
@@ -162,6 +163,34 @@ python "$JIMMYAI_CLI" create-and-poll \
 ```
 
 `seedance2.0-mini` / `seedance2.0-mini-video`: pass `resolution`, or use billing name as `--model` (e.g. `seedance2.0-mini-720p`). Docs: https://docs.viraltok.ai/zh/api-reference/seedance/mini/create.md
+
+### MiniMax H3 video (async)
+
+```bash
+python "$JIMMYAI_CLI" create-and-poll \
+  --type minimax-video \
+  --model minimax-h3 \
+  --prompt "A cinematic product shot with natural lighting" \
+  --duration 5 \
+  --aspect-ratio "16:9" \
+  --image "https://example.com/reference.png" \
+  --download output.mp4
+```
+
+Or create only:
+
+```bash
+python "$JIMMYAI_CLI" create-minimax-video \
+  --model minimax-h3 \
+  --prompt "A cinematic product shot with natural lighting" \
+  --duration 5 \
+  --aspect-ratio "16:9" \
+  --size "2560x1440" \
+  --image "https://example.com/reference.png" \
+  --audio "https://example.com/reference.mp3"
+```
+
+`minimax-h3`: duration 5–15 s; max 5 reference images + 1 audio; optional `--first-image` / `--last-image`. Docs: https://docs.viraltok.ai/zh/api-reference/minimax/create.md
 
 ### Mini 特价版 video (Seedance, async)
 

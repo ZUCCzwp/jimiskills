@@ -99,6 +99,15 @@
 - `duration` must be 4–15 seconds.
 - Poll with `GET /api/open-api/v1/videos/{taskId}` like other async video tasks.
 
+## MiniMax H3 (`minimax-h3`)
+
+- Use `POST /api/open-api/v1/minimax/videos` with `"model": "minimax-h3"`.
+- `duration` must be 5–15 seconds (default 5).
+- `aspect_ratio`: `16:9` / `9:16` / `1:1` / `4:3` / `3:4` / `21:9`.
+- `reference_images` max 5; `reference_audios` max 1; optional `first_image` / `last_image`.
+- Poll with `GET /api/open-api/v1/videos/{taskId}`.
+- Docs: https://docs.viraltok.ai/zh/api-reference/minimax/create.md
+
 ## video_url is a relative path (custom OSS)
 
 - Cause: older API responses could return OSS object keys like `seedance/mini-sp/video/xxx.mp4` instead of a full URL.

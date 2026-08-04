@@ -284,6 +284,35 @@ Billing: `per_second`, duration probed from `video_url` and **ceiled** (min 1s).
 }
 ```
 
+## MiniMax H3 video
+
+`POST /api/open-api/v1/minimax/videos` — poll `GET /api/open-api/v1/videos/{taskId}`.
+
+| Field | Required | Notes |
+|-------|----------|-------|
+| model | yes | `minimax-h3` (aliases `minimax_h3` / `minimaxh3` normalize) |
+| prompt | yes | 1–5000 chars |
+| duration | no | 5–15, default `5` |
+| aspect_ratio / ratio | no | `16:9` / `9:16` / `1:1` / `4:3` / `3:4` / `21:9`, default `16:9` |
+| size | no | `2560x1440` / `1440x2560` / `1440x1440` / `1920x1440` / `1440x1920` / `3360x1440` |
+| reference_images / images | no | max **5** public URLs |
+| reference_audios | no | max **1** public URL |
+| first_image / last_image | no | optional first/last frame URL |
+
+Docs: https://docs.viraltok.ai/zh/api-reference/minimax/create.md
+
+```json
+{
+  "model": "minimax-h3",
+  "prompt": "A cinematic product shot with natural lighting",
+  "duration": 5,
+  "aspect_ratio": "16:9",
+  "size": "2560x1440",
+  "reference_images": ["https://example.com/reference.png"],
+  "reference_audios": ["https://example.com/reference.mp3"]
+}
+```
+
 ## Model route notes (Sora)
 
 | route | models | duration |

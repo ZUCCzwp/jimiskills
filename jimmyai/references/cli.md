@@ -29,6 +29,7 @@ export JIMMYAI_BASE_URL="https://api.viraltok.ai"
 |---------|---------|
 | `create-video` | Create Sora video task (async) |
 | `create-seedance-video` | Create Seedance video task (async) |
+| `create-minimax-video` | Create MiniMax H3 video task (async) |
 | `create-gemini-video` | Create Gemini Omni video task |
 | `create-image` | Create async image task |
 | `generate-image` | Sync text-to-image (OpenAI-compatible) |
@@ -103,6 +104,25 @@ python "$JIMMYAI_CLI" create-seedance-video \
 
 `seedance2.0-fast-i2v`: image refs only (max 9), no `reference_videos` / `reference_audios`, duration 1–15 s. Docs: https://docs.viraltok.ai/zh/api-reference/seedance/md/fast-i2v.md
 
+## create-minimax-video
+
+`POST /api/open-api/v1/minimax/videos` — poll with `poll --type video`.
+
+```bash
+python "$JIMMYAI_CLI" create-minimax-video \
+  --model minimax-h3 \
+  --prompt "A cinematic product shot with natural lighting" \
+  --duration 5 \
+  --aspect-ratio "16:9" \
+  --size "2560x1440" \
+  --image "https://example.com/reference.png" \
+  --audio "https://example.com/reference.mp3" \
+  --first-image "https://example.com/first.png" \
+  --last-image "https://example.com/last.png"
+```
+
+`minimax-h3`: duration 5–15 s (default 5); max 5 `--image` and 1 `--audio`; optional first/last frames. Docs: https://docs.viraltok.ai/zh/api-reference/minimax/create.md
+
 ## create-gemini-video
 
 ```bash
@@ -157,7 +177,7 @@ python "$JIMMYAI_CLI" create-and-poll \
   --download output.mp4
 ```
 
-`--type` values: `video`, `gemini-video`, `seedance-video`, `image`
+`--type` values: `video`, `gemini-video`, `seedance-video`, `minimax-video`, `image`
 
 Seedance example:
 
@@ -168,6 +188,19 @@ python "$JIMMYAI_CLI" create-and-poll \
   --prompt "A cat walking in a garden" \
   --duration 8 \
   --ratio "16:9" \
+  --image "https://example.com/ref.jpg" \
+  --download output.mp4
+```
+
+MiniMax H3 example:
+
+```bash
+python "$JIMMYAI_CLI" create-and-poll \
+  --type minimax-video \
+  --model minimax-h3 \
+  --prompt "A cinematic product shot with natural lighting" \
+  --duration 5 \
+  --aspect-ratio "16:9" \
   --image "https://example.com/ref.jpg" \
   --download output.mp4
 ```
