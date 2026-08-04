@@ -121,8 +121,7 @@ python "$JIMMYAI_CLI" create-minimax-video \
   --last-image "https://example.com/last.png"
 ```
 
-`minimax-h3`: duration 5–15 s (default 5); max 5 `--image` and 1 `--audio`; optional first/last frames. Docs: https://docs.viraltok.ai/zh/api-reference/minimax/create.md
-
+`minimax-h3`: billed `per_task` (flat per request). Duration 5–15 s (default 5); max 5 `--image` and 1 `--audio`; optional first/last frames. Docs: https://docs.viraltok.ai/zh/api-reference/minimax/create.md
 ## create-gemini-video
 
 ```bash

@@ -299,7 +299,7 @@ Billing: `per_second`, duration probed from `video_url` and **ceiled** (min 1s).
 | reference_audios | no | max **1** public URL |
 | first_image / last_image | no | optional first/last frame URL |
 
-Docs: https://docs.viraltok.ai/zh/api-reference/minimax/create.md
+Billing: `per_task` (flat per request). `duration` is generation length only and does not affect cost. Docs: https://docs.viraltok.ai/zh/api-reference/minimax/create.md
 
 ```json
 {

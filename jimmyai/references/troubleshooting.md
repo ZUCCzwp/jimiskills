@@ -102,6 +102,7 @@
 ## MiniMax H3 (`minimax-h3`)
 
 - Use `POST /api/open-api/v1/minimax/videos` with `"model": "minimax-h3"`.
+- Billing is `per_task` (flat per request); `duration` does not change cost.
 - `duration` must be 5–15 seconds (default 5).
 - `aspect_ratio`: `16:9` / `9:16` / `1:1` / `4:3` / `3:4` / `21:9`.
 - `reference_images` max 5; `reference_audios` max 1; optional `first_image` / `last_image`.

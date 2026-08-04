@@ -190,7 +190,7 @@ python "$JIMMYAI_CLI" create-minimax-video \
   --audio "https://example.com/reference.mp3"
 ```
 
-`minimax-h3`: duration 5–15 s; max 5 reference images + 1 audio; optional `--first-image` / `--last-image`. Docs: https://docs.viraltok.ai/zh/api-reference/minimax/create.md
+`minimax-h3`: billed `per_task` (flat per request; `duration` does not change cost). Duration 5–15 s; max 5 reference images + 1 audio; optional `--first-image` / `--last-image`. Docs: https://docs.viraltok.ai/zh/api-reference/minimax/create.md
 
 ### Mini 特价版 video (Seedance, async)
 
