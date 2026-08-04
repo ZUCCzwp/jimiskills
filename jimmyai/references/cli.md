@@ -30,6 +30,7 @@ export JIMMYAI_BASE_URL="https://api.viraltok.ai"
 | `create-video` | Create Sora video task (async) |
 | `create-seedance-video` | Create Seedance video task (async) |
 | `create-minimax-video` | Create MiniMax H3 video task (async) |
+| `create-seedance25-video` | Create Seedance 2.5 video task (async) |
 | `create-gemini-video` | Create Gemini Omni video task |
 | `create-image` | Create async image task |
 | `generate-image` | Sync text-to-image (OpenAI-compatible) |
@@ -122,6 +123,24 @@ python "$JIMMYAI_CLI" create-minimax-video \
 ```
 
 `minimax-h3`: billed `per_task` (flat per request). Duration 5–15 s (default 5); max 5 `--image` and 1 `--audio`; optional first/last frames. Docs: https://docs.viraltok.ai/zh/api-reference/minimax/create.md
+
+## create-seedance25-video
+
+`POST /api/open-api/v1/seedance25/videos` — poll with `poll --type video`.
+
+```bash
+python "$JIMMYAI_CLI" create-seedance25-video \
+  --model seedance-2.5 \
+  --prompt "A cinematic product shot with natural lighting" \
+  --duration 4 \
+  --aspect-ratio 16:9 \
+  --resolution 720p \
+  --image "https://example.com/reference.png" \
+  --video "https://example.com/reference.mp4" \
+  --audio "https://example.com/reference.mp3"
+```
+
+`seedance-2.5`: billed `per_second` by resolution (`seedance-2.5-480p` / `seedance-2.5-720p`). Duration 4–30 s (default 4); aspect_ratio `16:9|9:16|1:1` (default `9:16`); resolution `480p|720p`; max 30 `--image` / 10 `--video` / 10 `--audio`. Docs: https://docs.viraltok.ai/zh/api-reference/seedance/25/create.md
 ## create-gemini-video
 
 ```bash
@@ -176,7 +195,7 @@ python "$JIMMYAI_CLI" create-and-poll \
   --download output.mp4
 ```
 
-`--type` values: `video`, `gemini-video`, `seedance-video`, `minimax-video`, `image`
+`--type` values: `video`, `gemini-video`, `seedance-video`, `seedance25-video`, `minimax-video`, `image`
 
 Seedance example:
 
@@ -200,6 +219,20 @@ python "$JIMMYAI_CLI" create-and-poll \
   --prompt "A cinematic product shot with natural lighting" \
   --duration 5 \
   --aspect-ratio "16:9" \
+  --image "https://example.com/ref.jpg" \
+  --download output.mp4
+```
+
+Seedance 2.5 example:
+
+```bash
+python "$JIMMYAI_CLI" create-and-poll \
+  --type seedance25-video \
+  --model seedance-2.5 \
+  --prompt "A cinematic product shot with natural lighting" \
+  --duration 4 \
+  --aspect-ratio "16:9" \
+  --resolution 720p \
   --image "https://example.com/ref.jpg" \
   --download output.mp4
 ```

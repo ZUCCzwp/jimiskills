@@ -109,6 +109,18 @@
 - Poll with `GET /api/open-api/v1/videos/{taskId}`.
 - Docs: https://docs.viraltok.ai/zh/api-reference/minimax/create.md
 
+## Seedance 2.5 (`seedance-2.5`)
+
+- Use `POST /api/open-api/v1/seedance25/videos` with `"model": "seedance-2.5"`.
+- Billing is `per_second` by resolution (`seedance-2.5-480p` / `seedance-2.5-720p`; `unit_price × duration`).
+- Request `model` stays `seedance-2.5`; billing key follows `resolution`.
+- `duration` must be 4–30 seconds (default 4).
+- `aspect_ratio`: `16:9` / `9:16` / `1:1` (default `9:16`).
+- `resolution`: `480p` / `720p` (default `480p`).
+- `reference_images` max 30; `reference_videos` max 10 (total ≤ 30s); `reference_audios` max 10.
+- Poll with `GET /api/open-api/v1/videos/{taskId}`.
+- Docs: https://docs.viraltok.ai/zh/api-reference/seedance/25/create.md
+
 ## video_url is a relative path (custom OSS)
 
 - Cause: older API responses could return OSS object keys like `seedance/mini-sp/video/xxx.mp4` instead of a full URL.

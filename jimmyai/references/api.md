@@ -313,6 +313,36 @@ Billing: `per_task` (flat per request). `duration` is generation length only and
 }
 ```
 
+## Seedance 2.5 video
+
+`POST /api/open-api/v1/seedance25/videos` — poll `GET /api/open-api/v1/videos/{taskId}`.
+
+| Field | Required | Notes |
+|-------|----------|-------|
+| model | yes | `seedance-2.5` (aliases `seedance2.5` / `seedance_2.5` / `seedance25` normalize) |
+| prompt | yes | 1–5000 chars |
+| duration | no | 4–30, default `4` |
+| aspect_ratio / ratio | no | `16:9` / `9:16` / `1:1`, default `9:16` |
+| resolution | no | `480p` / `720p`, default `480p` |
+| reference_images / images | no | max **30** public URLs |
+| reference_videos / videos | no | max **10** public URLs (total ≤ 30s) |
+| reference_audios / audios | no | max **10** public URLs |
+
+Billing: `per_second` by resolution (`seedance-2.5-480p` / `seedance-2.5-720p`; `unit_price × duration`). Request `model` stays `seedance-2.5`. Docs: https://docs.viraltok.ai/zh/api-reference/seedance/25/create.md
+
+```json
+{
+  "model": "seedance-2.5",
+  "prompt": "A cinematic product shot with natural lighting",
+  "duration": 4,
+  "aspect_ratio": "16:9",
+  "resolution": "720p",
+  "reference_images": ["https://example.com/reference.png"],
+  "reference_videos": ["https://example.com/reference.mp4"],
+  "reference_audios": ["https://example.com/reference.mp3"]
+}
+```
+
 ## Model route notes (Sora)
 
 | route | models | duration |
