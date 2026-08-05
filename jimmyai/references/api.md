@@ -291,7 +291,7 @@ Billing: `per_second`, duration probed from `video_url` and **ceiled** (min 1s).
 | Field | Required | Notes |
 |-------|----------|-------|
 | model | yes | `minimax-h3` (aliases `minimax_h3` / `minimaxh3` normalize) |
-| prompt | yes | 1–5000 chars |
+| prompt | yes | 1–2000 chars |
 | duration | no | 5–15, default `5` |
 | aspect_ratio / ratio | no | `16:9` / `9:16` / `1:1` / `4:3` / `3:4` / `21:9`, default `16:9` |
 | size | no | `2560x1440` / `1440x2560` / `1440x1440` / `1920x1440` / `1440x1920` / `3360x1440` |
