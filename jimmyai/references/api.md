@@ -343,6 +343,42 @@ Billing: `per_second` by resolution (`seedance-2.5-480p` / `seedance-2.5-720p`; 
 }
 ```
 
+## Seedance 2.0 933 video
+
+`POST /api/open-api/v1/seedance/videos` — poll `GET /api/open-api/v1/videos/{taskId}`.
+
+| Field | Required | Notes |
+|-------|----------|-------|
+| model | yes | `seedance2.0-933` (aliases `seedance2_0_933` / `seedance20933` normalize) |
+| prompt | yes | 1–5000 chars |
+| duration | no | 4–15, default `4` |
+| aspect_ratio / ratio | no | `21:9` / `16:9` / `4:3` / `1:1` / `3:4` / `9:16`, default `16:9` |
+| resolution | no | `480p` / `720p` / `1080p`, default `480p` |
+| face_processing | no | default `true` |
+| generate_audio | no | default `false` |
+| reference_mode | no | `image` / `frame`, default `image` |
+| reference_images / images | no | max **9** public URLs |
+| reference_videos / videos | no | max **3** public URLs |
+| reference_audios / audios | no | max **3** public URLs |
+
+Billing: `per_second` by resolution (`seedance2.0-933-480p` / `seedance2.0-933-720p` / `seedance2.0-933-1080p`; `unit_price × duration`). Request `model` stays `seedance2.0-933`. Docs: https://docs.viraltok.ai/zh/api-reference/seedance/20933/create.md
+
+```json
+{
+  "model": "seedance2.0-933",
+  "prompt": "A cinematic product shot with natural lighting",
+  "duration": 4,
+  "aspect_ratio": "16:9",
+  "resolution": "720p",
+  "face_processing": true,
+  "generate_audio": false,
+  "reference_mode": "image",
+  "reference_images": ["https://example.com/reference.png"],
+  "reference_videos": ["https://example.com/reference.mp4"],
+  "reference_audios": ["https://example.com/reference.mp3"]
+}
+```
+
 ## Model route notes (Sora)
 
 | route | models | duration |

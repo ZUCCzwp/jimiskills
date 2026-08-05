@@ -463,6 +463,59 @@ def cmd_create_seedance25_video(args: argparse.Namespace) -> None:
         print(task_id)
 
 
+def _parse_optional_bool(value: str) -> bool:
+    v = value.strip().lower()
+    if v in ("1", "true", "yes", "y", "on"):
+        return True
+    if v in ("0", "false", "no", "n", "off"):
+        return False
+    raise argparse.ArgumentTypeError(f"expected boolean, got {value!r}")
+
+
+def cmd_create_seedance20933_video(args: argparse.Namespace) -> None:
+    api_key = _api_key(args.dry_run)
+    base = _base_url(args.base_url)
+    prompt = _read_prompt(args.prompt, args.prompt_file)
+    body: Dict[str, Any] = {
+        "model": args.model,
+        "prompt": prompt,
+        "duration": args.duration,
+    }
+    if args.aspect_ratio:
+        body["aspect_ratio"] = args.aspect_ratio
+    if args.resolution:
+        body["resolution"] = args.resolution
+    if getattr(args, "face_processing", None) is not None:
+        body["face_processing"] = args.face_processing
+    if getattr(args, "generate_audio", None) is not None:
+        body["generate_audio"] = args.generate_audio
+    if getattr(args, "reference_mode", None):
+        body["reference_mode"] = args.reference_mode
+    if args.image:
+        body["reference_images"] = args.image
+    if getattr(args, "video", None):
+        body["reference_videos"] = args.video
+    if args.audio:
+        body["reference_audios"] = args.audio
+
+    payload = _request(
+        "POST",
+        f"{base}/api/open-api/v1/seedance/videos",
+        api_key,
+        body,
+        dry_run=args.dry_run,
+    )
+    if args.dry_run:
+        return
+    _check_code(payload)
+    if args.json_out:
+        Path(args.json_out).write_text(json.dumps(payload, indent=2), encoding="utf-8")
+    print(json.dumps(payload, indent=2, ensure_ascii=False))
+    task_id = (payload.get("data") or {}).get("task_id")
+    if task_id:
+        print(task_id)
+
+
 def cmd_create_image(args: argparse.Namespace) -> None:
     api_key = _api_key(args.dry_run)
     base = _base_url(args.base_url)
@@ -630,6 +683,30 @@ def cmd_create_and_poll(args: argparse.Namespace) -> None:
             body["reference_audios"] = args.audio
         url = f"{base}/api/open-api/v1/seedance25/videos"
         poll_type = "video"
+    elif args.type == "seedance20933-video":
+        body = {
+            "model": args.model,
+            "prompt": prompt,
+            "duration": args.duration,
+        }
+        if args.aspect_ratio:
+            body["aspect_ratio"] = args.aspect_ratio
+        if args.resolution:
+            body["resolution"] = args.resolution
+        if getattr(args, "face_processing", None) is not None:
+            body["face_processing"] = args.face_processing
+        if getattr(args, "generate_audio", None) is not None:
+            body["generate_audio"] = args.generate_audio
+        if getattr(args, "reference_mode", None):
+            body["reference_mode"] = args.reference_mode
+        if args.image:
+            body["reference_images"] = args.image
+        if getattr(args, "video", None):
+            body["reference_videos"] = args.video
+        if getattr(args, "audio", None):
+            body["reference_audios"] = args.audio
+        url = f"{base}/api/open-api/v1/seedance/videos"
+        poll_type = "video"
     elif args.type == "image":
         body = {"model": args.model, "prompt": prompt}
         if args.ratio:
@@ -774,6 +851,39 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--audio", action="append", help="Reference audio URL (repeatable, max 10)")
     p.set_defaults(func=cmd_create_seedance25_video)
 
+    p = sub.add_parser("create-seedance20933-video", help="Create Seedance 2.0 933 video task")
+    _add_common_flags(p)
+    _add_prompt_flags(p)
+    p.add_argument("--model", default="seedance2.0-933")
+    p.add_argument("--duration", type=int, default=4)
+    p.add_argument("--aspect-ratio", dest="aspect_ratio", default="16:9")
+    p.add_argument("--resolution", default="480p", choices=["480p", "720p", "1080p"])
+    p.add_argument(
+        "--face-processing",
+        dest="face_processing",
+        type=_parse_optional_bool,
+        default=None,
+        help="Enable face processing (true/false); API default true",
+    )
+    p.add_argument(
+        "--generate-audio",
+        dest="generate_audio",
+        type=_parse_optional_bool,
+        default=None,
+        help="Generate audio (true/false); API default false",
+    )
+    p.add_argument(
+        "--reference-mode",
+        dest="reference_mode",
+        choices=["image", "frame"],
+        default=None,
+        help="Reference mode (default image)",
+    )
+    p.add_argument("--image", action="append", help="Reference image URL (repeatable, max 9)")
+    p.add_argument("--video", action="append", help="Reference video URL (repeatable, max 3)")
+    p.add_argument("--audio", action="append", help="Reference audio URL (repeatable, max 3)")
+    p.set_defaults(func=cmd_create_seedance20933_video)
+
     p = sub.add_parser("create-image", help="Create async image task")
     _add_common_flags(p)
     _add_prompt_flags(p)
@@ -819,7 +929,11 @@ def build_parser() -> argparse.ArgumentParser:
     p = sub.add_parser("create-and-poll", help="Create task and poll until done")
     _add_common_flags(p)
     _add_prompt_flags(p)
-    p.add_argument("--type", choices=["video", "gemini-video", "seedance-video", "seedance25-video", "minimax-video", "image"], default="video")
+    p.add_argument(
+        "--type",
+        choices=["video", "gemini-video", "seedance-video", "seedance25-video", "seedance20933-video", "minimax-video", "image"],
+        default="video",
+    )
     p.add_argument("--model", default="sora2-12s")
     p.add_argument("--duration", type=int, default=12)
     p.add_argument("--orientation", choices=["landscape", "portrait"])
@@ -828,9 +942,30 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--ratio", default="auto")
     p.add_argument("--quality", default="low")
     p.add_argument("--size", help="MiniMax H3 output size, e.g. 2560x1440")
+    p.add_argument(
+        "--face-processing",
+        dest="face_processing",
+        type=_parse_optional_bool,
+        default=None,
+        help="Seedance 2.0 933 face processing (true/false)",
+    )
+    p.add_argument(
+        "--generate-audio",
+        dest="generate_audio",
+        type=_parse_optional_bool,
+        default=None,
+        help="Seedance 2.0 933 generate audio (true/false)",
+    )
+    p.add_argument(
+        "--reference-mode",
+        dest="reference_mode",
+        choices=["image", "frame"],
+        default=None,
+        help="Seedance 2.0 933 reference mode",
+    )
     p.add_argument("--image", action="append", help="Reference image URL (repeatable)")
-    p.add_argument("--video", action="append", help="Reference video URL (Seedance 2.5, max 10)")
-    p.add_argument("--audio", action="append", help="Reference audio URL (MiniMax / Seedance 2.5)")
+    p.add_argument("--video", action="append", help="Reference video URL (Seedance 2.5 / Seedance 2.0 933)")
+    p.add_argument("--audio", action="append", help="Reference audio URL (MiniMax / Seedance 2.5 / Seedance 2.0 933)")
     p.add_argument("--first-image", dest="first_image", help="First frame URL (Seedance / MiniMax)")
     p.add_argument("--last-image", dest="last_image", help="Last frame URL (Seedance / MiniMax)")
     p.add_argument("--interval", type=float, default=DEFAULT_POLL_INTERVAL)

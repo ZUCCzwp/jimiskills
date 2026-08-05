@@ -31,6 +31,7 @@ export JIMMYAI_BASE_URL="https://api.viraltok.ai"
 | `create-seedance-video` | Create Seedance video task (async) |
 | `create-minimax-video` | Create MiniMax H3 video task (async) |
 | `create-seedance25-video` | Create Seedance 2.5 video task (async) |
+| `create-seedance20933-video` | Create Seedance 2.0 933 video task (async) |
 | `create-gemini-video` | Create Gemini Omni video task |
 | `create-image` | Create async image task |
 | `generate-image` | Sync text-to-image (OpenAI-compatible) |
@@ -141,6 +142,28 @@ python "$JIMMYAI_CLI" create-seedance25-video \
 ```
 
 `seedance-2.5`: billed `per_second` by resolution (`seedance-2.5-480p` / `seedance-2.5-720p`). Duration 4–30 s (default 4); aspect_ratio `16:9|9:16|1:1` (default `9:16`); resolution `480p|720p`; max 30 `--image` / 10 `--video` / 10 `--audio`. Docs: https://docs.viraltok.ai/zh/api-reference/seedance/25/create.md
+
+## create-seedance20933-video
+
+`POST /api/open-api/v1/seedance/videos` — poll with `poll --type video`.
+
+```bash
+python "$JIMMYAI_CLI" create-seedance20933-video \
+  --model seedance2.0-933 \
+  --prompt "A cinematic product shot with natural lighting" \
+  --duration 4 \
+  --aspect-ratio 16:9 \
+  --resolution 720p \
+  --face-processing true \
+  --generate-audio false \
+  --reference-mode image \
+  --image "https://example.com/reference.png" \
+  --video "https://example.com/reference.mp4" \
+  --audio "https://example.com/reference.mp3"
+```
+
+`seedance2.0-933`: billed `per_second` by resolution (`seedance2.0-933-480p` / `seedance2.0-933-720p` / `seedance2.0-933-1080p`). Duration 4–15 s (default 4); aspect_ratio `21:9|16:9|4:3|1:1|3:4|9:16` (default `16:9`); resolution `480p|720p|1080p`; max 9 `--image` / 3 `--video` / 3 `--audio`; optional `--face-processing` / `--generate-audio` / `--reference-mode`. Docs: https://docs.viraltok.ai/zh/api-reference/seedance/20933/create.md
+
 ## create-gemini-video
 
 ```bash
@@ -195,7 +218,7 @@ python "$JIMMYAI_CLI" create-and-poll \
   --download output.mp4
 ```
 
-`--type` values: `video`, `gemini-video`, `seedance-video`, `seedance25-video`, `minimax-video`, `image`
+`--type` values: `video`, `gemini-video`, `seedance-video`, `seedance25-video`, `seedance20933-video`, `minimax-video`, `image`
 
 Seedance example:
 
@@ -229,6 +252,20 @@ Seedance 2.5 example:
 python "$JIMMYAI_CLI" create-and-poll \
   --type seedance25-video \
   --model seedance-2.5 \
+  --prompt "A cinematic product shot with natural lighting" \
+  --duration 4 \
+  --aspect-ratio "16:9" \
+  --resolution 720p \
+  --image "https://example.com/ref.jpg" \
+  --download output.mp4
+```
+
+Seedance 2.0 933 example:
+
+```bash
+python "$JIMMYAI_CLI" create-and-poll \
+  --type seedance20933-video \
+  --model seedance2.0-933 \
   --prompt "A cinematic product shot with natural lighting" \
   --duration 4 \
   --aspect-ratio "16:9" \
