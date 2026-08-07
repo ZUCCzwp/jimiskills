@@ -143,7 +143,7 @@ Poll via `GET /api/open-api/v1/videos/{taskId}` (same as Sora / Gemini Omni).
 
 | Route | `model` | Billing | Duration | Notes |
 |-------|---------|---------|----------|-------|
-| Manxue | `sd2_mx_*`, `sd2_mx_fast_*`, `sd2_mx_video_*` | per second | 4–12 s | assets need `asset://` audit |
+| Manxue | `sd2_mx_*`, `sd2_mx_fast_*`, `sd2_mx_video_*` | per second | 4–15 s | assets need `asset://` audit |
 | SP economy | `seedance2.0-sp`, `seedance2.0-fast-sp` | per second × resolution | 4–15 s | `resolution`: `720p` / `1080p` only (**not `480p`**); see SP doc |
 | SP official | `seedance2.0-of-sp`, `seedance2.0-of-fast-sp` | per second × resolution | 4–15 s | see SP doc |
 | Mini | `seedance2.0-mini`, `seedance2.0-mini-video` | per second × resolution | 4–15 s | billing names `seedance2.0-mini-{resolution}` / `seedance2.0-mini-{resolution}-video` also accepted as `model` (omit `resolution`) |
