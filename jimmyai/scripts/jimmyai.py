@@ -581,6 +581,52 @@ def cmd_generate_image(args: argparse.Namespace) -> None:
     print(json.dumps(payload, indent=2, ensure_ascii=False))
 
 
+def cmd_remove_bg(args: argparse.Namespace) -> None:
+    api_key = _api_key(args.dry_run)
+    base = _base_url(args.base_url)
+    image_url = (args.image_url or "").strip()
+    if not image_url:
+        _die("--image-url is required")
+
+    body: Dict[str, Any] = {"image_url": image_url}
+    if args.model:
+        body["model"] = args.model
+    if args.operating_resolution:
+        body["operating_resolution"] = args.operating_resolution
+    if args.output_format:
+        body["output_format"] = args.output_format
+    if args.refine_foreground is not None:
+        body["refine_foreground"] = args.refine_foreground
+    if args.response_format:
+        body["response_format"] = args.response_format
+
+    payload = _request(
+        "POST",
+        f"{base}/api/open-api/v1/images/remove-bg",
+        api_key,
+        body,
+        timeout=args.timeout,
+        dry_run=args.dry_run,
+    )
+    if args.dry_run:
+        return
+    _check_code(payload)
+    if args.json_out:
+        Path(args.json_out).write_text(json.dumps(payload, indent=2), encoding="utf-8")
+
+    data = payload.get("data") or {}
+    if args.output:
+        b64 = data.get("b64_json")
+        if b64:
+            Path(args.output).write_bytes(base64.b64decode(b64))
+            print(f"Saved to {args.output}")
+        elif data.get("image_url"):
+            _warn("response_format=url returned image_url; use that URL instead of --output")
+        else:
+            _warn("no b64_json in response; nothing saved to --output")
+    print(json.dumps(payload, indent=2, ensure_ascii=False))
+
+
 def cmd_poll(args: argparse.Namespace) -> None:
     api_key = _api_key(args.dry_run)
     base = _base_url(args.base_url)
@@ -902,6 +948,30 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--timeout", type=float, default=DEFAULT_SYNC_TIMEOUT)
     p.add_argument("--output", help="Save b64_json result to file")
     p.set_defaults(func=cmd_generate_image)
+
+    p = sub.add_parser("remove-bg", help="Sync background removal")
+    _add_common_flags(p)
+    p.add_argument("--image-url", required=True, help="Public source image URL")
+    p.add_argument("--model", default="general_light_2k")
+    p.add_argument("--operating-resolution", dest="operating_resolution", default="2048x2048")
+    p.add_argument("--output-format", dest="output_format", default="png", choices=["png", "webp", "gif"])
+    p.add_argument(
+        "--refine-foreground",
+        dest="refine_foreground",
+        type=_parse_optional_bool,
+        default=None,
+        help="Refine foreground edges (true/false, default true server-side)",
+    )
+    p.add_argument(
+        "--response-format",
+        dest="response_format",
+        choices=["b64_json", "url"],
+        default="b64_json",
+        help="b64_json (default) or url",
+    )
+    p.add_argument("--timeout", type=float, default=DEFAULT_SYNC_TIMEOUT)
+    p.add_argument("--output", help="Save b64_json result to file")
+    p.set_defaults(func=cmd_remove_bg)
 
     p = sub.add_parser("poll", help="Poll task status")
     _add_common_flags(p)

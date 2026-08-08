@@ -266,6 +266,32 @@ Same `response_format` as generations: default `url`, optional `b64_json`. Form 
 
 `POST /api/open-api/v1/images/understand` — Gemini-powered analysis
 
+### Sync — remove background
+
+`POST /api/open-api/v1/images/remove-bg`
+
+Synchronous. Charges immediately on success (billing model `viraltok-remove-bg`, per-task). Default returns `data.b64_json`. Pass `response_format=url` to get `data.image_url` instead. Timeout ≥ 180 s. Docs: https://docs.viraltok.ai/zh/api-reference/images/remove-bg.md
+
+| Field | Required | Notes |
+|-------|----------|-------|
+| image_url | yes | public source image URL |
+| model | no | `general_light` / `general_light_2k` (default) / `general_heavy` / `matting` / `portrait` / `general_dynamic` |
+| operating_resolution | no | `1024x1024` / `2048x2048` (default) / `2304x2304` (`general_dynamic` only) |
+| output_format | no | `png` (default) / `webp` / `gif` |
+| refine_foreground | no | default `true` |
+| response_format | no | `b64_json` (default) or `url` |
+
+```json
+{
+  "image_url": "https://example.com/photo.png",
+  "model": "general_light_2k",
+  "operating_resolution": "2048x2048",
+  "output_format": "png",
+  "refine_foreground": true,
+  "response_format": "b64_json"
+}
+```
+
 ## Tools — video super-resolution
 
 `POST /api/open-api/v1/super-resolution/videos` — poll `GET /api/open-api/v1/videos/{taskId}`.

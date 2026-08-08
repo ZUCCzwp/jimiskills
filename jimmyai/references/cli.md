@@ -35,6 +35,7 @@ export JIMMYAI_BASE_URL="https://api.viraltok.ai"
 | `create-gemini-video` | Create Gemini Omni video task |
 | `create-image` | Create async image task |
 | `generate-image` | Sync text-to-image (OpenAI-compatible) |
+| `remove-bg` | Sync background removal |
 | `poll` | Query task status by ID |
 | `user-balance` | Query user JimiCoin account balance |
 | `key-balance` | Query API key quota balance |
@@ -196,6 +197,24 @@ python "$JIMMYAI_CLI" generate-image \
 ```
 
 Sync calls may take 30–120 s. Default timeout is 180 s (`--timeout`).
+
+## remove-bg (sync)
+
+`POST /api/open-api/v1/images/remove-bg` — default returns `b64_json`; use `--response-format url` for `image_url`.
+
+```bash
+# Default: save base64 result to file
+python "$JIMMYAI_CLI" remove-bg \
+  --image-url "https://example.com/photo.png" \
+  --output cutout.png
+
+# Prefer URL instead of base64
+python "$JIMMYAI_CLI" remove-bg \
+  --image-url "https://example.com/photo.png" \
+  --response-format url
+```
+
+Timeout ≥ 180 s recommended (`--timeout`).
 
 ## poll
 

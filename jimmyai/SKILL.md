@@ -1,6 +1,6 @@
 ---
 name: "jimmyai"
-description: "Integrate JimmyAI image and video generation APIs (Sora, VEO, Gemini Omni, Seedance including SP economy, Mini 特价版 and Seedance 2.5, MiniMax H3, Seedance 2.0 933, GPT Image) via the bundled CLI (`scripts/jimmyai.py`). Use when the user asks to connect JimmyAI, generate AI images/videos, poll async tasks, set up API keys, or integrate https://api.viraltok.ai — including zero-experience onboarding. Requires `JIMMYAI_API_KEY`."
+description: "Integrate JimmyAI image and video generation APIs (Sora, VEO, Gemini Omni, Seedance including SP economy, Mini 特价版 and Seedance 2.5, MiniMax H3, Seedance 2.0 933, GPT Image, remove-bg) via the bundled CLI (`scripts/jimmyai.py`). Use when the user asks to connect JimmyAI, generate AI images/videos, remove image backgrounds, poll async tasks, set up API keys, or integrate https://api.viraltok.ai — including zero-experience onboarding. Requires `JIMMYAI_API_KEY`."
 ---
 
 # JimmyAI API Skill
@@ -14,6 +14,7 @@ This skill helps users integrate JimmyAI from zero — register, get a key, send
 - First-time JimmyAI setup (account, API key, recharge, env var)
 - Generate a video (Sora / Gemini Omni / VEO / Seedance / Seedance 2.5 / MiniMax H3 / Seedance 2.0 933)
 - Generate an image (sync or async)
+- Remove image background (sync `remove-bg`)
 - Poll task status and download results
 - Debug auth, billing, or network errors
 - Build integration code (curl, Python, Node, etc.)
@@ -47,6 +48,7 @@ If `JIMMYAI_API_KEY` is missing, guide the user to set it locally and confirm wh
 |------------|-------------------|
 | Quick image, no polling | `generate-image` → `POST /images/generations` (sync) |
 | Image with more model options | `create-image` → poll `GET /images/{taskId}` |
+| Remove image background | `remove-bg` → `POST /images/remove-bg` (sync; default `b64_json`) |
 | Sora video | `create-video` → poll `GET /videos/{taskId}` |
 | Gemini Omni video | `create-gemini-video` → poll `GET /videos/{taskId}` |
 | Gemini Omni 10s (`omni-10s`) | same endpoint with `--model omni-10s` |
@@ -60,7 +62,7 @@ If `JIMMYAI_API_KEY` is missing, guide the user to set it locally and confirm wh
 | Upload reference media (image/video/audio) | `upload-file` → `POST /files/upload` |
 | Create + wait in one step | `create-and-poll` |
 
-For VEO, Manxue Seedance, STD, image edits, image understanding, or **local file upload** (`POST /files/upload`), fetch the specific page from https://docs.viraltok.ai/llms.txt before calling. SP economy detail: https://docs.viraltok.ai/zh/api-reference/seedance/sp/create.md · Seedance 2.5: https://docs.viraltok.ai/zh/api-reference/seedance/25/create.md · MiniMax H3: https://docs.viraltok.ai/zh/api-reference/minimax/create.md · Seedance 2.0 933: https://docs.viraltok.ai/zh/api-reference/seedance/20933/create.md
+For VEO, Manxue Seedance, STD, image edits, image understanding, remove-bg, or **local file upload** (`POST /files/upload`), fetch the specific page from https://docs.viraltok.ai/llms.txt before calling. SP economy detail: https://docs.viraltok.ai/zh/api-reference/seedance/sp/create.md · Seedance 2.5: https://docs.viraltok.ai/zh/api-reference/seedance/25/create.md · MiniMax H3: https://docs.viraltok.ai/zh/api-reference/minimax/create.md · Seedance 2.0 933: https://docs.viraltok.ai/zh/api-reference/seedance/20933/create.md · Remove background: https://docs.viraltok.ai/zh/api-reference/images/remove-bg.md
 
 ## Workflow
 
@@ -122,6 +124,20 @@ python "$JIMMYAI_CLI" create-and-poll \
 python "$JIMMYAI_CLI" generate-image \
   --prompt "Cyberpunk city at night, neon signs" \
   --quality high
+```
+
+### Remove background (sync)
+
+```bash
+# Default returns b64_json
+python "$JIMMYAI_CLI" remove-bg \
+  --image-url "https://example.com/photo.png" \
+  --output cutout.png
+
+# Prefer URL
+python "$JIMMYAI_CLI" remove-bg \
+  --image-url "https://example.com/photo.png" \
+  --response-format url
 ```
 
 ### Fast I2V video (Seedance, async)
