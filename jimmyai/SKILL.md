@@ -1,6 +1,6 @@
 ---
 name: "jimmyai"
-description: "Integrate JimmyAI image and video generation APIs (Sora, VEO, Gemini Omni, Seedance including SP economy, Mini 特价版 and Seedance 2.5, MiniMax H3, Seedance 2.0 933, GPT Image, remove-bg) via the bundled CLI (`scripts/jimmyai.py`). Use when the user asks to connect JimmyAI, generate AI images/videos, remove image backgrounds, poll async tasks, set up API keys, or integrate https://api.viraltok.ai — including zero-experience onboarding. Requires `JIMMYAI_API_KEY`."
+description: "Integrate JimmyAI image and video generation APIs (Sora, VEO, Gemini Omni, Seedance including SP economy, Mini 特价版, Seedance 2.5 / 2.5 SP, MiniMax H3, Seedance 2.0 933, GPT Image, remove-bg) via the bundled CLI (`scripts/jimmyai.py`). Use when the user asks to connect JimmyAI, generate AI images/videos, remove image backgrounds, poll async tasks, set up API keys, or integrate https://api.viraltok.ai — including zero-experience onboarding. Requires `JIMMYAI_API_KEY`."
 ---
 
 # JimmyAI API Skill
@@ -54,7 +54,7 @@ If `JIMMYAI_API_KEY` is missing, guide the user to set it locally and confirm wh
 | Gemini Omni 10s (`omni-10s`) | same endpoint with `--model omni-10s` |
 | Seedance video (SP economy / MD / Fast I2V / Mini 特价版 / etc.) | `create-seedance-video` → poll `GET /videos/{taskId}` |
 | MiniMax H3 video | `create-minimax-video` → poll `GET /videos/{taskId}` |
-| Seedance 2.5 video | `create-seedance25-video` → poll `GET /videos/{taskId}` |
+| Seedance 2.5 / 2.5 SP video | `create-seedance25-video` → poll `GET /videos/{taskId}` |
 | Seedance 2.0 933 video | `create-seedance20933-video` → poll `GET /videos/{taskId}` |
 | Just check task status | `poll --task-id <id> --type video\|image` |
 | Check user account balance | `user-balance` → `GET /user/balance` |
@@ -221,7 +221,6 @@ python "$JIMMYAI_CLI" create-and-poll \
   --aspect-ratio "16:9" \
   --resolution 720p \
   --image "https://example.com/reference.png" \
-  --video "https://example.com/reference.mp4" \
   --audio "https://example.com/reference.mp3" \
   --download output.mp4
 ```
@@ -237,7 +236,22 @@ python "$JIMMYAI_CLI" create-seedance25-video \
   --resolution 480p
 ```
 
-`seedance-2.5`: billed `per_second` by resolution (`seedance-2.5-480p` / `seedance-2.5-720p`). Duration 4–30 s (default 4); aspect_ratio `16:9|9:16|1:1`; resolution `480p|720p`; max 30 images / 10 videos / 10 audios. Docs: https://docs.viraltok.ai/zh/api-reference/seedance/25/create.md
+SP economy (`seedance-2.5-sp`, flat **0.5**/s, 720p only, reference videos allowed):
+
+```bash
+python "$JIMMYAI_CLI" create-seedance25-video \
+  --model seedance-2.5-sp \
+  --prompt "A cinematic product shot with natural lighting" \
+  --duration 5 \
+  --aspect-ratio "16:9" \
+  --resolution 720p \
+  --image "https://example.com/reference.png" \
+  --video "https://example.com/reference.mp4"
+```
+
+`seedance-2.5`: billed `per_second` by resolution (`seedance-2.5-480p` / `seedance-2.5-720p`). Duration 4–30 s (default 4); aspect_ratio `16:9|9:16|1:1`; resolution `480p|720p`; max 30 images / 10 audios; **reference videos not supported**. Docs: https://docs.viraltok.ai/zh/api-reference/seedance/25/create.md
+
+`seedance-2.5-sp`: billed `per_second` at fixed **0.5**/s (`seedance-2.5-sp`). Duration 4–29 s; aspect_ratio `16:9|9:16|1:1`; resolution **720p only**; max 30 images / 10 videos / 10 audios. Same endpoint and docs.
 
 ### Seedance 2.0 933 video (async)
 

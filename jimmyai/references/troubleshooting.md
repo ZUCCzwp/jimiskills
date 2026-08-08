@@ -109,15 +109,15 @@
 - Poll with `GET /api/open-api/v1/videos/{taskId}`.
 - Docs: https://docs.viraltok.ai/zh/api-reference/minimax/create.md
 
-## Seedance 2.5 (`seedance-2.5`)
+## Seedance 2.5 (`seedance-2.5` / `seedance-2.5-sp`)
 
-- Use `POST /api/open-api/v1/seedance25/videos` with `"model": "seedance-2.5"`.
-- Billing is `per_second` by resolution (`seedance-2.5-480p` / `seedance-2.5-720p`; `unit_price × duration`).
-- Request `model` stays `seedance-2.5`; billing key follows `resolution`.
-- `duration` must be 4–30 seconds (default 4).
+- Use `POST /api/open-api/v1/seedance25/videos` with `"model": "seedance-2.5"` or `"seedance-2.5-sp"`.
+- Standard billing is `per_second` by resolution (`seedance-2.5-480p` / `seedance-2.5-720p`; `unit_price × duration`). Request `model` stays `seedance-2.5`; billing key follows `resolution`.
+- SP billing is `per_second` at fixed **0.5**/s (`seedance-2.5-sp`; `0.5 × duration`).
+- Standard: `duration` 4–30 s (default 4); `resolution` `480p` / `720p` (default `480p`); reference videos **not supported**.
+- SP: `duration` 4–29 s; `resolution` **720p only**; reference videos max 10.
 - `aspect_ratio`: `16:9` / `9:16` / `1:1` (default `9:16`).
-- `resolution`: `480p` / `720p` (default `480p`).
-- `reference_images` max 30; `reference_videos` max 10 (total ≤ 30s); `reference_audios` max 10.
+- `reference_images` max 30; `reference_audios` max 10.
 - Poll with `GET /api/open-api/v1/videos/{taskId}`.
 - Docs: https://docs.viraltok.ai/zh/api-reference/seedance/25/create.md
 

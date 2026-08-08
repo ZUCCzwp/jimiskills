@@ -138,11 +138,25 @@ python "$JIMMYAI_CLI" create-seedance25-video \
   --aspect-ratio 16:9 \
   --resolution 720p \
   --image "https://example.com/reference.png" \
-  --video "https://example.com/reference.mp4" \
   --audio "https://example.com/reference.mp3"
 ```
 
-`seedance-2.5`: billed `per_second` by resolution (`seedance-2.5-480p` / `seedance-2.5-720p`). Duration 4–30 s (default 4); aspect_ratio `16:9|9:16|1:1` (default `9:16`); resolution `480p|720p`; max 30 `--image` / 10 `--video` / 10 `--audio`. Docs: https://docs.viraltok.ai/zh/api-reference/seedance/25/create.md
+SP:
+
+```bash
+python "$JIMMYAI_CLI" create-seedance25-video \
+  --model seedance-2.5-sp \
+  --prompt "A cinematic product shot with natural lighting" \
+  --duration 5 \
+  --aspect-ratio 16:9 \
+  --resolution 720p \
+  --image "https://example.com/reference.png" \
+  --video "https://example.com/reference.mp4"
+```
+
+`seedance-2.5`: billed `per_second` by resolution (`seedance-2.5-480p` / `seedance-2.5-720p`). Duration 4–30 s (default 4); aspect_ratio `16:9|9:16|1:1` (default `9:16`); resolution `480p|720p`; max 30 `--image` / 10 `--audio`; **reference videos not supported**. Docs: https://docs.viraltok.ai/zh/api-reference/seedance/25/create.md
+
+`seedance-2.5-sp`: billed `per_second` at fixed **0.5**/s. Duration 4–29 s; resolution **720p only**; max 30 `--image` / 10 `--video` / 10 `--audio`. Same docs.
 
 ## create-seedance20933-video
 

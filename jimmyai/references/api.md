@@ -345,16 +345,23 @@ Billing: `per_task` (flat per request). `duration` is generation length only and
 
 | Field | Required | Notes |
 |-------|----------|-------|
-| model | yes | `seedance-2.5` (aliases `seedance2.5` / `seedance_2.5` / `seedance25` normalize) |
+| model | yes | `seedance-2.5` (aliases `seedance2.5` / `seedance_2.5` / `seedance25`) or `seedance-2.5-sp` |
 | prompt | yes | 1–5000 chars |
-| duration | no | 4–30, default `4` |
+| duration | no | Standard 4–30 (default `4`); SP 4–29 |
 | aspect_ratio / ratio | no | `16:9` / `9:16` / `1:1`, default `9:16` |
-| resolution | no | `480p` / `720p`, default `480p` |
+| resolution | no | Standard `480p` / `720p` (default `480p`); SP **720p only** |
 | reference_images / images | no | max **30** public URLs |
-| reference_videos / videos | no | max **10** public URLs (total ≤ 30s) |
+| reference_videos / videos | no | **SP only**, max **10**; standard returns an error if provided |
 | reference_audios / audios | no | max **10** public URLs |
 
-Billing: `per_second` by resolution (`seedance-2.5-480p` / `seedance-2.5-720p`; `unit_price × duration`). Request `model` stays `seedance-2.5`. Docs: https://docs.viraltok.ai/zh/api-reference/seedance/25/create.md
+Billing:
+
+- `seedance-2.5`: `per_second` by resolution (`seedance-2.5-480p` / `seedance-2.5-720p`; `unit_price × duration`). Request `model` stays `seedance-2.5`.
+- `seedance-2.5-sp`: `per_second` fixed **0.5**/s (`seedance-2.5-sp`; `0.5 × duration`).
+
+Docs: https://docs.viraltok.ai/zh/api-reference/seedance/25/create.md
+
+Standard:
 
 ```json
 {
@@ -364,8 +371,21 @@ Billing: `per_second` by resolution (`seedance-2.5-480p` / `seedance-2.5-720p`; 
   "aspect_ratio": "16:9",
   "resolution": "720p",
   "reference_images": ["https://example.com/reference.png"],
-  "reference_videos": ["https://example.com/reference.mp4"],
   "reference_audios": ["https://example.com/reference.mp3"]
+}
+```
+
+SP:
+
+```json
+{
+  "model": "seedance-2.5-sp",
+  "prompt": "A cinematic product shot with natural lighting",
+  "duration": 5,
+  "aspect_ratio": "16:9",
+  "resolution": "720p",
+  "reference_images": ["https://example.com/reference.png"],
+  "reference_videos": ["https://example.com/reference.mp4"]
 }
 ```
 

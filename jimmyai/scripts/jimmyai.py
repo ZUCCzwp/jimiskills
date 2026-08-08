@@ -888,7 +888,11 @@ def build_parser() -> argparse.ArgumentParser:
     p = sub.add_parser("create-seedance25-video", help="Create Seedance 2.5 video task")
     _add_common_flags(p)
     _add_prompt_flags(p)
-    p.add_argument("--model", default="seedance-2.5")
+    p.add_argument(
+        "--model",
+        default="seedance-2.5",
+        help="seedance-2.5 (standard) or seedance-2.5-sp (SP, 0.5/s, 720p only)",
+    )
     p.add_argument("--duration", type=int, default=4)
     p.add_argument("--aspect-ratio", dest="aspect_ratio", default="9:16")
     p.add_argument("--resolution", default="480p", choices=["480p", "720p"])
