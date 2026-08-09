@@ -389,6 +389,27 @@ SP:
 }
 ```
 
+## Flux 3 video
+
+`POST /api/open-api/v1/flux3/videos` — poll `GET /api/open-api/v1/videos/{taskId}`.
+
+| Field | Required | Notes |
+|-------|----------|-------|
+| model | yes | Only: `flux-3-draft` / `flux-3-i2v-draft` / `flux-3-flf-draft` / `flux-3-keyframes-draft` / `flux-3-extend-draft` / `flux-3-enhance` |
+| prompt | usually | 1–5000 chars; **not** required for `flux-3-enhance` |
+| duration | no | 5–20, default `5` (pass same duration when enhancing) |
+| aspect_ratio / ratio | no | `auto` / `21:9` / `2:1` / `16:9` / `4:3` / `1:1` / `3:4` / `9:16` |
+| image_url | i2v | required for `flux-3-i2v-draft` |
+| start_image_url / end_image_url | flf | required for `flux-3-flf-draft` |
+| keyframes | keyframes | required for `flux-3-keyframes-draft` (max 10) |
+| video_url | extend | required for `flux-3-extend-draft` |
+| draft_cache_url | enhance | required for `flux-3-enhance` (from draft task `result.draft_cache_url`) |
+
+Do **not** send `resolution`. Drafts are fixed **720p**; enhance is fixed **1080p**. Billing is `per_second` and the billing model equals the request `model`.
+
+Docs: https://docs.viraltok.ai/zh/api-reference/flux3/create.md
+
+
 ## Seedance 2.0 933 video
 
 `POST /api/open-api/v1/seedance/videos` — poll `GET /api/open-api/v1/videos/{taskId}`.

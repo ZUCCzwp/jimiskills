@@ -55,6 +55,7 @@ If `JIMMYAI_API_KEY` is missing, guide the user to set it locally and confirm wh
 | Seedance video (SP economy / MD / Fast I2V / Mini 特价版 / etc.) | `create-seedance-video` → poll `GET /videos/{taskId}` |
 | MiniMax H3 video | `create-minimax-video` → poll `GET /videos/{taskId}` |
 | Seedance 2.5 / 2.5 SP video | `create-seedance25-video` → poll `GET /videos/{taskId}` |
+| Flux 3 video | `POST /api/open-api/v1/flux3/videos` → poll `GET /videos/{taskId}` |
 | Seedance 2.0 933 video | `create-seedance20933-video` → poll `GET /videos/{taskId}` |
 | Just check task status | `poll --task-id <id> --type video\|image` |
 | Check user account balance | `user-balance` → `GET /user/balance` |
@@ -62,7 +63,7 @@ If `JIMMYAI_API_KEY` is missing, guide the user to set it locally and confirm wh
 | Upload reference media (image/video/audio) | `upload-file` → `POST /files/upload` |
 | Create + wait in one step | `create-and-poll` |
 
-For VEO, Manxue Seedance, STD, image edits, image understanding, remove-bg, or **local file upload** (`POST /files/upload`), fetch the specific page from https://docs.viraltok.ai/llms.txt before calling. SP economy detail: https://docs.viraltok.ai/zh/api-reference/seedance/sp/create.md · Seedance 2.5: https://docs.viraltok.ai/zh/api-reference/seedance/25/create.md · MiniMax H3: https://docs.viraltok.ai/zh/api-reference/minimax/create.md · Seedance 2.0 933: https://docs.viraltok.ai/zh/api-reference/seedance/20933/create.md · Remove background: https://docs.viraltok.ai/zh/api-reference/images/remove-bg.md
+For VEO, Manxue Seedance, STD, image edits, image understanding, remove-bg, or **local file upload** (`POST /files/upload`), fetch the specific page from https://docs.viraltok.ai/llms.txt before calling. SP economy detail: https://docs.viraltok.ai/zh/api-reference/seedance/sp/create.md · Seedance 2.5: https://docs.viraltok.ai/zh/api-reference/seedance/25/create.md · Flux 3: https://docs.viraltok.ai/zh/api-reference/flux3/create.md · MiniMax H3: https://docs.viraltok.ai/zh/api-reference/minimax/create.md · Seedance 2.0 933: https://docs.viraltok.ai/zh/api-reference/seedance/20933/create.md · Remove background: https://docs.viraltok.ai/zh/api-reference/images/remove-bg.md
 
 ## Workflow
 
