@@ -133,7 +133,18 @@ Poll via same `GET /api/open-api/v1/videos/{taskId}`.
 
 `POST /api/open-api/v1/veo/videos` — see https://docs.viraltok.ai/zh/api-reference/veo/create-video.md
 
-`POST /api/open-api/v1/veo/frames` — first/last frame mode
+`POST /api/open-api/v1/veo/frames` — first/last frame or reference-image mode.
+
+| Field | Required | Notes |
+|-------|----------|-------|
+| model | yes | `veo_3_1_fast` (or billing alias `veo_3_1_fast-4k`) |
+| prompt | yes | text description |
+| resolution | no | `720p` / `1080p` (bill `veo_3_1_fast`) or `4k` (bill `veo_3_1_fast-4k`) |
+| orientation | no | `landscape` / `portrait` |
+| first_frame_url / last_frame_url | frames | first frame required in frame mode |
+| images | reference | 1–3 reference images (mutually exclusive with frames) |
+
+Billing is `per_task`. 4K uses a separate catalog model `veo_3_1_fast-4k`. Docs: https://docs.viraltok.ai/zh/api-reference/veo/create-frames.md
 
 ### Seedance — create
 
