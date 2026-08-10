@@ -139,7 +139,7 @@ Poll via same `GET /api/open-api/v1/videos/{taskId}`.
 
 | Field | Required | Notes |
 |-------|----------|-------|
-| model | yes | Fast: `veo_3_1_fast` (or `veo_3_1_fast-4k`); Lite: `veo_3_1_lite` (or `veo_3_1_lite-hd` / `veo_3_1_lite-4k`) |
+| model | yes | Fast: `veo_3_1_fast` (or `veo_3_1_fast-4k`); Lite: `veo_3_1_lite` (**720p only**) |
 | prompt | yes | text description |
 | resolution | no | see billing table below |
 | orientation | no | `landscape` / `portrait` |
@@ -152,11 +152,9 @@ Billing is `per_task`. Fast vs Lite are product tiers (same endpoint):
 |-----------------|------------|---------------|
 | `veo_3_1_fast` | `720p` / `1080p` (default `720p`) | `veo_3_1_fast` |
 | `veo_3_1_fast` | `4k` | `veo_3_1_fast-4k` |
-| `veo_3_1_lite` | `720p` (default) | `veo_3_1_lite` |
-| `veo_3_1_lite` | `1080p` | `veo_3_1_lite-hd` |
-| `veo_3_1_lite` | `4k` | `veo_3_1_lite-4k` |
+| `veo_3_1_lite` | `720p` only (default) | `veo_3_1_lite` |
 
-You may pass the billing model name directly as `model` (e.g. `veo_3_1_lite-hd`).
+Lite rejects `1080p` / `4k`. You may pass `veo_3_1_fast-4k` as `model` for Fast 4K billing.
 
 ### Seedance — create
 
