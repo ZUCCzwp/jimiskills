@@ -52,6 +52,7 @@ If `JIMMYAI_API_KEY` is missing, guide the user to set it locally and confirm wh
 | Sora video | `create-video` → poll `GET /videos/{taskId}` |
 | Gemini Omni video | `create-gemini-video` → poll `GET /videos/{taskId}` |
 | Gemini Omni 10s (`omni-10s`) | same endpoint with `--model omni-10s` |
+| VEO frames (Fast / Lite) | `POST /api/open-api/v1/veo/frames` → poll `GET /videos/{taskId}` (see docs; CLI may need raw curl) |
 | Seedance video (SP economy / MD / Fast I2V / Mini 特价版 / etc.) | `create-seedance-video` → poll `GET /videos/{taskId}` |
 | MiniMax H3 video | `create-minimax-video` → poll `GET /videos/{taskId}` |
 | Seedance 2.5 / 2.5 SP video | `create-seedance25-video` → poll `GET /videos/{taskId}` |
@@ -105,6 +106,15 @@ Response `code`: `20000` = success, `20001` = auth failure, `20002` = bad params
 - Prefer bundled CLI; do not modify `scripts/jimmyai.py` unless the user asks
 - For full API params, see `references/api.md`
 - For step-by-step beginner guide, see `references/quickstart.md`
+
+### Customer-facing content boundaries
+
+When writing docs, README snippets, chat answers, code comments for users, or examples that leave this skill:
+
+- **Do not reveal upstream channel vendors.** Never name, link, or imply internal providers / reseller gateways (routing codes, private Apifox portals, vendor hostnames, channel mounts/weights, YAML vendor credentials).
+- Describe only JimmyAI / ViraltokAI **public** OpenAPI models, request fields, billing, and behavior.
+- Do not paste upstream vendor API path shapes or slug aliases unless they are identical to the public OpenAPI contract.
+- When models differ by quality/speed tier (e.g. Veo Fast vs Lite), present them as **product variants**, not as different suppliers.
 
 ## Examples
 

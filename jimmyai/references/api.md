@@ -6,6 +6,8 @@ OpenAPI: https://docs.viraltok.ai/zh/api-reference/openapi.json
 Base URL: `https://api.viraltok.ai`  
 Auth: `Authorization: Bearer <JIMMYAI_API_KEY>`
 
+**Content boundary:** document only public OpenAPI models, fields, and billing. Do not name or link upstream channel vendors, private vendor portals, or internal routing mounts.
+
 ## Response codes
 
 | code | meaning |
@@ -133,18 +135,28 @@ Poll via same `GET /api/open-api/v1/videos/{taskId}`.
 
 `POST /api/open-api/v1/veo/videos` — see https://docs.viraltok.ai/zh/api-reference/veo/create-video.md
 
-`POST /api/open-api/v1/veo/frames` — first/last frame or reference-image mode.
+`POST /api/open-api/v1/veo/frames` — first/last frame or reference-image mode. Docs: https://docs.viraltok.ai/zh/api-reference/veo/create-frames.md
 
 | Field | Required | Notes |
 |-------|----------|-------|
-| model | yes | `veo_3_1_fast` (or billing alias `veo_3_1_fast-4k`) |
+| model | yes | Fast: `veo_3_1_fast` (or `veo_3_1_fast-4k`); Lite: `veo_3_1_lite` (or `veo_3_1_lite-hd` / `veo_3_1_lite-4k`) |
 | prompt | yes | text description |
-| resolution | no | `720p` / `1080p` (bill `veo_3_1_fast`) or `4k` (bill `veo_3_1_fast-4k`) |
+| resolution | no | see billing table below |
 | orientation | no | `landscape` / `portrait` |
 | first_frame_url / last_frame_url | frames | first frame required in frame mode |
 | images | reference | 1–3 reference images (mutually exclusive with frames) |
 
-Billing is `per_task`. 4K uses a separate catalog model `veo_3_1_fast-4k`. Docs: https://docs.viraltok.ai/zh/api-reference/veo/create-frames.md
+Billing is `per_task`. Fast vs Lite are product tiers (same endpoint):
+
+| Request `model` | resolution | Billing model |
+|-----------------|------------|---------------|
+| `veo_3_1_fast` | `720p` / `1080p` (default `720p`) | `veo_3_1_fast` |
+| `veo_3_1_fast` | `4k` | `veo_3_1_fast-4k` |
+| `veo_3_1_lite` | `720p` (default) | `veo_3_1_lite` |
+| `veo_3_1_lite` | `1080p` | `veo_3_1_lite-hd` |
+| `veo_3_1_lite` | `4k` | `veo_3_1_lite-4k` |
+
+You may pass the billing model name directly as `model` (e.g. `veo_3_1_lite-hd`).
 
 ### Seedance — create
 
