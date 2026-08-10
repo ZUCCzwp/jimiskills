@@ -134,6 +134,18 @@
 - Poll with `GET /api/open-api/v1/videos/{taskId}`.
 - Docs: https://docs.viraltok.ai/zh/api-reference/seedance/20933/create.md
 
+## Seedance 2.0 GZ 720p (`seedance2.0-gz-720p`)
+
+- Use `POST /api/open-api/v1/seedance/videos` with `"model": "seedance2.0-gz-720p"`.
+- Billing is `per_second` (`seedance2.0-gz-720p`; `unit_price × duration`).
+- Resolution is **fixed 720p**.
+- `duration` must be 4–15 seconds (default 5).
+- `aspect_ratio`: `21:9` / `16:9` / `4:3` / `1:1` / `3:4` / `9:16` (default `16:9`).
+- `images` max 9; `reference_videos` max 3; `reference_audios` max 3 (audio requires image or video refs).
+- Result `video_url` is a direct media link — download promptly.
+- Poll with `GET /api/open-api/v1/videos/{taskId}`.
+- Docs: https://docs.viraltok.ai/zh/api-reference/seedance/gz720/create.md
+
 ## video_url is a relative path (custom OSS)
 
 - Cause: older API responses could return OSS object keys like `seedance/mini-sp/video/xxx.mp4` instead of a full URL.

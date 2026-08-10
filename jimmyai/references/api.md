@@ -173,8 +173,10 @@ Poll via `GET /api/open-api/v1/videos/{taskId}` (same as Sora / Gemini Omni).
 | MD fast | `seedance2.0-fast-md` | per task | 4–15 s | same as MD |
 | **Fast I2V** | `seedance2.0-fast-i2v` | per task | 1–15 s | image refs only, max 9; no video/audio refs |
 | STD | `seedance2.0-std` | per task | 4–15 s | max 9 images, max 3 audio refs |
+| **GZ 720p** | `seedance2.0-gz-720p` | per second | 4–15 s | fixed 720p; max 9 images / 3 videos / 3 audios; audio requires image or video refs; direct result media URL |
 
 Fast I2V detail: https://docs.viraltok.ai/zh/api-reference/seedance/md/fast-i2v.md
+GZ 720p detail: https://docs.viraltok.ai/zh/api-reference/seedance/gz720/create.md
 
 | Field | Required | Notes |
 |-------|----------|-------|
@@ -482,6 +484,33 @@ Billing: `per_second` by resolution (`seedance2.0-933-480p` / `seedance2.0-933-7
   "reference_images": ["https://example.com/reference.png"],
   "reference_videos": ["https://example.com/reference.mp4"],
   "reference_audios": ["https://example.com/reference.mp3"]
+}
+```
+
+## Seedance 2.0 GZ 720p video
+
+`POST /api/open-api/v1/seedance/videos` — poll `GET /api/open-api/v1/videos/{taskId}`.
+
+| Field | Required | Notes |
+|-------|----------|-------|
+| model | yes | `seedance2.0-gz-720p` (aliases `seedance2.0-gz720p` / `seedance20-gz-720p` normalize) |
+| prompt | yes | 1–5000 chars |
+| duration | no | 4–15, default `5` |
+| aspect_ratio / ratio | no | `21:9` / `16:9` / `4:3` / `1:1` / `3:4` / `9:16`, default `16:9` |
+| images / reference_images | no | max **9** public URLs or `asset://` |
+| videos / reference_videos | no | max **3** public URLs |
+| audios / reference_audios | no | max **3**; must pair with image or video refs |
+
+Resolution is **fixed 720p**. Billing: `per_second` (`seedance2.0-gz-720p`; `unit_price × duration`). Result `video_url` is a direct media link — download promptly. Docs: https://docs.viraltok.ai/zh/api-reference/seedance/gz720/create.md
+
+```json
+{
+  "model": "seedance2.0-gz-720p",
+  "prompt": "A cinematic product shot with natural lighting",
+  "duration": 5,
+  "aspect_ratio": "16:9",
+  "images": ["https://example.com/reference.png"],
+  "reference_videos": ["https://example.com/reference.mp4"]
 }
 ```
 

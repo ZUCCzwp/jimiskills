@@ -100,6 +100,15 @@ python "$JIMMYAI_CLI" create-seedance-video \
   --resolution 720p \
   --ratio "16:9" \
   --image "https://example.com/ref.jpg"
+
+# GZ 720p (fixed 720p; per-second billing; direct result media URL)
+python "$JIMMYAI_CLI" create-seedance-video \
+  --model seedance2.0-gz-720p \
+  --prompt "A cinematic product shot with natural lighting" \
+  --duration 5 \
+  --ratio "16:9" \
+  --image "https://example.com/reference.png" \
+  --video "https://example.com/reference.mp4"
 ```
 
 `seedance2.0-sp` / `seedance2.0-fast-sp`: unified `POST /api/open-api/v1/seedance/videos`, `resolution` `720p` or `1080p` only (default `720p`), duration 4–15 s. `seedance2.0-fast-sp` does not support `reference_videos`. Docs: https://docs.viraltok.ai/zh/api-reference/seedance/sp/create.md
@@ -107,6 +116,8 @@ python "$JIMMYAI_CLI" create-seedance-video \
 `seedance2.0-mini-sp`: unified `POST /api/open-api/v1/seedance/videos`, `resolution` `480p` or `720p`, duration 4–15 s.
 
 `seedance2.0-fast-i2v`: image refs only (max 9), no `reference_videos` / `reference_audios`, duration 1–15 s. Docs: https://docs.viraltok.ai/zh/api-reference/seedance/md/fast-i2v.md
+
+`seedance2.0-gz-720p`: fixed **720p**, billed `per_second`, duration 4–15 s (default 5); aspect_ratio `21:9|16:9|4:3|1:1|3:4|9:16`; max 9 `--image` / 3 `--video` / 3 `--audio` (audio requires image or video). Result URL is a direct media link. Docs: https://docs.viraltok.ai/zh/api-reference/seedance/gz720/create.md
 
 ## create-minimax-video
 
@@ -283,6 +294,20 @@ python "$JIMMYAI_CLI" create-and-poll \
   --duration 8 \
   --ratio "16:9" \
   --image "https://example.com/ref.jpg" \
+  --download output.mp4
+```
+
+GZ 720p example:
+
+```bash
+python "$JIMMYAI_CLI" create-and-poll \
+  --type seedance-video \
+  --model seedance2.0-gz-720p \
+  --prompt "A cinematic product shot with natural lighting" \
+  --duration 5 \
+  --ratio "16:9" \
+  --image "https://example.com/reference.png" \
+  --video "https://example.com/reference.mp4" \
   --download output.mp4
 ```
 

@@ -1,6 +1,6 @@
 ---
 name: "jimmyai"
-description: "Integrate JimmyAI image and video generation APIs (Sora, VEO, Gemini Omni, Seedance including SP economy, Mini 特价版, Seedance 2.5 / 2.5 SP, MiniMax H3, Seedance 2.0 933, GPT Image, remove-bg, remove-subtitle) via the bundled CLI (`scripts/jimmyai.py`). Use when the user asks to connect JimmyAI, generate AI images/videos, remove image backgrounds, remove video subtitles, poll async tasks, set up API keys, or integrate https://api.viraltok.ai — including zero-experience onboarding. Requires `JIMMYAI_API_KEY`."
+description: "Integrate JimmyAI image and video generation APIs (Sora, VEO, Gemini Omni, Seedance including SP economy, Mini 特价版, Seedance 2.5 / 2.5 SP, MiniMax H3, Seedance 2.0 933, Seedance 2.0 GZ 720p, GPT Image, remove-bg, remove-subtitle) via the bundled CLI (`scripts/jimmyai.py`). Use when the user asks to connect JimmyAI, generate AI images/videos, remove image backgrounds, remove video subtitles, poll async tasks, set up API keys, or integrate https://api.viraltok.ai — including zero-experience onboarding. Requires `JIMMYAI_API_KEY`."
 ---
 
 # JimmyAI API Skill
@@ -12,7 +12,7 @@ This skill helps users integrate JimmyAI from zero — register, get a key, send
 ## When to use
 
 - First-time JimmyAI setup (account, API key, recharge, env var)
-- Generate a video (Sora / Gemini Omni / VEO / Seedance / Seedance 2.5 / MiniMax H3 / Seedance 2.0 933)
+- Generate a video (Sora / Gemini Omni / VEO / Seedance / Seedance 2.5 / MiniMax H3 / Seedance 2.0 933 / Seedance 2.0 GZ 720p)
 - Generate an image (sync or async)
 - Remove image background (sync `remove-bg`)
 - Remove video subtitles (async `remove-subtitle`)
@@ -55,7 +55,7 @@ If `JIMMYAI_API_KEY` is missing, guide the user to set it locally and confirm wh
 | Gemini Omni video | `create-gemini-video` → poll `GET /videos/{taskId}` |
 | Gemini Omni 10s (`omni-10s`) | same endpoint with `--model omni-10s` |
 | VEO frames (Fast / Lite) | `POST /api/open-api/v1/veo/frames` → poll `GET /videos/{taskId}` (see docs; CLI may need raw curl) |
-| Seedance video (SP economy / MD / Fast I2V / Mini 特价版 / etc.) | `create-seedance-video` → poll `GET /videos/{taskId}` |
+| Seedance video (SP economy / MD / Fast I2V / Mini 特价版 / GZ 720p / etc.) | `create-seedance-video` → poll `GET /videos/{taskId}` |
 | MiniMax H3 video | `create-minimax-video` → poll `GET /videos/{taskId}` |
 | Seedance 2.5 / 2.5 SP video | `create-seedance25-video` → poll `GET /videos/{taskId}` |
 | Flux 3 video | `POST /api/open-api/v1/flux3/videos` → poll `GET /videos/{taskId}` |
@@ -66,7 +66,7 @@ If `JIMMYAI_API_KEY` is missing, guide the user to set it locally and confirm wh
 | Upload reference media (image/video/audio) | `upload-file` → `POST /files/upload` |
 | Create + wait in one step | `create-and-poll` |
 
-For VEO, Manxue Seedance, STD, image edits, image understanding, remove-bg, remove-subtitle, or **local file upload** (`POST /files/upload`), fetch the specific page from https://docs.viraltok.ai/llms.txt before calling. SP economy detail: https://docs.viraltok.ai/zh/api-reference/seedance/sp/create.md · Seedance 2.5: https://docs.viraltok.ai/zh/api-reference/seedance/25/create.md · Flux 3: https://docs.viraltok.ai/zh/api-reference/flux3/create.md · MiniMax H3: https://docs.viraltok.ai/zh/api-reference/minimax/create.md · Seedance 2.0 933: https://docs.viraltok.ai/zh/api-reference/seedance/20933/create.md · Remove background: https://docs.viraltok.ai/zh/api-reference/images/remove-bg.md · Remove subtitle: https://docs.viraltok.ai/zh/api-reference/remove-subtitle/create.md
+For VEO, Manxue Seedance, STD, image edits, image understanding, remove-bg, remove-subtitle, or **local file upload** (`POST /files/upload`), fetch the specific page from https://docs.viraltok.ai/llms.txt before calling. SP economy detail: https://docs.viraltok.ai/zh/api-reference/seedance/sp/create.md · Seedance 2.5: https://docs.viraltok.ai/zh/api-reference/seedance/25/create.md · Flux 3: https://docs.viraltok.ai/zh/api-reference/flux3/create.md · MiniMax H3: https://docs.viraltok.ai/zh/api-reference/minimax/create.md · Seedance 2.0 933: https://docs.viraltok.ai/zh/api-reference/seedance/20933/create.md · Seedance 2.0 GZ 720p: https://docs.viraltok.ai/zh/api-reference/seedance/gz720/create.md · Remove background: https://docs.viraltok.ai/zh/api-reference/images/remove-bg.md · Remove subtitle: https://docs.viraltok.ai/zh/api-reference/remove-subtitle/create.md
 
 ## Workflow
 
@@ -314,6 +314,33 @@ python "$JIMMYAI_CLI" create-seedance20933-video \
 ```
 
 `seedance2.0-933`: billed `per_second` by resolution (`seedance2.0-933-480p` / `seedance2.0-933-720p` / `seedance2.0-933-1080p`). Duration 4–15 s (default 4); aspect_ratio `21:9|16:9|4:3|1:1|3:4|9:16` (default `16:9`); resolution `480p|720p|1080p`; max 9 images / 3 videos / 3 audios; `face_processing` default true; `generate_audio` default false; `reference_mode` `image|frame` (default `image`). Docs: https://docs.viraltok.ai/zh/api-reference/seedance/20933/create.md
+
+### Seedance 2.0 GZ 720p video (async)
+
+```bash
+python "$JIMMYAI_CLI" create-and-poll \
+  --type seedance-video \
+  --model seedance2.0-gz-720p \
+  --prompt "A cinematic product shot with natural lighting" \
+  --duration 5 \
+  --ratio "16:9" \
+  --image "https://example.com/reference.png" \
+  --video "https://example.com/reference.mp4" \
+  --download output.mp4
+```
+
+Or create only:
+
+```bash
+python "$JIMMYAI_CLI" create-seedance-video \
+  --model seedance2.0-gz-720p \
+  --prompt "A cinematic product shot with natural lighting" \
+  --duration 5 \
+  --ratio "16:9" \
+  --image "https://example.com/reference.png"
+```
+
+`seedance2.0-gz-720p`: billed `per_second` (`unit_price × duration`). Duration 4–15 s (default 5); aspect_ratio `21:9|16:9|4:3|1:1|3:4|9:16` (default `16:9`); resolution **fixed 720p**; max 9 images / 3 videos / 3 audios (audio requires image or video refs). Result `video_url` is a direct media link — download promptly. Docs: https://docs.viraltok.ai/zh/api-reference/seedance/gz720/create.md
 
 ### Mini 特价版 video (Seedance, async)
 

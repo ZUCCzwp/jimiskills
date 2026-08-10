@@ -328,6 +328,10 @@ def cmd_create_seedance_video(args: argparse.Namespace) -> None:
         body["resolution"] = args.resolution
     if args.image:
         body["images"] = args.image
+    if getattr(args, "video", None):
+        body["reference_videos"] = args.video
+    if getattr(args, "audio", None):
+        body["reference_audios"] = args.audio
     if args.first_image:
         body["first_image"] = args.first_image
     if args.last_image:
@@ -725,6 +729,10 @@ def cmd_create_and_poll(args: argparse.Namespace) -> None:
             body["resolution"] = args.resolution
         if args.image:
             body["images"] = args.image
+        if getattr(args, "video", None):
+            body["reference_videos"] = args.video
+        if getattr(args, "audio", None):
+            body["reference_audios"] = args.audio
         if getattr(args, "first_image", None):
             body["first_image"] = args.first_image
         if getattr(args, "last_image", None):
@@ -901,6 +909,8 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--ratio", default="16:9")
     p.add_argument("--resolution", default="720p", help="SP economy: 720p or 1080p; Mini 特价版 / Mini: 480p or 720p")
     p.add_argument("--image", action="append", help="Reference image URL (repeatable)")
+    p.add_argument("--video", action="append", help="Reference video URL (repeatable; e.g. seedance2.0-gz-720p)")
+    p.add_argument("--audio", action="append", help="Reference audio URL (repeatable; e.g. seedance2.0-gz-720p)")
     p.add_argument("--first-image", dest="first_image", help="First frame image URL")
     p.add_argument("--last-image", dest="last_image", help="Last frame image URL")
     p.set_defaults(func=cmd_create_seedance_video)
@@ -1097,9 +1107,9 @@ def build_parser() -> argparse.ArgumentParser:
         help="Seedance 2.0 933 reference mode",
     )
     p.add_argument("--image", action="append", help="Reference image URL (repeatable)")
-    p.add_argument("--video", action="append", help="Reference video URL (Seedance 2.5 / Seedance 2.0 933)")
+    p.add_argument("--video", action="append", help="Reference video URL (Seedance / Seedance 2.5 / Seedance 2.0 933 / GZ 720p)")
     p.add_argument("--video-url", dest="video_url", help="Source video URL (remove-subtitle)")
-    p.add_argument("--audio", action="append", help="Reference audio URL (MiniMax / Seedance 2.5 / Seedance 2.0 933)")
+    p.add_argument("--audio", action="append", help="Reference audio URL (MiniMax / Seedance / Seedance 2.5 / Seedance 2.0 933 / GZ 720p)")
     p.add_argument("--first-image", dest="first_image", help="First frame URL (Seedance / MiniMax)")
     p.add_argument("--last-image", dest="last_image", help="Last frame URL (Seedance / MiniMax)")
     p.add_argument("--interval", type=float, default=DEFAULT_POLL_INTERVAL)
