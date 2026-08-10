@@ -36,6 +36,7 @@ export JIMMYAI_BASE_URL="https://api.viraltok.ai"
 | `create-image` | Create async image task |
 | `generate-image` | Sync text-to-image (OpenAI-compatible) |
 | `remove-bg` | Sync background removal |
+| `remove-subtitle` | Create video subtitle-removal task (async) |
 | `poll` | Query task status by ID |
 | `user-balance` | Query user JimiCoin account balance |
 | `key-balance` | Query API key quota balance |
@@ -230,6 +231,23 @@ python "$JIMMYAI_CLI" remove-bg \
 
 Timeout ≥ 180 s recommended (`--timeout`).
 
+## remove-subtitle (async)
+
+`POST /api/open-api/v1/remove-subtitle/videos` — poll with `poll --type video`.
+
+```bash
+python "$JIMMYAI_CLI" remove-subtitle \
+  --video-url "https://example.com/input.mp4"
+
+# Create + wait
+python "$JIMMYAI_CLI" create-and-poll \
+  --type remove-subtitle \
+  --video-url "https://example.com/input.mp4" \
+  --download output.mp4
+```
+
+Default model: `video_remove_subtitle`. Billing is `per_second` (duration probed from `video_url`, ceiled, min 1s).
+
 ## poll
 
 ```bash
@@ -251,7 +269,9 @@ python "$JIMMYAI_CLI" create-and-poll \
   --download output.mp4
 ```
 
-`--type` values: `video`, `gemini-video`, `seedance-video`, `seedance25-video`, `seedance20933-video`, `minimax-video`, `image`
+`--type` values: `video`, `gemini-video`, `seedance-video`, `seedance25-video`, `seedance20933-video`, `minimax-video`, `remove-subtitle`, `image`
+
+For `--type remove-subtitle`, pass `--video-url` (no `--prompt`). Model defaults to `video_remove_subtitle`.
 
 Seedance example:
 

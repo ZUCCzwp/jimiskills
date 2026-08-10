@@ -1,6 +1,6 @@
 ---
 name: "jimmyai"
-description: "Integrate JimmyAI image and video generation APIs (Sora, VEO, Gemini Omni, Seedance including SP economy, Mini 特价版, Seedance 2.5 / 2.5 SP, MiniMax H3, Seedance 2.0 933, GPT Image, remove-bg) via the bundled CLI (`scripts/jimmyai.py`). Use when the user asks to connect JimmyAI, generate AI images/videos, remove image backgrounds, poll async tasks, set up API keys, or integrate https://api.viraltok.ai — including zero-experience onboarding. Requires `JIMMYAI_API_KEY`."
+description: "Integrate JimmyAI image and video generation APIs (Sora, VEO, Gemini Omni, Seedance including SP economy, Mini 特价版, Seedance 2.5 / 2.5 SP, MiniMax H3, Seedance 2.0 933, GPT Image, remove-bg, remove-subtitle) via the bundled CLI (`scripts/jimmyai.py`). Use when the user asks to connect JimmyAI, generate AI images/videos, remove image backgrounds, remove video subtitles, poll async tasks, set up API keys, or integrate https://api.viraltok.ai — including zero-experience onboarding. Requires `JIMMYAI_API_KEY`."
 ---
 
 # JimmyAI API Skill
@@ -15,6 +15,7 @@ This skill helps users integrate JimmyAI from zero — register, get a key, send
 - Generate a video (Sora / Gemini Omni / VEO / Seedance / Seedance 2.5 / MiniMax H3 / Seedance 2.0 933)
 - Generate an image (sync or async)
 - Remove image background (sync `remove-bg`)
+- Remove video subtitles (async `remove-subtitle`)
 - Poll task status and download results
 - Debug auth, billing, or network errors
 - Build integration code (curl, Python, Node, etc.)
@@ -49,6 +50,7 @@ If `JIMMYAI_API_KEY` is missing, guide the user to set it locally and confirm wh
 | Quick image, no polling | `generate-image` → `POST /images/generations` (sync) |
 | Image with more model options | `create-image` → poll `GET /images/{taskId}` |
 | Remove image background | `remove-bg` → `POST /images/remove-bg` (sync; default `b64_json`) |
+| Remove video subtitles | `remove-subtitle` → poll `GET /videos/{taskId}` |
 | Sora video | `create-video` → poll `GET /videos/{taskId}` |
 | Gemini Omni video | `create-gemini-video` → poll `GET /videos/{taskId}` |
 | Gemini Omni 10s (`omni-10s`) | same endpoint with `--model omni-10s` |
@@ -64,7 +66,7 @@ If `JIMMYAI_API_KEY` is missing, guide the user to set it locally and confirm wh
 | Upload reference media (image/video/audio) | `upload-file` → `POST /files/upload` |
 | Create + wait in one step | `create-and-poll` |
 
-For VEO, Manxue Seedance, STD, image edits, image understanding, remove-bg, or **local file upload** (`POST /files/upload`), fetch the specific page from https://docs.viraltok.ai/llms.txt before calling. SP economy detail: https://docs.viraltok.ai/zh/api-reference/seedance/sp/create.md · Seedance 2.5: https://docs.viraltok.ai/zh/api-reference/seedance/25/create.md · Flux 3: https://docs.viraltok.ai/zh/api-reference/flux3/create.md · MiniMax H3: https://docs.viraltok.ai/zh/api-reference/minimax/create.md · Seedance 2.0 933: https://docs.viraltok.ai/zh/api-reference/seedance/20933/create.md · Remove background: https://docs.viraltok.ai/zh/api-reference/images/remove-bg.md
+For VEO, Manxue Seedance, STD, image edits, image understanding, remove-bg, remove-subtitle, or **local file upload** (`POST /files/upload`), fetch the specific page from https://docs.viraltok.ai/llms.txt before calling. SP economy detail: https://docs.viraltok.ai/zh/api-reference/seedance/sp/create.md · Seedance 2.5: https://docs.viraltok.ai/zh/api-reference/seedance/25/create.md · Flux 3: https://docs.viraltok.ai/zh/api-reference/flux3/create.md · MiniMax H3: https://docs.viraltok.ai/zh/api-reference/minimax/create.md · Seedance 2.0 933: https://docs.viraltok.ai/zh/api-reference/seedance/20933/create.md · Remove background: https://docs.viraltok.ai/zh/api-reference/images/remove-bg.md · Remove subtitle: https://docs.viraltok.ai/zh/api-reference/remove-subtitle/create.md
 
 ## Workflow
 
@@ -150,6 +152,26 @@ python "$JIMMYAI_CLI" remove-bg \
   --image-url "https://example.com/photo.png" \
   --response-format url
 ```
+
+### Remove video subtitles (async)
+
+```bash
+python "$JIMMYAI_CLI" create-and-poll \
+  --type remove-subtitle \
+  --video-url "https://example.com/input.mp4" \
+  --download output.mp4
+```
+
+Or create only, then poll:
+
+```bash
+python "$JIMMYAI_CLI" remove-subtitle \
+  --video-url "https://example.com/input.mp4"
+
+python "$JIMMYAI_CLI" poll --task-id "video_xxx" --type video --download output.mp4
+```
+
+Model: `video_remove_subtitle` (default). Billing: `per_second`, duration probed from `video_url` and **ceiled** (min 1s). Keep the source URL reachable while the task runs. Docs: https://docs.viraltok.ai/zh/api-reference/remove-subtitle/create.md
 
 ### Fast I2V video (Seedance, async)
 

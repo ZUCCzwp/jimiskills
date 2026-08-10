@@ -331,6 +331,24 @@ Billing: `per_second`, duration probed from `video_url` and **ceiled** (min 1s).
 }
 ```
 
+## Tools — remove video subtitles
+
+`POST /api/open-api/v1/remove-subtitle/videos` — poll `GET /api/open-api/v1/videos/{taskId}`.
+
+| Field | Required | Notes |
+|-------|----------|-------|
+| model | no | `video_remove_subtitle` (default) |
+| video_url | yes | public source video URL; keep reachable while the task runs |
+
+Billing: `per_second`, duration probed from `video_url` and **ceiled** (min 1s). Docs: https://docs.viraltok.ai/zh/api-reference/remove-subtitle/create.md
+
+```json
+{
+  "model": "video_remove_subtitle",
+  "video_url": "https://example.com/input.mp4"
+}
+```
+
 ## MiniMax H3 video
 
 `POST /api/open-api/v1/minimax/videos` — poll `GET /api/open-api/v1/videos/{taskId}`.

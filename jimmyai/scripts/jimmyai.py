@@ -627,6 +627,35 @@ def cmd_remove_bg(args: argparse.Namespace) -> None:
     print(json.dumps(payload, indent=2, ensure_ascii=False))
 
 
+def cmd_remove_subtitle(args: argparse.Namespace) -> None:
+    api_key = _api_key(args.dry_run)
+    base = _base_url(args.base_url)
+    video_url = (args.video_url or "").strip()
+    if not video_url:
+        _die("--video-url is required")
+
+    body: Dict[str, Any] = {"video_url": video_url}
+    if args.model:
+        body["model"] = args.model
+
+    payload = _request(
+        "POST",
+        f"{base}/api/open-api/v1/remove-subtitle/videos",
+        api_key,
+        body,
+        dry_run=args.dry_run,
+    )
+    if args.dry_run:
+        return
+    _check_code(payload)
+    if args.json_out:
+        Path(args.json_out).write_text(json.dumps(payload, indent=2), encoding="utf-8")
+    print(json.dumps(payload, indent=2, ensure_ascii=False))
+    task_id = (payload.get("data") or {}).get("task_id")
+    if task_id:
+        print(task_id)
+
+
 def cmd_poll(args: argparse.Namespace) -> None:
     api_key = _api_key(args.dry_run)
     base = _base_url(args.base_url)
@@ -645,10 +674,19 @@ def cmd_poll(args: argparse.Namespace) -> None:
 def cmd_create_and_poll(args: argparse.Namespace) -> None:
     api_key = _api_key(args.dry_run)
     base = _base_url(args.base_url)
-    prompt = _read_prompt(args.prompt, args.prompt_file)
 
-    if args.type == "video":
-        body: Dict[str, Any] = {
+    if args.type == "remove-subtitle":
+        video_url = (getattr(args, "video_url", None) or "").strip()
+        if not video_url:
+            _die("--video-url is required for --type remove-subtitle")
+        # create-and-poll defaults --model to sora2-12s; remap for this type
+        model = args.model if args.model and args.model != "sora2-12s" else "video_remove_subtitle"
+        body: Dict[str, Any] = {"video_url": video_url, "model": model}
+        url = f"{base}/api/open-api/v1/remove-subtitle/videos"
+        poll_type = "video"
+    elif args.type == "video":
+        prompt = _read_prompt(args.prompt, args.prompt_file)
+        body = {
             "model": args.model,
             "prompt": prompt,
             "duration": args.duration,
@@ -660,6 +698,7 @@ def cmd_create_and_poll(args: argparse.Namespace) -> None:
         url = f"{base}/api/open-api/v1/videos"
         poll_type = "video"
     elif args.type == "gemini-video":
+        prompt = _read_prompt(args.prompt, args.prompt_file)
         body = {"model": args.model, "prompt": prompt}
         if args.duration is not None:
             body["duration"] = args.duration
@@ -674,6 +713,7 @@ def cmd_create_and_poll(args: argparse.Namespace) -> None:
         url = f"{base}/api/open-api/v1/gemini/omni/videos"
         poll_type = "video"
     elif args.type == "seedance-video":
+        prompt = _read_prompt(args.prompt, args.prompt_file)
         body = {
             "model": args.model,
             "prompt": prompt,
@@ -692,6 +732,7 @@ def cmd_create_and_poll(args: argparse.Namespace) -> None:
         url = f"{base}/api/open-api/v1/seedance/videos"
         poll_type = "video"
     elif args.type == "minimax-video":
+        prompt = _read_prompt(args.prompt, args.prompt_file)
         body = {
             "model": args.model,
             "prompt": prompt,
@@ -712,6 +753,7 @@ def cmd_create_and_poll(args: argparse.Namespace) -> None:
         url = f"{base}/api/open-api/v1/minimax/videos"
         poll_type = "video"
     elif args.type == "seedance25-video":
+        prompt = _read_prompt(args.prompt, args.prompt_file)
         body = {
             "model": args.model,
             "prompt": prompt,
@@ -730,6 +772,7 @@ def cmd_create_and_poll(args: argparse.Namespace) -> None:
         url = f"{base}/api/open-api/v1/seedance25/videos"
         poll_type = "video"
     elif args.type == "seedance20933-video":
+        prompt = _read_prompt(args.prompt, args.prompt_file)
         body = {
             "model": args.model,
             "prompt": prompt,
@@ -754,6 +797,7 @@ def cmd_create_and_poll(args: argparse.Namespace) -> None:
         url = f"{base}/api/open-api/v1/seedance/videos"
         poll_type = "video"
     elif args.type == "image":
+        prompt = _read_prompt(args.prompt, args.prompt_file)
         body = {"model": args.model, "prompt": prompt}
         if args.ratio:
             body["ratio"] = args.ratio
@@ -977,6 +1021,12 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--output", help="Save b64_json result to file")
     p.set_defaults(func=cmd_remove_bg)
 
+    p = sub.add_parser("remove-subtitle", help="Create video subtitle-removal task (async)")
+    _add_common_flags(p)
+    p.add_argument("--video-url", required=True, help="Public source video URL")
+    p.add_argument("--model", default="video_remove_subtitle")
+    p.set_defaults(func=cmd_remove_subtitle)
+
     p = sub.add_parser("poll", help="Poll task status")
     _add_common_flags(p)
     p.add_argument("--task-id", required=True)
@@ -1005,7 +1055,16 @@ def build_parser() -> argparse.ArgumentParser:
     _add_prompt_flags(p)
     p.add_argument(
         "--type",
-        choices=["video", "gemini-video", "seedance-video", "seedance25-video", "seedance20933-video", "minimax-video", "image"],
+        choices=[
+            "video",
+            "gemini-video",
+            "seedance-video",
+            "seedance25-video",
+            "seedance20933-video",
+            "minimax-video",
+            "remove-subtitle",
+            "image",
+        ],
         default="video",
     )
     p.add_argument("--model", default="sora2-12s")
@@ -1039,6 +1098,7 @@ def build_parser() -> argparse.ArgumentParser:
     )
     p.add_argument("--image", action="append", help="Reference image URL (repeatable)")
     p.add_argument("--video", action="append", help="Reference video URL (Seedance 2.5 / Seedance 2.0 933)")
+    p.add_argument("--video-url", dest="video_url", help="Source video URL (remove-subtitle)")
     p.add_argument("--audio", action="append", help="Reference audio URL (MiniMax / Seedance 2.5 / Seedance 2.0 933)")
     p.add_argument("--first-image", dest="first_image", help="First frame URL (Seedance / MiniMax)")
     p.add_argument("--last-image", dest="last_image", help="Last frame URL (Seedance / MiniMax)")
