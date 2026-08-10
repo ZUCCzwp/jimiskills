@@ -174,9 +174,11 @@ Poll via `GET /api/open-api/v1/videos/{taskId}` (same as Sora / Gemini Omni).
 | **Fast I2V** | `seedance2.0-fast-i2v` | per task | 1–15 s | image refs only, max 9; no video/audio refs |
 | STD | `seedance2.0-std` | per task | 4–15 s | max 9 images, max 3 audio refs |
 | **GZ 720p** | `seedance2.0-gz-720p` | per second | 4–15 s | fixed 720p; max 9 images / 3 videos / 3 audios; audio requires image or video refs; direct result media URL |
+| **933 720p** | `sd2-933-720p` | per second **0.0479**/s | 4–15 s | fixed 720p; max 9 images / 3 videos / 3 audios; `reference_mode` frame/media; `generate_audio` default true |
 
 Fast I2V detail: https://docs.viraltok.ai/zh/api-reference/seedance/md/fast-i2v.md
 GZ 720p detail: https://docs.viraltok.ai/zh/api-reference/seedance/gz720/create.md
+933 720p detail: https://docs.viraltok.ai/zh/api-reference/seedance/933720/create.md
 
 | Field | Required | Notes |
 |-------|----------|-------|
@@ -509,6 +511,37 @@ Resolution is **fixed 720p**. Billing: `per_second` (`seedance2.0-gz-720p`; `uni
   "prompt": "A cinematic product shot with natural lighting",
   "duration": 5,
   "aspect_ratio": "16:9",
+  "images": ["https://example.com/reference.png"],
+  "reference_videos": ["https://example.com/reference.mp4"]
+}
+```
+
+## Seedance 933 720p video
+
+`POST /api/open-api/v1/seedance/videos` — poll `GET /api/open-api/v1/videos/{taskId}`.
+
+| Field | Required | Notes |
+|-------|----------|-------|
+| model | yes | `sd2-933-720p` (aliases `sd2_933_720p` / `sd2-933720p` normalize) |
+| prompt | yes | 1–5000 chars |
+| duration | no | 4–15, default `5` |
+| aspect_ratio / ratio | no | `16:9` / `9:16` / `1:1` / `4:3` / `3:4`, default `16:9` |
+| reference_mode | no | `frame` / `media` (alias `image` → `media`) |
+| generate_audio | no | default `true` |
+| images / reference_images | no | max **9** |
+| videos / reference_videos | no | max **3** |
+| audios / reference_audios | no | max **3**; must pair with image or video refs |
+
+Resolution is **fixed 720p**. Billing: `per_second` at **0.0479**/s (`0.0479 × duration`). Docs: https://docs.viraltok.ai/zh/api-reference/seedance/933720/create.md
+
+```json
+{
+  "model": "sd2-933-720p",
+  "prompt": "A cinematic product shot with natural lighting",
+  "duration": 5,
+  "aspect_ratio": "16:9",
+  "reference_mode": "media",
+  "generate_audio": true,
   "images": ["https://example.com/reference.png"],
   "reference_videos": ["https://example.com/reference.mp4"]
 }
