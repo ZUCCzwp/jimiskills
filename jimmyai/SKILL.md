@@ -269,7 +269,7 @@ python "$JIMMYAI_CLI" create-seedance25-video \
   --resolution 480p
 ```
 
-SP economy (`seedance-2.5-sp`, flat **0.5**/s, 720p only, reference videos allowed):
+SP economy (`seedance-2.5-sp`, flat **0.5**/s, 720p only, reference videos and first/last frames allowed):
 
 ```bash
 python "$JIMMYAI_CLI" create-seedance25-video \
@@ -278,13 +278,13 @@ python "$JIMMYAI_CLI" create-seedance25-video \
   --duration 5 \
   --aspect-ratio "16:9" \
   --resolution 720p \
-  --image "https://example.com/reference.png" \
-  --video "https://example.com/reference.mp4"
+  --first-image "https://example.com/start.png" \
+  --last-image "https://example.com/end.png"
 ```
 
 `seedance-2.5`: billed `per_second` by resolution (`seedance-2.5-480p` / `seedance-2.5-720p`). Duration 4–30 s (default 4); aspect_ratio `16:9|9:16|1:1`; resolution `480p|720p`; max 30 images / 10 audios; **reference videos not supported**. Docs: https://docs.viraltok.ai/zh/api-reference/seedance/25/create.md
 
-`seedance-2.5-sp`: billed `per_second` at fixed **0.5**/s (`seedance-2.5-sp`). Duration 4–29 s; aspect_ratio `16:9|9:16|1:1`; resolution **720p only**; max 30 images / 10 videos / 10 audios. Same endpoint and docs.
+`seedance-2.5-sp`: billed `per_second` at fixed **0.5**/s (`seedance-2.5-sp`). Duration 4–30 s; aspect_ratio `16:9|9:16|1:1`; resolution **720p only**; max 30 images / 10 videos / 10 audios; optional `--first-image` / `--last-image` (mutually exclusive with `--image`). Same endpoint and docs.
 
 ### Seedance 2.0 933 video (async)
 

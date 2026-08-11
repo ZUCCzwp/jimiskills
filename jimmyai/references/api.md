@@ -390,9 +390,10 @@ Billing: `per_task` (flat per request). `duration` is generation length only and
 |-------|----------|-------|
 | model | yes | `seedance-2.5` (aliases `seedance2.5` / `seedance_2.5` / `seedance25`) or `seedance-2.5-sp` |
 | prompt | yes | 1–5000 chars |
-| duration | no | Standard 4–30 (default `4`); SP 4–29 |
+| duration | no | Standard / SP 4–30 (default `4`) |
 | aspect_ratio / ratio | no | `16:9` / `9:16` / `1:1`, default `9:16` |
 | resolution | no | Standard `480p` / `720p` (default `480p`); SP **720p only** |
+| first_image / last_image | no | **SP only**; mutually exclusive with `reference_images` / `images` |
 | reference_images / images | no | max **30** public URLs |
 | reference_videos / videos | no | **SP only**, max **10**; standard returns an error if provided |
 | reference_audios / audios | no | max **10** public URLs |
@@ -427,8 +428,8 @@ SP:
   "duration": 5,
   "aspect_ratio": "16:9",
   "resolution": "720p",
-  "reference_images": ["https://example.com/reference.png"],
-  "reference_videos": ["https://example.com/reference.mp4"]
+  "first_image": "https://example.com/start.png",
+  "last_image": "https://example.com/end.png"
 }
 ```
 

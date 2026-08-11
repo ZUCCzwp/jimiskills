@@ -448,6 +448,10 @@ def cmd_create_seedance25_video(args: argparse.Namespace) -> None:
         body["reference_videos"] = args.video
     if args.audio:
         body["reference_audios"] = args.audio
+    if getattr(args, "first_image", None):
+        body["first_image"] = args.first_image
+    if getattr(args, "last_image", None):
+        body["last_image"] = args.last_image
 
     payload = _request(
         "POST",
@@ -777,6 +781,10 @@ def cmd_create_and_poll(args: argparse.Namespace) -> None:
             body["reference_videos"] = args.video
         if getattr(args, "audio", None):
             body["reference_audios"] = args.audio
+        if getattr(args, "first_image", None):
+            body["first_image"] = args.first_image
+        if getattr(args, "last_image", None):
+            body["last_image"] = args.last_image
         url = f"{base}/api/open-api/v1/seedance25/videos"
         poll_type = "video"
     elif args.type == "seedance20933-video":
@@ -953,6 +961,8 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--image", action="append", help="Reference image URL (repeatable, max 30)")
     p.add_argument("--video", action="append", help="Reference video URL (repeatable, max 10)")
     p.add_argument("--audio", action="append", help="Reference audio URL (repeatable, max 10)")
+    p.add_argument("--first-image", dest="first_image", help="First frame image URL (SP only)")
+    p.add_argument("--last-image", dest="last_image", help="Last frame image URL (SP only)")
     p.set_defaults(func=cmd_create_seedance25_video)
 
     p = sub.add_parser("create-seedance20933-video", help="Create Seedance 2.0 933 video task")
@@ -1110,8 +1120,8 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--video", action="append", help="Reference video URL (Seedance / Seedance 2.5 / Seedance 2.0 933 / GZ 720p)")
     p.add_argument("--video-url", dest="video_url", help="Source video URL (remove-subtitle)")
     p.add_argument("--audio", action="append", help="Reference audio URL (MiniMax / Seedance / Seedance 2.5 / Seedance 2.0 933 / GZ 720p)")
-    p.add_argument("--first-image", dest="first_image", help="First frame URL (Seedance / MiniMax)")
-    p.add_argument("--last-image", dest="last_image", help="Last frame URL (Seedance / MiniMax)")
+    p.add_argument("--first-image", dest="first_image", help="First frame URL (Seedance / Seedance 2.5 SP / MiniMax)")
+    p.add_argument("--last-image", dest="last_image", help="Last frame URL (Seedance / Seedance 2.5 SP / MiniMax)")
     p.add_argument("--interval", type=float, default=DEFAULT_POLL_INTERVAL)
     p.add_argument("--timeout", type=float, default=DEFAULT_POLL_TIMEOUT)
     p.add_argument("--download", help="Download result media to path")
