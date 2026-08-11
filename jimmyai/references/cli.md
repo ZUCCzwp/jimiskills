@@ -177,9 +177,9 @@ python "$JIMMYAI_CLI" create-seedance25-video \
   --last-image "https://example.com/end.png"
 ```
 
-`seedance-2.5`: billed `per_second` by resolution (`seedance-2.5-480p` / `seedance-2.5-720p`). Duration 4–30 s (default 4); aspect_ratio `16:9|9:16|1:1` (default `9:16`); resolution `480p|720p`; max 30 `--image` / 10 `--audio`; **reference videos not supported**. Docs: https://docs.viraltok.ai/zh/api-reference/seedance/25/create.md
+`seedance-2.5`: billed `per_second` by resolution (`seedance-2.5-480p` / `seedance-2.5-720p`). Duration 4–30 s (default 4); aspect_ratio `16:9|9:16|1:1` (default `9:16`); resolution `480p|720p`; max 30 `--image` / 10 `--video` (each & total ≤30.2s) / 10 `--audio` (each ≤30s). Docs: https://docs.viraltok.ai/zh/api-reference/seedance/25/create.md
 
-`seedance-2.5-sp`: billed `per_second` at fixed **0.5**/s. Duration 4–30 s; resolution **720p only**; max 30 `--image` / 10 `--video` / 10 `--audio`; optional `--first-image` / `--last-image` (mutually exclusive with `--image`). Same docs.
+`seedance-2.5-sp`: billed `per_second` at fixed **0.5**/s. Duration 4–30 s; resolution **720p only**; same media limits; optional `--first-image` / `--last-image` (mutually exclusive with `--image`). Same docs.
 
 ## create-seedance20933-video
 

@@ -395,8 +395,8 @@ Billing: `per_task` (flat per request). `duration` is generation length only and
 | resolution | no | Standard `480p` / `720p` (default `480p`); SP **720p only** |
 | first_image / last_image | no | **SP only**; mutually exclusive with `reference_images` / `images` |
 | reference_images / images | no | max **30** public URLs |
-| reference_videos / videos | no | **SP only**, max **10**; standard returns an error if provided |
-| reference_audios / audios | no | max **10** public URLs |
+| reference_videos / videos | no | max **10**; each and total ≤ **30.2** s |
+| reference_audios / audios | no | max **10**; each ≤ **30** s |
 
 Billing:
 
