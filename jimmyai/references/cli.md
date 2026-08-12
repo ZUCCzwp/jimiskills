@@ -30,6 +30,7 @@ export JIMMYAI_BASE_URL="https://api.viraltok.ai"
 | `create-video` | Create Sora video task (async) |
 | `create-seedance-video` | Create Seedance video task (async) |
 | `create-minimax-video` | Create MiniMax H3 video task (async) |
+| `create-kling-video` | Create Kling O3 video task (async) |
 | `create-seedance25-video` | Create Seedance 2.5 video task (async) |
 | `create-seedance20933-video` | Create Seedance 2.0 933 video task (async) |
 | `create-gemini-video` | Create Gemini Omni video task |
@@ -148,6 +149,24 @@ python "$JIMMYAI_CLI" create-minimax-video \
 ```
 
 `minimax-h3`: billed `per_task` (flat per request). Duration 5–15 s (default 5); max 5 `--image` and 1 `--audio`; optional first/last frames. Docs: https://docs.viraltok.ai/zh/api-reference/minimax/create.md
+
+## create-kling-video
+
+`POST /api/open-api/v1/kling/videos` — poll with `poll --type video`.
+
+```bash
+python "$JIMMYAI_CLI" create-kling-video \
+  --model kling-o3 \
+  --prompt "A cinematic product shot with natural lighting" \
+  --duration 6 \
+  --aspect-ratio "16:9" \
+  --resolution 720p \
+  --image "https://example.com/reference.png" \
+  --first-image "https://example.com/first.png" \
+  --last-image "https://example.com/last.png"
+```
+
+`kling-o3`: billed `per_task` (flat per request). Duration 3–15 s (default 6); resolution `720p`/`1080p`; max 3 `--image`; optional first/last frames and `--generate-audio`. Docs: https://docs.viraltok.ai/zh/api-reference/kling/create.md
 
 ## create-seedance25-video
 
@@ -331,6 +350,20 @@ python "$JIMMYAI_CLI" create-and-poll \
   --prompt "A cinematic product shot with natural lighting" \
   --duration 5 \
   --aspect-ratio "16:9" \
+  --image "https://example.com/ref.jpg" \
+  --download output.mp4
+```
+
+Kling O3 example:
+
+```bash
+python "$JIMMYAI_CLI" create-and-poll \
+  --type kling-video \
+  --model kling-o3 \
+  --prompt "A cinematic product shot with natural lighting" \
+  --duration 6 \
+  --aspect-ratio "16:9" \
+  --resolution 720p \
   --image "https://example.com/ref.jpg" \
   --download output.mp4
 ```

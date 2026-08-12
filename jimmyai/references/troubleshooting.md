@@ -109,6 +109,18 @@
 - Poll with `GET /api/open-api/v1/videos/{taskId}`.
 - Docs: https://docs.viraltok.ai/zh/api-reference/minimax/create.md
 
+## Kling O3 (`kling-o3`)
+
+- Use `POST /api/open-api/v1/kling/videos` with `"model": "kling-o3"`.
+- Billing is `per_task` (flat per request); `duration` does not change cost.
+- Billing key follows `resolution` (`kling-o3-720p` / `kling-o3-1080p`), falling back to `kling-o3`.
+- `duration` must be 3–15 seconds (default 6).
+- `aspect_ratio`: `16:9` / `9:16` / `1:1` (default `16:9`).
+- `resolution`: `720p` / `1080p` (default `720p`).
+- `reference_images` max 3; optional `first_image` / `last_image`; `generate_audio` default `false`.
+- Poll with `GET /api/open-api/v1/videos/{taskId}`.
+- Docs: https://docs.viraltok.ai/zh/api-reference/kling/create.md
+
 ## Seedance 2.5 (`seedance-2.5` / `seedance-2.5-sp`)
 
 - Use `POST /api/open-api/v1/seedance25/videos` with `"model": "seedance-2.5"` or `"seedance-2.5-sp"`.

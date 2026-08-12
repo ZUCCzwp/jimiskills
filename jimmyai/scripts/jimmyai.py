@@ -429,6 +429,48 @@ def cmd_create_minimax_video(args: argparse.Namespace) -> None:
         print(task_id)
 
 
+def cmd_create_kling_video(args: argparse.Namespace) -> None:
+    api_key = _api_key(args.dry_run)
+    base = _base_url(args.base_url)
+    prompt = _read_prompt(args.prompt, args.prompt_file)
+    body: Dict[str, Any] = {
+        "model": args.model,
+        "prompt": prompt,
+        "duration": args.duration,
+    }
+    if args.aspect_ratio:
+        body["aspect_ratio"] = args.aspect_ratio
+    if args.resolution:
+        body["resolution"] = args.resolution
+    if args.image:
+        body["reference_images"] = args.image
+    if args.first_image:
+        body["first_image"] = args.first_image
+    if args.last_image:
+        body["last_image"] = args.last_image
+    if getattr(args, "generate_audio", None) is not None:
+        body["generate_audio"] = args.generate_audio
+    if getattr(args, "reference_mode", None):
+        body["reference_mode"] = args.reference_mode
+
+    payload = _request(
+        "POST",
+        f"{base}/api/open-api/v1/kling/videos",
+        api_key,
+        body,
+        dry_run=args.dry_run,
+    )
+    if args.dry_run:
+        return
+    _check_code(payload)
+    if args.json_out:
+        Path(args.json_out).write_text(json.dumps(payload, indent=2), encoding="utf-8")
+    print(json.dumps(payload, indent=2, ensure_ascii=False))
+    task_id = (payload.get("data") or {}).get("task_id")
+    if task_id:
+        print(task_id)
+
+
 def cmd_create_seedance25_video(args: argparse.Namespace) -> None:
     api_key = _api_key(args.dry_run)
     base = _base_url(args.base_url)
@@ -764,6 +806,30 @@ def cmd_create_and_poll(args: argparse.Namespace) -> None:
             body["last_image"] = args.last_image
         url = f"{base}/api/open-api/v1/minimax/videos"
         poll_type = "video"
+    elif args.type == "kling-video":
+        prompt = _read_prompt(args.prompt, args.prompt_file)
+        model = args.model if args.model and args.model != "sora2-12s" else "kling-o3"
+        body = {
+            "model": model,
+            "prompt": prompt,
+            "duration": args.duration,
+        }
+        if args.aspect_ratio:
+            body["aspect_ratio"] = args.aspect_ratio
+        if args.resolution:
+            body["resolution"] = args.resolution
+        if args.image:
+            body["reference_images"] = args.image
+        if getattr(args, "first_image", None):
+            body["first_image"] = args.first_image
+        if getattr(args, "last_image", None):
+            body["last_image"] = args.last_image
+        if getattr(args, "generate_audio", None) is not None:
+            body["generate_audio"] = args.generate_audio
+        if getattr(args, "reference_mode", None):
+            body["reference_mode"] = args.reference_mode
+        url = f"{base}/api/open-api/v1/kling/videos"
+        poll_type = "video"
     elif args.type == "seedance25-video":
         prompt = _read_prompt(args.prompt, args.prompt_file)
         body = {
@@ -947,6 +1013,26 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--last-image", dest="last_image", help="Last frame image URL")
     p.set_defaults(func=cmd_create_minimax_video)
 
+    p = sub.add_parser("create-kling-video", help="Create Kling O3 video task")
+    _add_common_flags(p)
+    _add_prompt_flags(p)
+    p.add_argument("--model", default="kling-o3")
+    p.add_argument("--duration", type=int, default=6)
+    p.add_argument("--aspect-ratio", dest="aspect_ratio", default="16:9")
+    p.add_argument("--resolution", default="720p", choices=["720p", "1080p"])
+    p.add_argument("--image", action="append", help="Reference image URL (repeatable, max 3)")
+    p.add_argument("--first-image", dest="first_image", help="First frame image URL")
+    p.add_argument("--last-image", dest="last_image", help="Last frame image URL")
+    p.add_argument(
+        "--generate-audio",
+        dest="generate_audio",
+        type=_parse_optional_bool,
+        default=None,
+        help="Whether to generate an audio track (true/false)",
+    )
+    p.add_argument("--reference-mode", dest="reference_mode", help="Optional reference mode")
+    p.set_defaults(func=cmd_create_kling_video)
+
     p = sub.add_parser("create-seedance25-video", help="Create Seedance 2.5 video task")
     _add_common_flags(p)
     _add_prompt_flags(p)
@@ -1082,6 +1168,7 @@ def build_parser() -> argparse.ArgumentParser:
             "seedance25-video",
             "seedance20933-video",
             "minimax-video",
+            "kling-video",
             "remove-subtitle",
             "image",
         ],
@@ -1120,8 +1207,8 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--video", action="append", help="Reference video URL (Seedance / Seedance 2.5 / Seedance 2.0 933 / GZ 720p)")
     p.add_argument("--video-url", dest="video_url", help="Source video URL (remove-subtitle)")
     p.add_argument("--audio", action="append", help="Reference audio URL (MiniMax / Seedance / Seedance 2.5 / Seedance 2.0 933 / GZ 720p)")
-    p.add_argument("--first-image", dest="first_image", help="First frame URL (Seedance / Seedance 2.5 SP / MiniMax)")
-    p.add_argument("--last-image", dest="last_image", help="Last frame URL (Seedance / Seedance 2.5 SP / MiniMax)")
+    p.add_argument("--first-image", dest="first_image", help="First frame URL (Seedance / Seedance 2.5 SP / MiniMax / Kling)")
+    p.add_argument("--last-image", dest="last_image", help="Last frame URL (Seedance / Seedance 2.5 SP / MiniMax / Kling)")
     p.add_argument("--interval", type=float, default=DEFAULT_POLL_INTERVAL)
     p.add_argument("--timeout", type=float, default=DEFAULT_POLL_TIMEOUT)
     p.add_argument("--download", help="Download result media to path")

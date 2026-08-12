@@ -386,6 +386,36 @@ Billing: `per_task` (flat per request). `duration` is generation length only and
 }
 ```
 
+## Kling O3 video
+
+`POST /api/open-api/v1/kling/videos` — poll `GET /api/open-api/v1/videos/{taskId}`.
+
+| Field | Required | Notes |
+|-------|----------|-------|
+| model | yes | `kling-o3` (aliases `klingo3` / `kling_o3` / `KlingO3` normalize) |
+| prompt | yes | 1–2000 chars |
+| duration | no | 3–15, default `6` |
+| aspect_ratio / ratio | no | `16:9` / `9:16` / `1:1`, default `16:9` |
+| resolution | no | `720p` / `1080p`, default `720p` |
+| reference_images / images | no | max **3** public URLs |
+| first_image / last_image | no | optional first/last frame URL |
+| generate_audio | no | default `false` |
+| reference_mode | no | optional string |
+
+Billing: `per_task`. Request `model` stays `kling-o3`. Billing key follows resolution (`kling-o3-720p` / `kling-o3-1080p`), falling back to `kling-o3`. `duration` does not affect cost. Docs: https://docs.viraltok.ai/zh/api-reference/kling/create.md
+
+```json
+{
+  "model": "kling-o3",
+  "prompt": "A cinematic product shot with natural lighting",
+  "duration": 6,
+  "aspect_ratio": "16:9",
+  "resolution": "720p",
+  "reference_images": ["https://example.com/reference.png"],
+  "generate_audio": false
+}
+```
+
 ## Seedance 2.5 video
 
 `POST /api/open-api/v1/seedance25/videos` — poll `GET /api/open-api/v1/videos/{taskId}`.

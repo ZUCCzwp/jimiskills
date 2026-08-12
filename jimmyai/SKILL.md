@@ -1,6 +1,6 @@
 ---
 name: "jimmyai"
-description: "Integrate JimmyAI image and video generation APIs (Sora, VEO, Gemini Omni, Seedance including SP economy, Mini 特价版, Seedance 2.5 / 2.5 SP, MiniMax H3, Seedance 2.0 933, Seedance 2.0 GZ 720p, Seedance 933 720p, GPT Image, Grok Imagine Image, remove-bg, remove-subtitle) via the bundled CLI (`scripts/jimmyai.py`). Use when the user asks to connect JimmyAI, generate AI images/videos, remove image backgrounds, remove video subtitles, poll async tasks, set up API keys, or integrate https://api.viraltok.ai — including zero-experience onboarding. Requires `JIMMYAI_API_KEY`."
+description: "Integrate JimmyAI image and video generation APIs (Sora, VEO, Gemini Omni, Seedance including SP economy, Mini 特价版, Seedance 2.5 / 2.5 SP, MiniMax H3, Kling O3, Seedance 2.0 933, Seedance 2.0 GZ 720p, Seedance 933 720p, GPT Image, Grok Imagine Image, remove-bg, remove-subtitle) via the bundled CLI (`scripts/jimmyai.py`). Use when the user asks to connect JimmyAI, generate AI images/videos, remove image backgrounds, remove video subtitles, poll async tasks, set up API keys, or integrate https://api.viraltok.ai — including zero-experience onboarding. Requires `JIMMYAI_API_KEY`."
 ---
 
 # JimmyAI API Skill
@@ -12,7 +12,7 @@ This skill helps users integrate JimmyAI from zero — register, get a key, send
 ## When to use
 
 - First-time JimmyAI setup (account, API key, recharge, env var)
-- Generate a video (Sora / Gemini Omni / VEO / Seedance / Seedance 2.5 / MiniMax H3 / Seedance 2.0 933 / Seedance 2.0 GZ 720p / Seedance 933 720p)
+- Generate a video (Sora / Gemini Omni / VEO / Seedance / Seedance 2.5 / MiniMax H3 / Kling O3 / Seedance 2.0 933 / Seedance 2.0 GZ 720p / Seedance 933 720p)
 - Generate an image (sync or async)
 - Remove image background (sync `remove-bg`)
 - Remove video subtitles (async `remove-subtitle`)
@@ -57,6 +57,7 @@ If `JIMMYAI_API_KEY` is missing, guide the user to set it locally and confirm wh
 | VEO frames (Fast / Lite) | `POST /api/open-api/v1/veo/frames` → poll `GET /videos/{taskId}` (see docs; CLI may need raw curl) |
 | Seedance video (SP economy / MD / Fast I2V / Mini 特价版 / GZ 720p / 933 720p / etc.) | `create-seedance-video` → poll `GET /videos/{taskId}` |
 | MiniMax H3 video | `create-minimax-video` → poll `GET /videos/{taskId}` |
+| Kling O3 video | `create-kling-video` → poll `GET /videos/{taskId}` |
 | Seedance 2.5 / 2.5 SP video | `create-seedance25-video` → poll `GET /videos/{taskId}` |
 | Flux 3 video | `POST /api/open-api/v1/flux3/videos` → poll `GET /videos/{taskId}` |
 | Seedance 2.0 933 video | `create-seedance20933-video` → poll `GET /videos/{taskId}` |
@@ -66,7 +67,7 @@ If `JIMMYAI_API_KEY` is missing, guide the user to set it locally and confirm wh
 | Upload reference media (image/video/audio) | `upload-file` → `POST /files/upload` |
 | Create + wait in one step | `create-and-poll` |
 
-For VEO, Manxue Seedance, STD, image edits, image understanding, remove-bg, remove-subtitle, or **local file upload** (`POST /files/upload`), fetch the specific page from https://docs.viraltok.ai/llms.txt before calling. SP economy detail: https://docs.viraltok.ai/zh/api-reference/seedance/sp/create.md · Seedance 2.5: https://docs.viraltok.ai/zh/api-reference/seedance/25/create.md · Flux 3: https://docs.viraltok.ai/zh/api-reference/flux3/create.md · MiniMax H3: https://docs.viraltok.ai/zh/api-reference/minimax/create.md · Seedance 2.0 933: https://docs.viraltok.ai/zh/api-reference/seedance/20933/create.md · Seedance 2.0 GZ 720p: https://docs.viraltok.ai/zh/api-reference/seedance/gz720/create.md · Seedance 933 720p: https://docs.viraltok.ai/zh/api-reference/seedance/933720/create.md · Remove background: https://docs.viraltok.ai/zh/api-reference/images/remove-bg.md · Remove subtitle: https://docs.viraltok.ai/zh/api-reference/remove-subtitle/create.md
+For VEO, Manxue Seedance, STD, image edits, image understanding, remove-bg, remove-subtitle, or **local file upload** (`POST /files/upload`), fetch the specific page from https://docs.viraltok.ai/llms.txt before calling. SP economy detail: https://docs.viraltok.ai/zh/api-reference/seedance/sp/create.md · Seedance 2.5: https://docs.viraltok.ai/zh/api-reference/seedance/25/create.md · Flux 3: https://docs.viraltok.ai/zh/api-reference/flux3/create.md · MiniMax H3: https://docs.viraltok.ai/zh/api-reference/minimax/create.md · Kling O3: https://docs.viraltok.ai/zh/api-reference/kling/create.md · Seedance 2.0 933: https://docs.viraltok.ai/zh/api-reference/seedance/20933/create.md · Seedance 2.0 GZ 720p: https://docs.viraltok.ai/zh/api-reference/seedance/gz720/create.md · Seedance 933 720p: https://docs.viraltok.ai/zh/api-reference/seedance/933720/create.md · Remove background: https://docs.viraltok.ai/zh/api-reference/images/remove-bg.md · Remove subtitle: https://docs.viraltok.ai/zh/api-reference/remove-subtitle/create.md
 
 ## Workflow
 
@@ -242,6 +243,36 @@ python "$JIMMYAI_CLI" create-minimax-video \
 ```
 
 `minimax-h3`: billed `per_task` (flat per request; `duration` does not change cost). Duration 5–15 s; max 5 reference images + 1 audio; optional `--first-image` / `--last-image`. Docs: https://docs.viraltok.ai/zh/api-reference/minimax/create.md
+
+### Kling O3 video (async)
+
+```bash
+python "$JIMMYAI_CLI" create-and-poll \
+  --type kling-video \
+  --model kling-o3 \
+  --prompt "A cinematic product shot with natural lighting" \
+  --duration 6 \
+  --aspect-ratio "16:9" \
+  --resolution 720p \
+  --image "https://example.com/reference.png" \
+  --download output.mp4
+```
+
+Or create only:
+
+```bash
+python "$JIMMYAI_CLI" create-kling-video \
+  --model kling-o3 \
+  --prompt "A cinematic product shot with natural lighting" \
+  --duration 6 \
+  --aspect-ratio "16:9" \
+  --resolution 720p \
+  --image "https://example.com/reference.png" \
+  --first-image "https://example.com/first.png" \
+  --last-image "https://example.com/last.png"
+```
+
+`kling-o3`: billed `per_task` (flat per request; `duration` does not change cost). Duration 3–15 s (default 6); resolution `720p`/`1080p`; max 3 reference images; optional `--first-image` / `--last-image` / `--generate-audio`. Docs: https://docs.viraltok.ai/zh/api-reference/kling/create.md
 
 ### Seedance 2.5 video (async)
 
