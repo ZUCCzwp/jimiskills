@@ -124,6 +124,7 @@
 ## Seedance 2.5 (`seedance-2.5` / `seedance-2.5-sp`)
 
 - Use `POST /api/open-api/v1/seedance25/videos` with `"model": "seedance-2.5"` or `"seedance-2.5-sp"`.
+- **Do not** use `/api/open-api/v1/seedance/videos` for these models — that endpoint is Seedance 2.0 (including Full/Manxue). Wrong path routes onto the Full line.
 - Standard billing is `per_second` by resolution (`seedance-2.5-480p` / `seedance-2.5-720p`; `unit_price × duration`). Request `model` stays `seedance-2.5`; billing key follows `resolution`.
 - SP billing is `per_second` at fixed **0.5**/s (`seedance-2.5-sp`; `0.5 × duration`).
 - Standard: `duration` 4–30 s (default 4); `resolution` `480p` / `720p` (default `480p`).

@@ -253,9 +253,9 @@ Asset audit (Manxue routes only):
 
 **Seedream 5.0 Pro** (`doubao-seedream-5-0-pro`): async `POST /api/open-api/v1/images`, poll `GET /api/open-api/v1/images/{taskId}`. Billing = resolution base (`doubao-seedream-5-0-pro-1k` / `-2k`) + `max(0, refs - 1) × doubao-seedream-5-0-pro-ref` (first reference free). Resolution `1k`/`2k` (default `2k`). Ratios: `1:1`, `4:3`, `3:4`, `16:9`, `9:16`, `3:2`, `2:3`, `21:9`, `auto`. Docs: https://docs.viraltok.ai/zh/api-reference/images/seedream-5-0-pro/create.md
 
-**Grok Imagine Image** (`grok-imagine-image`): async `POST /api/open-api/v1/images`, poll `GET /api/open-api/v1/images/{taskId}`. Billing = unit price × `n` (`1`–`4`). Resolution `1k`/`2k` (default `1k`). `output_format`: `jpeg`/`png`/`webp`. With `images` (max 3) → edit mode (`ratio` default `auto`). Result: `image_url` + `image_urls`. Docs: https://docs.viraltok.ai/zh/api-reference/images/grok-imagine-image/create.md
+**Grok Imagine Image** (`grok-imagine-image`): async `POST /api/open-api/v1/images`, poll `GET /api/open-api/v1/images/{taskId}`. Billing = unit price × `n` (`1`–`4`); no per-reference surcharge. Resolution `1k`/`2k` (default `1k`). `output_format`: `jpeg`/`png`/`webp`. With `images` (max 3) → edit mode (`ratio` default `auto`). Result: `image_url` + `image_urls`. Docs: https://docs.viraltok.ai/zh/api-reference/images/grok-imagine-image/create.md
 
-**Grok Imagine Image 2.0** (`grok-imagine-image-2`): Quality tier. Same fields; billing by resolution (`grok-imagine-image-2-1k` / `-2k`) × `n`. Docs: https://docs.viraltok.ai/zh/api-reference/images/grok-imagine-image-2/create.md
+**Grok Imagine Image 2.0** (`grok-imagine-image-2`): Quality tier. Same fields; billing by resolution (`grok-imagine-image-2-1k` / `-2k`) × `n`. Image-to-image (with `images`) also bills `refs × grok-imagine-image-2` from the first reference. Docs: https://docs.viraltok.ai/zh/api-reference/images/grok-imagine-image-2/create.md
 
 ```json
 {
