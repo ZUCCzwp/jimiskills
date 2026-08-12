@@ -363,7 +363,7 @@ Billing: `per_second`, duration probed from `video_url` and **ceiled** (min 1s).
 
 | Field | Required | Notes |
 |-------|----------|-------|
-| model | yes | `minimax-h3` (aliases `minimax_h3` / `minimaxh3` normalize) |
+| model | yes | `minimax-h3` or `minimax-h3-gz` (separate billing; same endpoint) |
 | prompt | yes | 1–2000 chars |
 | duration | no | 5–15, default `5` |
 | aspect_ratio / ratio | no | `16:9` / `9:16` / `1:1` / `4:3` / `3:4` / `21:9`, default `16:9` |
@@ -372,7 +372,7 @@ Billing: `per_second`, duration probed from `video_url` and **ceiled** (min 1s).
 | reference_audios | no | max **1** public URL |
 | first_image / last_image | no | optional first/last frame URL |
 
-Billing: `per_task` (flat per request). `duration` is generation length only and does not affect cost. Docs: https://docs.viraltok.ai/zh/api-reference/minimax/create.md
+Billing: `per_task` (flat per request). Billing model name matches `model` (`minimax-h3` vs `minimax-h3-gz`). `duration` is generation length only and does not affect cost. Docs: https://docs.viraltok.ai/zh/api-reference/minimax/create.md
 
 ```json
 {
