@@ -369,10 +369,17 @@ Billing: `per_second`, duration probed from `video_url` and **ceiled** (min 1s).
 | aspect_ratio / ratio | no | `16:9` / `9:16` / `1:1` / `4:3` / `3:4` / `21:9`, default `16:9` |
 | size | no | `2560x1440` / `1440x2560` / `1440x1440` / `1920x1440` / `1440x1920` / `3360x1440` |
 | reference_images / images | no | max **5** public URLs |
-| reference_audios | no | max **1** public URL |
+| reference_videos / videos | no | `minimax-h3-gz` only, max **3**; mutually exclusive with first/last frames |
+| reference_audios | no | max **1** public URL; on `minimax-h3-gz` must pair with an image or video |
 | first_image / last_image | no | optional first/last frame URL |
+| resolution | no | `minimax-h3-gz` only: `768P` (default) or `2K` |
 
-Billing: `per_task` (flat per request). Billing model name matches `model` (`minimax-h3` vs `minimax-h3-gz`). `duration` is generation length only and does not affect cost. Docs: https://docs.viraltok.ai/zh/api-reference/minimax/create.md
+Billing:
+
+- No reference videos: `per_task` via `minimax-h3-gz-768p` / `minimax-h3-gz-2k`. `duration` does not affect cost.
+- With `reference_videos`: `per_second` via **separate** `minimax-h3-gz-video-768p` / `minimax-h3-gz-video-2k`. Cost = unit_price × (rounded reference-video seconds + `duration`).
+
+Docs: https://docs.viraltok.ai/zh/api-reference/minimax/create.md · GZ: https://docs.viraltok.ai/zh/api-reference/minimax/create-gz.md
 
 ```json
 {
