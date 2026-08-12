@@ -244,14 +244,18 @@ Asset audit (Manxue routes only):
 
 | Field | Required | Notes |
 |-------|----------|-------|
-| model | yes | `gpt-image-2`, `nano-banana`, `nano-banana-2`, `nano-banana-pro`, `doubao-seedream-5-0-pro` |
+| model | yes | `gpt-image-2`, `nano-banana`, `nano-banana-2`, `nano-banana-pro`, `doubao-seedream-5-0-pro`, `grok-imagine-image`, `grok-imagine-image-2` |
 | prompt | yes | text description |
 | ratio | no | `auto`, `1:1`, `16:9`, `9:16`, etc. |
-| resolution | no | `1k`, `2k`, `4k` (Seedream 5.0 Pro: `1k`/`2k` only) |
+| resolution | no | `1k`, `2k`, `4k` (Seedream 5.0 Pro / Grok Imagine Image: `1k`/`2k` only) |
 | quality | no | `low`, `medium`, `high` (gpt-image-2) |
-| images | no | reference URLs or base64 (Seedream: max 10; per image: jpeg/png/webp/bmp/tiff/gif/heic/heif, aspect [1/16,16], sides >14px, ≤30MB, ≤6000×6000 px) |
+| images | no | reference URLs or base64 (Seedream: max 10; Grok Imagine Image edit: max 3; per image limits vary by model) |
 
 **Seedream 5.0 Pro** (`doubao-seedream-5-0-pro`): async `POST /api/open-api/v1/images`, poll `GET /api/open-api/v1/images/{taskId}`. Billing = resolution base (`doubao-seedream-5-0-pro-1k` / `-2k`) + `max(0, refs - 1) × doubao-seedream-5-0-pro-ref` (first reference free). Resolution `1k`/`2k` (default `2k`). Ratios: `1:1`, `4:3`, `3:4`, `16:9`, `9:16`, `3:2`, `2:3`, `21:9`, `auto`. Docs: https://docs.viraltok.ai/zh/api-reference/images/seedream-5-0-pro/create.md
+
+**Grok Imagine Image** (`grok-imagine-image`): async `POST /api/open-api/v1/images`, poll `GET /api/open-api/v1/images/{taskId}`. Billing = unit price × `n` (`1`–`4`). Resolution `1k`/`2k` (default `1k`). `output_format`: `jpeg`/`png`/`webp`. With `images` (max 3) → edit mode (`ratio` default `auto`). Result: `image_url` + `image_urls`. Docs: https://docs.viraltok.ai/zh/api-reference/images/grok-imagine-image/create.md
+
+**Grok Imagine Image 2.0** (`grok-imagine-image-2`): Quality tier. Same fields; billing by resolution (`grok-imagine-image-2-1k` / `-2k`) × `n`. Docs: https://docs.viraltok.ai/zh/api-reference/images/grok-imagine-image-2/create.md
 
 ```json
 {
