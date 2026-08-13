@@ -113,7 +113,7 @@ CLI: `python "$JIMMYAI_CLI" upload-file --file /path/to/photo.jpg`
 
 `GET /api/open-api/v1/videos/{taskId}`
 
-Result fields: `data.status`, `data.progress`, `data.result.video_url`, `data.error_message`
+Result fields: `data.status`, `data.progress`, `data.result.video_url`, `data.error_message`. For `seedance2.5-gz` after complete: `data.usage.completion_tokens`, `data.usage.total_tokens`.
 
 ### Gemini Omni — create
 
@@ -429,7 +429,7 @@ Billing: `per_task`. Request `model` stays `kling-o3`. Billing key follows resol
 
 | Field | Required | Notes |
 |-------|----------|-------|
-| model | yes | `seedance-2.5` (aliases `seedance2.5` / `seedance_2.5` / `seedance25`) or `seedance-2.5-sp` |
+| model | yes | `seedance-2.5` (aliases `seedance2.5` / `seedance_2.5` / `seedance25`), `seedance-2.5-sp`, or `seedance2.5-gz` |
 | prompt | yes | 1–5000 chars |
 | duration | no | Standard / SP 4–30 (default `4`) |
 | aspect_ratio / ratio | no | `16:9` / `9:16` / `1:1`, default `9:16` |
@@ -443,8 +443,9 @@ Billing:
 
 - `seedance-2.5`: `per_second` by resolution (`seedance-2.5-480p` / `seedance-2.5-720p`; `unit_price × duration`). Request `model` stays `seedance-2.5`.
 - `seedance-2.5-sp`: `per_second` fixed **0.5**/s (`seedance-2.5-sp`; `0.5 × duration`).
+- `seedance2.5-gz`: precharged `per_second` by resolution (`seedance2.5-gz-480p` / `seedance2.5-gz-720p`). With reference videos: `seedance2.5-gz-video-*` and precharged seconds = output + ref video duration. `duration=-1` precharges 30s. After success, settled from `completion_tokens` (one refund or extra-charge row). Query returns `data.usage.completion_tokens` / `data.usage.total_tokens`.
 
-Docs: https://docs.viraltok.ai/zh/api-reference/seedance/25/create.md
+Docs: https://docs.viraltok.ai/zh/api-reference/seedance/25/create.md · GZ: https://docs.viraltok.ai/zh/api-reference/seedance/25/create-gz.md
 
 Standard:
 

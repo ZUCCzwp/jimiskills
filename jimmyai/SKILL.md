@@ -67,7 +67,7 @@ If `JIMMYAI_API_KEY` is missing, guide the user to set it locally and confirm wh
 | Upload reference media (image/video/audio) | `upload-file` → `POST /files/upload` |
 | Create + wait in one step | `create-and-poll` |
 
-For VEO, Manxue Seedance, STD, image edits, image understanding, remove-bg, remove-subtitle, or **local file upload** (`POST /files/upload`), fetch the specific page from https://docs.viraltok.ai/llms.txt before calling. SP economy detail: https://docs.viraltok.ai/zh/api-reference/seedance/sp/create.md · Seedance 2.5: https://docs.viraltok.ai/zh/api-reference/seedance/25/create.md · Flux 3: https://docs.viraltok.ai/zh/api-reference/flux3/create.md · MiniMax H3: https://docs.viraltok.ai/zh/api-reference/minimax/create.md · Kling O3: https://docs.viraltok.ai/zh/api-reference/kling/create.md · Seedance 2.0 933: https://docs.viraltok.ai/zh/api-reference/seedance/20933/create.md · Seedance 2.0 GZ 720p: https://docs.viraltok.ai/zh/api-reference/seedance/gz720/create.md · Seedance 933 720p: https://docs.viraltok.ai/zh/api-reference/seedance/933720/create.md · Remove background: https://docs.viraltok.ai/zh/api-reference/images/remove-bg.md · Remove subtitle: https://docs.viraltok.ai/zh/api-reference/remove-subtitle/create.md
+For VEO, Manxue Seedance, STD, image edits, image understanding, remove-bg, remove-subtitle, or **local file upload** (`POST /files/upload`), fetch the specific page from https://docs.viraltok.ai/llms.txt before calling. SP economy detail: https://docs.viraltok.ai/zh/api-reference/seedance/sp/create.md · Seedance 2.5: https://docs.viraltok.ai/zh/api-reference/seedance/25/create.md · Seedance 2.5 GZ: https://docs.viraltok.ai/zh/api-reference/seedance/25/create-gz.md · Flux 3: https://docs.viraltok.ai/zh/api-reference/flux3/create.md · MiniMax H3: https://docs.viraltok.ai/zh/api-reference/minimax/create.md · Kling O3: https://docs.viraltok.ai/zh/api-reference/kling/create.md · Seedance 2.0 933: https://docs.viraltok.ai/zh/api-reference/seedance/20933/create.md · Seedance 2.0 GZ 720p: https://docs.viraltok.ai/zh/api-reference/seedance/gz720/create.md · Seedance 933 720p: https://docs.viraltok.ai/zh/api-reference/seedance/933720/create.md · Remove background: https://docs.viraltok.ai/zh/api-reference/images/remove-bg.md · Remove subtitle: https://docs.viraltok.ai/zh/api-reference/remove-subtitle/create.md
 
 ## Workflow
 
@@ -316,6 +316,21 @@ python "$JIMMYAI_CLI" create-seedance25-video \
 `seedance-2.5`: billed `per_second` by resolution (`seedance-2.5-480p` / `seedance-2.5-720p`). Duration 4–30 s (default 4); aspect_ratio `16:9|9:16|1:1`; resolution `480p|720p`; max 30 images / 10 videos (each & total ≤30.2s) / 10 audios (each ≤30s). Docs: https://docs.viraltok.ai/zh/api-reference/seedance/25/create.md
 
 `seedance-2.5-sp`: billed `per_second` at fixed **0.5**/s (`seedance-2.5-sp`). Duration 4–30 s; aspect_ratio `16:9|9:16|1:1`; resolution **720p only**; same media limits as standard; optional `--first-image` / `--last-image` (mutually exclusive with `--image`). Same endpoint and docs.
+
+GZ (`seedance2.5-gz`, precharged per-second `seedance2.5-gz-480p` / `seedance2.5-gz-720p`; with reference videos uses `seedance2.5-gz-video-*` and precharged seconds = output + ref video duration; settled from `completion_tokens` after success; query returns `data.usage`):
+
+```bash
+python "$JIMMYAI_CLI" create-seedance25-video \
+  --model seedance2.5-gz \
+  --prompt "A cinematic product shot with natural lighting" \
+  --duration 8 \
+  --aspect-ratio "16:9" \
+  --resolution 720p \
+  --image "https://example.com/reference.png" \
+  --video "https://example.com/reference.mp4"
+```
+
+`seedance2.5-gz`: duration 4–30 s or `-1` auto (precharge 30s), default 5; aspect_ratio `16:9|9:16|1:1|4:3|3:4|21:9|adaptive`; resolution `480p|720p` (default 720p); max 30 images / 10 videos / 10 audios; first/last frames allowed. Same endpoint. Docs: https://docs.viraltok.ai/zh/api-reference/seedance/25/create-gz.md
 
 ### Seedance 2.0 933 video (async)
 

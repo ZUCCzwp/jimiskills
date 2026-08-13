@@ -200,6 +200,8 @@ python "$JIMMYAI_CLI" create-seedance25-video \
 
 `seedance-2.5-sp`: billed `per_second` at fixed **0.5**/s. Duration 4–30 s; resolution **720p only**; same media limits; optional `--first-image` / `--last-image` (mutually exclusive with `--image`). Same docs.
 
+`seedance2.5-gz`: precharged `per_second` by resolution (`seedance2.5-gz-480p` / `seedance2.5-gz-720p`). With `--video`, precharge uses `seedance2.5-gz-video-*` and seconds = output + ref video duration; after success the task is settled to actual usage. Duration 4–30 s or `-1`; default 5; ratios include `adaptive`; max 30 `--image` / 10 `--video` / 10 `--audio`. Docs: https://docs.viraltok.ai/zh/api-reference/seedance/25/create-gz.md
+
 ## create-seedance20933-video
 
 `POST /api/open-api/v1/seedance/videos` — poll with `poll --type video`.

@@ -121,18 +121,20 @@
 - Poll with `GET /api/open-api/v1/videos/{taskId}`.
 - Docs: https://docs.viraltok.ai/zh/api-reference/kling/create.md
 
-## Seedance 2.5 (`seedance-2.5` / `seedance-2.5-sp`)
+## Seedance 2.5 (`seedance-2.5` / `seedance-2.5-sp` / `seedance2.5-gz`)
 
-- Use `POST /api/open-api/v1/seedance25/videos` with `"model": "seedance-2.5"` or `"seedance-2.5-sp"`.
+- Use `POST /api/open-api/v1/seedance25/videos` with `"model": "seedance-2.5"`, `"seedance-2.5-sp"`, or `"seedance2.5-gz"`.
 - **Do not** use `/api/open-api/v1/seedance/videos` for these models — that endpoint is Seedance 2.0 (including Full/Manxue). Wrong path routes onto the Full line.
 - Standard billing is `per_second` by resolution (`seedance-2.5-480p` / `seedance-2.5-720p`; `unit_price × duration`). Request `model` stays `seedance-2.5`; billing key follows `resolution`.
 - SP billing is `per_second` at fixed **0.5**/s (`seedance-2.5-sp`; `0.5 × duration`).
+- GZ is precharged `per_second` by resolution (`seedance2.5-gz-480p` / `seedance2.5-gz-720p`). With reference videos the billing model becomes `seedance2.5-gz-video-*` and precharged seconds = output + ref video duration. `duration=-1` precharges 30s. After success, usage is settled to actual cost (one refund or extra-charge row).
 - Standard: `duration` 4–30 s (default 4); `resolution` `480p` / `720p` (default `480p`).
 - SP: `duration` 4–30 s; `resolution` **720p only**; optional `first_image` / `last_image` (cannot combine with `reference_images` / `images`).
-- `aspect_ratio`: `16:9` / `9:16` / `1:1` (default `9:16`).
+- GZ: `duration` 4–30 s or `-1` (default 5); `resolution` `480p` / `720p` (default `720p`); aspect ratios include `adaptive`; optional first/last frames.
+- `aspect_ratio`: `16:9` / `9:16` / `1:1` (default `9:16`). GZ also accepts `4:3` / `3:4` / `21:9` / `adaptive`.
 - `reference_images` max 30; `reference_videos` max 10 (each and total ≤ **30.2** s); `reference_audios` max 10 (each ≤ **30** s).
 - Poll with `GET /api/open-api/v1/videos/{taskId}`.
-- Docs: https://docs.viraltok.ai/zh/api-reference/seedance/25/create.md
+- Docs: https://docs.viraltok.ai/zh/api-reference/seedance/25/create.md · GZ: https://docs.viraltok.ai/zh/api-reference/seedance/25/create-gz.md
 
 ## Seedance 2.0 933 (`seedance2.0-933`)
 
