@@ -173,11 +173,11 @@ Poll via `GET /api/open-api/v1/videos/{taskId}` (same as Sora / Gemini Omni).
 | MD fast | `seedance2.0-fast-md` | per task | 4–15 s | same as MD |
 | **Fast I2V** | `seedance2.0-fast-i2v` | per task | 1–15 s | image refs only, max 9; no video/audio refs |
 | STD | `seedance2.0-std` | per task | 4–15 s | max 9 images, max 3 audio refs |
-| **GZ 720p** | `seedance2.0-gz-720p` | per second | 4–15 s | fixed 720p; max 9 images / 3 videos / 3 audios; audio requires image or video refs; direct result media URL |
+| **GZ 2.0** | `seedance2.0-gz*` | per second | 4–15 s | standard `480p/720p/1080p`; fast/mini `480p/720p`; max 9 images / 3 videos / 3 audios; public URLs auto asset-reviewed; **direct upstream result URL** |
 | **933 720p** | `sd2-933-720p` | per second **0.0479**/s | 4–15 s | fixed 720p; max 9 images / 3 videos / 3 audios; `reference_mode` frame/media; `generate_audio` default true |
 
 Fast I2V detail: https://docs.viraltok.ai/zh/api-reference/seedance/md/fast-i2v.md
-GZ 720p detail: https://docs.viraltok.ai/zh/api-reference/seedance/gz720/create.md
+GZ 2.0 detail: https://docs.viraltok.ai/zh/api-reference/seedance/gz720/create.md
 933 720p detail: https://docs.viraltok.ai/zh/api-reference/seedance/933720/create.md
 
 | Field | Required | Notes |
@@ -532,21 +532,24 @@ Billing: `per_second` by resolution (`seedance2.0-933-480p` / `seedance2.0-933-7
 }
 ```
 
-## Seedance 2.0 GZ 720p video
+## Seedance 2.0 GZ video
 
 `POST /api/open-api/v1/seedance/videos` — poll `GET /api/open-api/v1/videos/{taskId}`.
 
 | Field | Required | Notes |
 |-------|----------|-------|
-| model | yes | `seedance2.0-gz-720p` (aliases `seedance2.0-gz720p` / `seedance20-gz-720p` normalize) |
-| prompt | yes | 1–5000 chars |
+| model | yes | `seedance2.0-gz*` (`seedance2.0-gz-720p` / `-480p` / `-1080p`, `seedance2.0-gz-fast*`, `seedance2.0-gz-mini*`) |
+| prompt | yes | required |
 | duration | no | 4–15, default `5` |
-| aspect_ratio / ratio | no | `21:9` / `16:9` / `4:3` / `1:1` / `3:4` / `9:16`, default `16:9` |
-| images / reference_images | no | max **9** public URLs or `asset://` |
-| videos / reference_videos | no | max **3** public URLs |
+| resolution | no | standard `480p` / `720p` / `1080p`; fast/mini `480p` / `720p` only |
+| aspect_ratio / ratio | no | `16:9` / `9:16` / `1:1` / `4:3` / `3:4` / `21:9` / `adaptive`, default `16:9` |
+| images / reference_images | no | max **9** public URLs or `asset://` (HTTPS auto-reviewed) |
+| videos / reference_videos | no | max **3** |
 | audios / reference_audios | no | max **3**; must pair with image or video refs |
+| first_image / last_image | no | mutually exclusive with multimodal refs |
+| generate_audio | no | default `true` |
 
-Resolution is **fixed 720p**. Billing: `per_second` (`seedance2.0-gz-720p`; `unit_price × duration`). Result `video_url` is a direct media link — download promptly. Docs: https://docs.viraltok.ai/zh/api-reference/seedance/gz720/create.md
+Billing: `per_second` (`unit_price × duration`). Result `video_url` is a **direct upstream media link** (not copied to our storage) — download promptly. Docs: https://docs.viraltok.ai/zh/api-reference/seedance/gz720/create.md
 
 ```json
 {

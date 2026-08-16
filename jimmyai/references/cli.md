@@ -102,7 +102,7 @@ python "$JIMMYAI_CLI" create-seedance-video \
   --ratio "16:9" \
   --image "https://example.com/ref.jpg"
 
-# GZ 720p (fixed 720p; per-second billing; direct result media URL)
+# GZ 2.0 (per-second; asset review; direct upstream result URL)
 python "$JIMMYAI_CLI" create-seedance-video \
   --model seedance2.0-gz-720p \
   --prompt "A cinematic product shot with natural lighting" \
@@ -127,7 +127,7 @@ python "$JIMMYAI_CLI" create-seedance-video \
 
 `seedance2.0-fast-i2v`: image refs only (max 9), no `reference_videos` / `reference_audios`, duration 1–15 s. Docs: https://docs.viraltok.ai/zh/api-reference/seedance/md/fast-i2v.md
 
-`seedance2.0-gz-720p`: fixed **720p**, billed `per_second`, duration 4–15 s (default 5); aspect_ratio `21:9|16:9|4:3|1:1|3:4|9:16`; max 9 `--image` / 3 `--video` / 3 `--audio` (audio requires image or video). Result URL is a direct media link. Docs: https://docs.viraltok.ai/zh/api-reference/seedance/gz720/create.md
+`seedance2.0-gz*`: billed `per_second`, duration 4–15 s (default 5); aspect_ratio `16:9|9:16|1:1|4:3|3:4|21:9|adaptive`; standard resolution `480p|720p|1080p` (fast/mini: `480p|720p`); max 9 `--image` / 3 `--video` / 3 `--audio` (audio requires image or video). HTTPS refs are auto asset-reviewed. Result URL is a **direct upstream link** (not stored on our OSS). Docs: https://docs.viraltok.ai/zh/api-reference/seedance/gz720/create.md
 
 `sd2-933-720p`: fixed **720p**, billed `per_second` at **0.0479**/s, duration 4–15 s (default 5); aspect_ratio `16:9|9:16|1:1|4:3|3:4`; max 9 `--image` / 3 `--video` / 3 `--audio`. Docs: https://docs.viraltok.ai/zh/api-reference/seedance/933720/create.md
 
@@ -329,7 +329,7 @@ python "$JIMMYAI_CLI" create-and-poll \
   --download output.mp4
 ```
 
-GZ 720p example:
+GZ 2.0 example:
 
 ```bash
 python "$JIMMYAI_CLI" create-and-poll \

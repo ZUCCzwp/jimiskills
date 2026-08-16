@@ -149,15 +149,16 @@
 - Poll with `GET /api/open-api/v1/videos/{taskId}`.
 - Docs: https://docs.viraltok.ai/zh/api-reference/seedance/20933/create.md
 
-## Seedance 2.0 GZ 720p (`seedance2.0-gz-720p`)
+## Seedance 2.0 GZ (`seedance2.0-gz*`)
 
-- Use `POST /api/open-api/v1/seedance/videos` with `"model": "seedance2.0-gz-720p"`.
-- Billing is `per_second` (`seedance2.0-gz-720p`; `unit_price × duration`).
-- Resolution is **fixed 720p**.
+- Use `POST /api/open-api/v1/seedance/videos` with a `model` starting with `seedance2.0-gz` (e.g. `seedance2.0-gz-720p`, `seedance2.0-gz-fast`, `seedance2.0-gz-mini`).
+- Billing is `per_second` (`unit_price × duration`).
+- Standard resolution `480p` / `720p` / `1080p`; Fast / Mini `480p` / `720p` only.
 - `duration` must be 4–15 seconds (default 5).
-- `aspect_ratio`: `21:9` / `16:9` / `4:3` / `1:1` / `3:4` / `9:16` (default `16:9`).
+- `aspect_ratio`: `16:9` / `9:16` / `1:1` / `4:3` / `3:4` / `21:9` / `adaptive` (default `16:9`).
 - `images` max 9; `reference_videos` max 3; `reference_audios` max 3 (audio requires image or video refs).
-- Result `video_url` is a direct media link — download promptly.
+- Public HTTPS refs are auto-submitted for Seedance 2.0 asset review (or pass `asset://` / `assetId://`). First/last frame cannot mix with multimodal refs.
+- Result `video_url` is a **direct upstream media link** (not copied to our storage) — download promptly.
 - Poll with `GET /api/open-api/v1/videos/{taskId}`.
 - Docs: https://docs.viraltok.ai/zh/api-reference/seedance/gz720/create.md
 
