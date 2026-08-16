@@ -127,7 +127,7 @@ python "$JIMMYAI_CLI" create-seedance-video \
 
 `seedance2.0-fast-i2v`: image refs only (max 9), no `reference_videos` / `reference_audios`, duration 1–15 s. Docs: https://docs.viraltok.ai/zh/api-reference/seedance/md/fast-i2v.md
 
-`seedance2.0-gz*`: billed `per_second`, duration 4–15 s (default 5); aspect_ratio `16:9|9:16|1:1|4:3|3:4|21:9|adaptive`; standard resolution `480p|720p|1080p` (fast/mini: `480p|720p`); max 9 `--image` / 3 `--video` / 3 `--audio` (audio requires image or video). HTTPS refs are auto asset-reviewed. Result URL is a **direct upstream link** (not stored on our OSS). Docs: https://docs.viraltok.ai/zh/api-reference/seedance/gz720/create.md
+`seedance2.0-gz*`: billed `per_million_tokens` (`completion_tokens / 1e6 × unit_price`); reference videos use `-video` billing names; duration 4–15 s (default 5); aspect_ratio `16:9|9:16|1:1|4:3|3:4|21:9|adaptive`; standard resolution `480p|720p|1080p` (fast/mini: `480p|720p`); max 9 `--image` / 3 `--video` / 3 `--audio` (audio requires image or video). HTTPS refs are auto asset-reviewed. Result URL is a **direct upstream link** (not stored on our OSS). Docs: https://docs.viraltok.ai/zh/api-reference/seedance/gz720/create.md
 
 `sd2-933-720p`: fixed **720p**, billed `per_second` at **0.0479**/s, duration 4–15 s (default 5); aspect_ratio `16:9|9:16|1:1|4:3|3:4`; max 9 `--image` / 3 `--video` / 3 `--audio`. Docs: https://docs.viraltok.ai/zh/api-reference/seedance/933720/create.md
 

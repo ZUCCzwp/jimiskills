@@ -152,7 +152,7 @@
 ## Seedance 2.0 GZ (`seedance2.0-gz*`)
 
 - Use `POST /api/open-api/v1/seedance/videos` with a `model` starting with `seedance2.0-gz` (e.g. `seedance2.0-gz-720p`, `seedance2.0-gz-fast`, `seedance2.0-gz-mini`).
-- Billing is `per_second` (`unit_price × duration`).
+- Billing is `per_million_tokens` (`completion_tokens / 1,000,000 × unit_price`).
 - Standard resolution `480p` / `720p` / `1080p`; Fast / Mini `480p` / `720p` only.
 - `duration` must be 4–15 seconds (default 5).
 - `aspect_ratio`: `16:9` / `9:16` / `1:1` / `4:3` / `3:4` / `21:9` / `adaptive` (default `16:9`).

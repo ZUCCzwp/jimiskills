@@ -386,7 +386,7 @@ python "$JIMMYAI_CLI" create-seedance-video \
   --image "https://example.com/reference.png"
 ```
 
-`seedance2.0-gz*` series (`seedance2.0-gz-720p` / `-480p` / `-1080p`, `seedance2.0-gz-fast*`, `seedance2.0-gz-mini*`): billed `per_second`. Duration 4–15 s (default 5); aspect_ratio `16:9|9:16|1:1|4:3|3:4|21:9|adaptive`; standard resolution `480p|720p|1080p` (fast/mini: `480p|720p` only). Public HTTPS refs are auto-submitted for asset review (or pass `asset://`). First/last frame cannot mix with multimodal refs. Result `video_url` is a **direct upstream link** (not copied to our storage) — download promptly. Docs: https://docs.viraltok.ai/zh/api-reference/seedance/gz720/create.md
+`seedance2.0-gz*` series (`seedance2.0-gz-720p` / `-480p` / `-1080p`, `seedance2.0-gz-fast*`, `seedance2.0-gz-mini*`): billed `per_million_tokens` (`completion_tokens / 1e6 × unit_price`). Reference videos use a separate `-video` billing name (e.g. `seedance2.0-gz-video-720p`). Duration 4–15 s (default 5); aspect_ratio `16:9|9:16|1:1|4:3|3:4|21:9|adaptive`; standard resolution `480p|720p|1080p` (fast/mini: `480p|720p` only). Public HTTPS refs are auto-submitted for asset review (or pass `asset://`). First/last frame cannot mix with multimodal refs. Result `video_url` is a **direct upstream link** (not copied to our storage) — download promptly. Docs: https://docs.viraltok.ai/zh/api-reference/seedance/gz720/create.md
 
 ### Seedance 933 720p video (async)
 
