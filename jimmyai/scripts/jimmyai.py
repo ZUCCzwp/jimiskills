@@ -251,6 +251,8 @@ def _poll_task(
 ) -> Dict[str, Any]:
     if task_type == "image":
         path = f"/api/open-api/v1/images/{task_id}"
+    elif task_type == "audio":
+        path = f"/api/open-api/v1/audios/{task_id}"
     else:
         path = f"/api/open-api/v1/videos/{task_id}"
 
@@ -271,8 +273,14 @@ def _poll_task(
             _die(f"Poll timeout after {timeout}s; last status={status}")
         time.sleep(interval)
 
-    result = (last.get("data") or {}).get("result") or {}
-    media_url = result.get("video_url") or result.get("image_url")
+    data = last.get("data") or {}
+    result = data.get("result") or {}
+    media_url = (
+        result.get("video_url")
+        or result.get("image_url")
+        or data.get("audioUrl")
+        or result.get("audio_url")
+    )
     if download and media_url:
         _download_url(media_url, Path(download))
     elif media_url:
@@ -706,6 +714,458 @@ def cmd_remove_subtitle(args: argparse.Namespace) -> None:
         print(task_id)
 
 
+def _video_translate_body(args: argparse.Namespace, *, default_model: str) -> Dict[str, Any]:
+    video_url = (getattr(args, "video_url", None) or "").strip()
+    if not video_url:
+        _die("--video-url is required")
+    output_language = (getattr(args, "output_language", None) or "").strip()
+    if not output_language:
+        _die("--output-language is required")
+
+    model = getattr(args, "model", None) or default_model
+    if model == "sora2-12s":
+        model = default_model
+    body: Dict[str, Any] = {
+        "video_url": video_url,
+        "output_language": output_language,
+        "model": model,
+    }
+    if getattr(args, "translate_audio_only", None) is not None:
+        body["translate_audio_only"] = args.translate_audio_only
+    if getattr(args, "speaker_num", None) is not None:
+        body["speaker_num"] = args.speaker_num
+    if getattr(args, "enable_dynamic_duration", None) is not None:
+        body["enable_dynamic_duration"] = args.enable_dynamic_duration
+    if getattr(args, "enable_caption", None) is not None:
+        body["enable_caption"] = args.enable_caption
+    srt_url = (getattr(args, "srt_url", None) or "").strip()
+    if srt_url:
+        body["srt_url"] = srt_url
+    srt_role = (getattr(args, "srt_role", None) or "").strip()
+    if srt_role:
+        body["srt_role"] = srt_role
+    brand_glossary_id = (getattr(args, "brand_glossary_id", None) or "").strip()
+    if brand_glossary_id:
+        body["brand_glossary_id"] = brand_glossary_id
+    return body
+
+
+def cmd_video_translate(args: argparse.Namespace) -> None:
+    api_key = _api_key(args.dry_run)
+    base = _base_url(args.base_url)
+    body = _video_translate_body(args, default_model="video-translate-precision")
+
+    payload = _request(
+        "POST",
+        f"{base}/api/open-api/v1/video-translate/videos",
+        api_key,
+        body,
+        dry_run=args.dry_run,
+    )
+    if args.dry_run:
+        return
+    _check_code(payload)
+    if args.json_out:
+        Path(args.json_out).write_text(json.dumps(payload, indent=2), encoding="utf-8")
+    print(json.dumps(payload, indent=2, ensure_ascii=False))
+    task_id = (payload.get("data") or {}).get("task_id")
+    if task_id:
+        print(task_id)
+
+
+def _print_create_payload(args: argparse.Namespace, payload: Dict[str, Any], *, id_keys: tuple = ("task_id", "id")) -> None:
+    if args.json_out:
+        Path(args.json_out).write_text(json.dumps(payload, indent=2), encoding="utf-8")
+    print(json.dumps(payload, indent=2, ensure_ascii=False))
+    data = payload.get("data") or {}
+    for key in id_keys:
+        value = data.get(key)
+        if value:
+            print(value)
+            return
+
+
+def _grok_video_body(args: argparse.Namespace, *, default_model: str) -> Dict[str, Any]:
+    prompt = _read_prompt(args.prompt, args.prompt_file)
+    model = getattr(args, "model", None) or default_model
+    if model == "sora2-12s":
+        model = default_model
+    images = list(getattr(args, "image", None) or [])
+    if len(images) != 1:
+        _die("Grok 1.5 video requires exactly one --image URL")
+    body: Dict[str, Any] = {
+        "model": model,
+        "prompt": prompt,
+        "image_urls": images,
+    }
+    duration = getattr(args, "duration", None)
+    if duration not in (10, 15):
+        duration = 10
+    body["duration"] = duration
+    ratio = getattr(args, "ratio", None) or getattr(args, "aspect_ratio", None)
+    if ratio and ratio != "auto":
+        body["ratio"] = ratio
+    return body
+
+
+def cmd_create_grok_video(args: argparse.Namespace) -> None:
+    api_key = _api_key(args.dry_run)
+    base = _base_url(args.base_url)
+    body = _grok_video_body(args, default_model="grok-imagine-video-1.5")
+    payload = _request(
+        "POST",
+        f"{base}/api/open-api/v1/grok/videos",
+        api_key,
+        body,
+        dry_run=args.dry_run,
+    )
+    if args.dry_run:
+        return
+    _check_code(payload)
+    _print_create_payload(args, payload)
+
+
+def _digital_human_body(args: argparse.Namespace, *, default_model: str) -> Dict[str, Any]:
+    video_url = (getattr(args, "video_url", None) or "").strip()
+    audio_url = (getattr(args, "audio_url", None) or "").strip()
+    if not video_url:
+        _die("--video-url is required")
+    if not audio_url:
+        _die("--audio-url is required")
+    model = getattr(args, "model", None) or default_model
+    if model == "sora2-12s":
+        model = default_model
+    body: Dict[str, Any] = {
+        "model": model,
+        "video_url": video_url,
+        "audio_url": audio_url,
+    }
+    if getattr(args, "model_version", None) is not None:
+        body["model_version"] = args.model_version
+    if getattr(args, "side_face", None) is not None:
+        body["side_face"] = args.side_face
+    if getattr(args, "tilted_face", None) is not None:
+        body["tilted_face"] = args.tilted_face
+    return body
+
+
+def cmd_create_digital_human(args: argparse.Namespace) -> None:
+    api_key = _api_key(args.dry_run)
+    base = _base_url(args.base_url)
+    body = _digital_human_body(args, default_model="digitalHuman")
+    payload = _request(
+        "POST",
+        f"{base}/api/open-api/v1/digital-human/videos",
+        api_key,
+        body,
+        dry_run=args.dry_run,
+    )
+    if args.dry_run:
+        return
+    _check_code(payload)
+    _print_create_payload(args, payload)
+
+
+def cmd_upscale(args: argparse.Namespace) -> None:
+    api_key = _api_key(args.dry_run)
+    base = _base_url(args.base_url)
+    image_url = (args.image_url or "").strip()
+    if not image_url:
+        _die("--image-url is required")
+
+    body: Dict[str, Any] = {"image_url": image_url}
+    if args.upscale_mode:
+        body["upscale_mode"] = args.upscale_mode
+    if args.upscale_factor is not None:
+        body["upscale_factor"] = args.upscale_factor
+    if args.target_resolution:
+        body["target_resolution"] = args.target_resolution
+    if args.noise_scale is not None:
+        body["noise_scale"] = args.noise_scale
+    if args.output_format:
+        body["output_format"] = args.output_format
+    if args.seed is not None:
+        body["seed"] = args.seed
+    if args.response_format:
+        body["response_format"] = args.response_format
+
+    payload = _request(
+        "POST",
+        f"{base}/api/open-api/v1/images/upscale",
+        api_key,
+        body,
+        timeout=args.timeout,
+        dry_run=args.dry_run,
+    )
+    if args.dry_run:
+        return
+    _check_code(payload)
+    if args.json_out:
+        Path(args.json_out).write_text(json.dumps(payload, indent=2), encoding="utf-8")
+
+    data = payload.get("data") or {}
+    if args.output:
+        b64 = data.get("b64_json")
+        if b64:
+            Path(args.output).write_bytes(base64.b64decode(b64))
+            print(f"Saved to {args.output}")
+        elif data.get("image_url"):
+            _download_url(data["image_url"], Path(args.output))
+        else:
+            _warn("no b64_json/image_url in response; nothing saved to --output")
+    print(json.dumps(payload, indent=2, ensure_ascii=False))
+
+
+def _flux3_video_body(args: argparse.Namespace, *, default_model: str) -> Dict[str, Any]:
+    model = getattr(args, "model", None) or default_model
+    if model == "sora2-12s":
+        model = default_model
+    body: Dict[str, Any] = {"model": model}
+    if model != "flux-3-enhance":
+        prompt = _read_prompt(args.prompt, args.prompt_file)
+        body["prompt"] = prompt
+    duration = getattr(args, "duration", None)
+    if duration is not None:
+        body["duration"] = duration
+    aspect = getattr(args, "aspect_ratio", None) or getattr(args, "ratio", None)
+    if aspect and aspect != "auto" and model != "flux-3-enhance":
+        body["aspect_ratio"] = aspect
+    if getattr(args, "generate_audio", None) is not None and model != "flux-3-enhance":
+        body["generate_audio"] = args.generate_audio
+    if getattr(args, "safety_tolerance", None) is not None:
+        body["safety_tolerance"] = args.safety_tolerance
+
+    image_url = (getattr(args, "image_url", None) or "").strip()
+    if not image_url and getattr(args, "image", None):
+        imgs = args.image if isinstance(args.image, list) else [args.image]
+        if imgs:
+            image_url = (imgs[0] or "").strip()
+    if image_url:
+        body["image_url"] = image_url
+
+    start = (getattr(args, "first_image", None) or getattr(args, "start_image_url", None) or "").strip()
+    end = (getattr(args, "last_image", None) or getattr(args, "end_image_url", None) or "").strip()
+    if start:
+        body["start_image_url"] = start
+    if end:
+        body["end_image_url"] = end
+
+    video_url = (getattr(args, "video_url", None) or "").strip()
+    if video_url:
+        body["video_url"] = video_url
+    draft = (getattr(args, "draft_cache_url", None) or "").strip()
+    if draft:
+        body["draft_cache_url"] = draft
+
+    keyframes_json = (getattr(args, "keyframes_json", None) or "").strip()
+    if keyframes_json:
+        try:
+            body["keyframes"] = json.loads(keyframes_json)
+        except json.JSONDecodeError as exc:
+            _die(f"Invalid --keyframes-json: {exc}")
+
+    if model == "flux-3-i2v-draft" and not body.get("image_url"):
+        _die("flux-3-i2v-draft requires --image-url or --image")
+    if model == "flux-3-flf-draft" and (not body.get("start_image_url") or not body.get("end_image_url")):
+        _die("flux-3-flf-draft requires --first-image and --last-image")
+    if model == "flux-3-keyframes-draft" and not body.get("keyframes"):
+        _die("flux-3-keyframes-draft requires --keyframes-json")
+    if model == "flux-3-extend-draft" and not body.get("video_url"):
+        _die("flux-3-extend-draft requires --video-url")
+    if model == "flux-3-enhance" and not body.get("draft_cache_url"):
+        _die("flux-3-enhance requires --draft-cache-url")
+    return body
+
+
+def cmd_create_flux3_video(args: argparse.Namespace) -> None:
+    api_key = _api_key(args.dry_run)
+    base = _base_url(args.base_url)
+    body = _flux3_video_body(args, default_model="flux-3-draft")
+    payload = _request(
+        "POST",
+        f"{base}/api/open-api/v1/flux3/videos",
+        api_key,
+        body,
+        dry_run=args.dry_run,
+    )
+    if args.dry_run:
+        return
+    _check_code(payload)
+    _print_create_payload(args, payload)
+
+
+def _veo_frames_body(args: argparse.Namespace, *, default_model: str) -> Dict[str, Any]:
+    prompt = _read_prompt(args.prompt, args.prompt_file)
+    model = getattr(args, "model", None) or default_model
+    if model == "sora2-12s":
+        model = default_model
+    body: Dict[str, Any] = {"model": model, "prompt": prompt}
+    if getattr(args, "resolution", None):
+        body["resolution"] = args.resolution
+    if getattr(args, "orientation", None):
+        body["orientation"] = args.orientation
+    first = (getattr(args, "first_image", None) or getattr(args, "first_frame_url", None) or "").strip()
+    last = (getattr(args, "last_image", None) or getattr(args, "last_frame_url", None) or "").strip()
+    images = list(getattr(args, "image", None) or [])
+    if images and (first or last):
+        _die("VEO: --image and --first-image/--last-image are mutually exclusive")
+    if first:
+        body["first_frame_url"] = first
+    if last:
+        body["last_frame_url"] = last
+    if images:
+        body["images"] = images
+    return body
+
+
+def cmd_create_veo_frames(args: argparse.Namespace) -> None:
+    api_key = _api_key(args.dry_run)
+    base = _base_url(args.base_url)
+    body = _veo_frames_body(args, default_model="veo_3_1_fast")
+    payload = _request(
+        "POST",
+        f"{base}/api/open-api/v1/veo/frames",
+        api_key,
+        body,
+        dry_run=args.dry_run,
+    )
+    if args.dry_run:
+        return
+    _check_code(payload)
+    _print_create_payload(args, payload)
+
+
+def _super_resolution_body(args: argparse.Namespace, *, default_model: str) -> Dict[str, Any]:
+    video_url = (getattr(args, "video_url", None) or "").strip()
+    if not video_url:
+        _die("--video-url is required")
+    model = getattr(args, "model", None) or default_model
+    if model == "sora2-12s":
+        model = default_model
+    return {"model": model, "video_url": video_url}
+
+
+def cmd_super_resolution(args: argparse.Namespace) -> None:
+    api_key = _api_key(args.dry_run)
+    base = _base_url(args.base_url)
+    body = _super_resolution_body(args, default_model="superResolution-1080p-lowfps")
+    payload = _request(
+        "POST",
+        f"{base}/api/open-api/v1/super-resolution/videos",
+        api_key,
+        body,
+        dry_run=args.dry_run,
+    )
+    if args.dry_run:
+        return
+    _check_code(payload)
+    _print_create_payload(args, payload)
+
+
+def cmd_understand_video(args: argparse.Namespace) -> None:
+    api_key = _api_key(args.dry_run)
+    base = _base_url(args.base_url)
+    prompt = _read_prompt(args.prompt, args.prompt_file)
+    video_url = (getattr(args, "video_url", None) or "").strip()
+    if not video_url:
+        _die("--video-url is required")
+    body: Dict[str, Any] = {
+        "model": args.model or "gemini-3.7-flash",
+        "video_url": video_url,
+        "contents": [{"role": "user", "parts": [{"text": prompt}]}],
+    }
+    payload = _request(
+        "POST",
+        f"{base}/api/open-api/v1/videos/understand",
+        api_key,
+        body,
+        timeout=args.timeout,
+        dry_run=args.dry_run,
+    )
+    if args.dry_run:
+        return
+    _check_code(payload)
+    if args.json_out:
+        Path(args.json_out).write_text(json.dumps(payload, indent=2), encoding="utf-8")
+    print(json.dumps(payload, indent=2, ensure_ascii=False))
+
+
+def _sound_clone_body(args: argparse.Namespace) -> Dict[str, Any]:
+    file_url = (getattr(args, "file_url", None) or "").strip()
+    if not file_url:
+        _die("--file-url is required")
+    body: Dict[str, Any] = {"fileUrl": file_url}
+    content = (getattr(args, "content_text", None) or "").strip()
+    if content:
+        body["contentText"] = content
+    if getattr(args, "sound_version", None):
+        body["soundVersion"] = args.sound_version
+    if getattr(args, "language", None):
+        body["language"] = args.language
+    return body
+
+
+def cmd_sound_clone(args: argparse.Namespace) -> None:
+    api_key = _api_key(args.dry_run)
+    base = _base_url(args.base_url)
+    body = _sound_clone_body(args)
+    payload = _request(
+        "POST",
+        f"{base}/api/open-api/v1/soundCloning/clones",
+        api_key,
+        body,
+        dry_run=args.dry_run,
+    )
+    if args.dry_run:
+        return
+    _check_code(payload)
+    _print_create_payload(args, payload, id_keys=("id", "task_id"))
+
+
+def _sound_clone_audio_body(args: argparse.Namespace) -> Dict[str, Any]:
+    model_id = (getattr(args, "model_id", None) or "").strip()
+    content = (getattr(args, "content_text", None) or "").strip()
+    if not model_id:
+        _die("--model-id is required")
+    if not content:
+        _die("--content-text is required")
+    body: Dict[str, Any] = {"modelId": model_id, "contentText": content}
+    if getattr(args, "sound_version", None):
+        body["soundVersion"] = args.sound_version
+    if getattr(args, "language", None):
+        body["language"] = args.language
+    if getattr(args, "emotion", None):
+        body["emotion"] = args.emotion
+    if getattr(args, "speed", None) is not None:
+        body["speed"] = args.speed
+    if getattr(args, "vol", None) is not None:
+        body["vol"] = args.vol
+    if getattr(args, "pitch", None) is not None:
+        body["pitch"] = args.pitch
+    if getattr(args, "subtitle_enable", None) is not None:
+        body["subtitleEnable"] = args.subtitle_enable
+    if getattr(args, "subtitle_type", None):
+        body["subtitleType"] = args.subtitle_type
+    return body
+
+
+def cmd_sound_clone_audio(args: argparse.Namespace) -> None:
+    api_key = _api_key(args.dry_run)
+    base = _base_url(args.base_url)
+    body = _sound_clone_audio_body(args)
+    payload = _request(
+        "POST",
+        f"{base}/api/open-api/v1/soundCloning/audios",
+        api_key,
+        body,
+        dry_run=args.dry_run,
+    )
+    if args.dry_run:
+        return
+    _check_code(payload)
+    _print_create_payload(args, payload, id_keys=("id", "task_id"))
+
+
 def cmd_poll(args: argparse.Namespace) -> None:
     api_key = _api_key(args.dry_run)
     base = _base_url(args.base_url)
@@ -734,6 +1194,38 @@ def cmd_create_and_poll(args: argparse.Namespace) -> None:
         body: Dict[str, Any] = {"video_url": video_url, "model": model}
         url = f"{base}/api/open-api/v1/remove-subtitle/videos"
         poll_type = "video"
+    elif args.type == "video-translate":
+        body = _video_translate_body(args, default_model="video-translate-precision")
+        url = f"{base}/api/open-api/v1/video-translate/videos"
+        poll_type = "video"
+    elif args.type == "grok-video":
+        body = _grok_video_body(args, default_model="grok-imagine-video-1.5")
+        url = f"{base}/api/open-api/v1/grok/videos"
+        poll_type = "video"
+    elif args.type == "digital-human":
+        body = _digital_human_body(args, default_model="digitalHuman")
+        url = f"{base}/api/open-api/v1/digital-human/videos"
+        poll_type = "video"
+    elif args.type == "flux3-video":
+        body = _flux3_video_body(args, default_model="flux-3-draft")
+        url = f"{base}/api/open-api/v1/flux3/videos"
+        poll_type = "video"
+    elif args.type == "veo-frames":
+        body = _veo_frames_body(args, default_model="veo_3_1_fast")
+        url = f"{base}/api/open-api/v1/veo/frames"
+        poll_type = "video"
+    elif args.type == "super-resolution":
+        body = _super_resolution_body(args, default_model="superResolution-1080p-lowfps")
+        url = f"{base}/api/open-api/v1/super-resolution/videos"
+        poll_type = "video"
+    elif args.type == "sound-clone":
+        body = _sound_clone_body(args)
+        url = f"{base}/api/open-api/v1/soundCloning/clones"
+        poll_type = "audio"
+    elif args.type == "sound-clone-audio":
+        body = _sound_clone_audio_body(args)
+        url = f"{base}/api/open-api/v1/soundCloning/audios"
+        poll_type = "audio"
     elif args.type == "video":
         prompt = _read_prompt(args.prompt, args.prompt_file)
         body = {
@@ -895,9 +1387,10 @@ def cmd_create_and_poll(args: argparse.Namespace) -> None:
         task_id = "dry-run-task"
     else:
         _check_code(created)
-        task_id = (created.get("data") or {}).get("task_id")
+        data = created.get("data") or {}
+        task_id = data.get("task_id") or data.get("id")
         if not task_id:
-            _die(f"No task_id in response: {json.dumps(created)}")
+            _die(f"No task_id/id in response: {json.dumps(created)}")
         print(f"task_id={task_id}", file=sys.stderr)
 
     _poll_task(
@@ -1133,10 +1626,177 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--model", default="video_remove_subtitle")
     p.set_defaults(func=cmd_remove_subtitle)
 
+    p = sub.add_parser("video-translate", help="Create video translation task (async)")
+    _add_common_flags(p)
+    p.add_argument("--video-url", required=True, help="Public source video URL (max 8 minutes)")
+    p.add_argument(
+        "--output-language",
+        dest="output_language",
+        required=True,
+        help="Target language enum or short alias (e.g. Chinese, zh, English)",
+    )
+    p.add_argument(
+        "--model",
+        default="video-translate-precision",
+        help="video-translate-precision (default) or video-translate-speed",
+    )
+    p.add_argument(
+        "--translate-audio-only",
+        dest="translate_audio_only",
+        type=_parse_optional_bool,
+        default=None,
+        help="Translate voice track only (true/false)",
+    )
+    p.add_argument("--speaker-num", dest="speaker_num", type=int, default=None, help="Number of speakers")
+    p.add_argument(
+        "--enable-dynamic-duration",
+        dest="enable_dynamic_duration",
+        type=_parse_optional_bool,
+        default=None,
+        help="Adjust duration for speaking rate (true/false, server default true)",
+    )
+    p.add_argument(
+        "--enable-caption",
+        dest="enable_caption",
+        type=_parse_optional_bool,
+        default=None,
+        help="Generate SRT captions (true/false); result.caption_url when done",
+    )
+    p.add_argument("--srt-url", dest="srt_url", help="Custom SRT file public URL")
+    p.add_argument("--srt-role", dest="srt_role", choices=["input", "output"], help="SRT role")
+    p.add_argument("--brand-glossary-id", dest="brand_glossary_id", help="Brand glossary ID")
+    p.set_defaults(func=cmd_video_translate)
+
+    p = sub.add_parser("create-grok-video", help="Create Grok 1.5 video task (async)")
+    _add_common_flags(p)
+    _add_prompt_flags(p)
+    p.add_argument("--model", default="grok-imagine-video-1.5")
+    p.add_argument("--duration", type=int, default=10, choices=[10, 15])
+    p.add_argument("--ratio", default="16:9", help="16:9 / 9:16 / 1:1 / 3:2 / 2:3")
+    p.add_argument("--image", action="append", required=True, help="Exactly one reference image URL")
+    p.set_defaults(func=cmd_create_grok_video)
+
+    p = sub.add_parser("create-digital-human", help="Create digital-human lip-sync task (async)")
+    _add_common_flags(p)
+    p.add_argument("--model", default="digitalHuman")
+    p.add_argument("--video-url", dest="video_url", required=True, help="Face video public URL")
+    p.add_argument("--audio-url", dest="audio_url", required=True, help="Drive audio public URL")
+    p.add_argument("--model-version", dest="model_version", type=int, choices=[1, 2], default=None)
+    p.add_argument("--side-face", dest="side_face", type=int, choices=[0, 1], default=None)
+    p.add_argument("--tilted-face", dest="tilted_face", type=int, choices=[0, 1], default=None)
+    p.set_defaults(func=cmd_create_digital_human)
+
+    p = sub.add_parser("upscale", help="Sync image upscale")
+    _add_common_flags(p)
+    p.add_argument("--image-url", dest="image_url", required=True, help="Public source image URL")
+    p.add_argument("--upscale-mode", dest="upscale_mode", choices=["factor", "target"], default="factor")
+    p.add_argument("--upscale-factor", dest="upscale_factor", type=float, default=None, help="1-20; factor mode")
+    p.add_argument(
+        "--target-resolution",
+        dest="target_resolution",
+        choices=["720p", "1080p", "1440p", "2160p", "2k", "4k"],
+        default=None,
+    )
+    p.add_argument("--noise-scale", dest="noise_scale", type=float, default=None)
+    p.add_argument("--output-format", dest="output_format", choices=["jpg", "png", "webp"], default="jpg")
+    p.add_argument("--seed", type=int, default=None)
+    p.add_argument(
+        "--response-format",
+        dest="response_format",
+        choices=["b64_json", "url"],
+        default="b64_json",
+    )
+    p.add_argument("--timeout", type=float, default=DEFAULT_SYNC_TIMEOUT)
+    p.add_argument("--output", help="Save result image to file")
+    p.set_defaults(func=cmd_upscale)
+
+    p = sub.add_parser("create-flux3-video", help="Create Flux 3 video task (async)")
+    _add_common_flags(p)
+    _add_prompt_flags(p)
+    p.add_argument(
+        "--model",
+        default="flux-3-draft",
+        help="flux-3-draft / flux-3-i2v-draft / flux-3-flf-draft / flux-3-keyframes-draft / flux-3-extend-draft / flux-3-enhance",
+    )
+    p.add_argument("--duration", type=int, default=5)
+    p.add_argument("--aspect-ratio", dest="aspect_ratio", default="16:9")
+    p.add_argument("--image", action="append", help="Alias for --image-url (first value)")
+    p.add_argument("--image-url", dest="image_url", help="Required for flux-3-i2v-draft")
+    p.add_argument("--first-image", dest="first_image", help="start_image_url for flf draft")
+    p.add_argument("--last-image", dest="last_image", help="end_image_url for flf draft")
+    p.add_argument("--video-url", dest="video_url", help="Required for flux-3-extend-draft")
+    p.add_argument("--draft-cache-url", dest="draft_cache_url", help="Required for flux-3-enhance")
+    p.add_argument("--keyframes-json", dest="keyframes_json", help="JSON array for keyframes draft")
+    p.add_argument(
+        "--generate-audio",
+        dest="generate_audio",
+        type=_parse_optional_bool,
+        default=None,
+        help="Generate audio (true/false; default true server-side)",
+    )
+    p.add_argument("--safety-tolerance", dest="safety_tolerance", type=int, default=None)
+    p.set_defaults(func=cmd_create_flux3_video)
+
+    p = sub.add_parser("create-veo-frames", help="Create VEO Fast/Lite frames task (async)")
+    _add_common_flags(p)
+    _add_prompt_flags(p)
+    p.add_argument("--model", default="veo_3_1_fast", help="veo_3_1_fast / veo_3_1_fast-4k / veo_3_1_lite")
+    p.add_argument("--resolution", default="720p", choices=["720p", "1080p", "4k"])
+    p.add_argument("--orientation", choices=["landscape", "portrait"])
+    p.add_argument("--image", action="append", help="Reference image URL (1-3; exclusive with frames)")
+    p.add_argument("--first-image", dest="first_image", help="first_frame_url")
+    p.add_argument("--last-image", dest="last_image", help="last_frame_url")
+    p.set_defaults(func=cmd_create_veo_frames)
+
+    p = sub.add_parser("super-resolution", help="Create video super-resolution task (async)")
+    _add_common_flags(p)
+    p.add_argument("--video-url", dest="video_url", required=True, help="Public source video URL")
+    p.add_argument(
+        "--model",
+        default="superResolution-1080p-lowfps",
+        help="superResolution-{720p|1080p|2k|4k}-{lowfps|highfps}",
+    )
+    p.set_defaults(func=cmd_super_resolution)
+
+    p = sub.add_parser("understand-video", help="Sync video understanding (Gemini)")
+    _add_common_flags(p)
+    _add_prompt_flags(p)
+    p.add_argument("--video-url", dest="video_url", required=True, help="Public source video URL")
+    p.add_argument("--model", default="gemini-3.7-flash")
+    p.add_argument("--timeout", type=float, default=DEFAULT_SYNC_TIMEOUT)
+    p.set_defaults(func=cmd_understand_video)
+
+    p = sub.add_parser("sound-clone", help="Create SoundClone preview task (async)")
+    _add_common_flags(p)
+    p.add_argument("--file-url", dest="file_url", required=True, help="Source audio/video public URL")
+    p.add_argument("--content-text", dest="content_text", help="Preview script (<270 chars)")
+    p.add_argument("--sound-version", dest="sound_version", choices=["v1", "v2"], default=None)
+    p.add_argument("--language", default=None, help="e.g. Chinese, English, auto")
+    p.set_defaults(func=cmd_sound_clone)
+
+    p = sub.add_parser("sound-clone-audio", help="Create SoundClone production audio task (async)")
+    _add_common_flags(p)
+    p.add_argument("--model-id", dest="model_id", required=True, help="modelId from completed preview")
+    p.add_argument("--content-text", dest="content_text", required=True, help="Script (<10000 chars)")
+    p.add_argument("--sound-version", dest="sound_version", choices=["v1", "v2"], default=None)
+    p.add_argument("--language", default=None)
+    p.add_argument("--emotion", default=None)
+    p.add_argument("--speed", type=float, default=None)
+    p.add_argument("--vol", type=float, default=None)
+    p.add_argument("--pitch", type=int, default=None)
+    p.add_argument(
+        "--subtitle-enable",
+        dest="subtitle_enable",
+        type=_parse_optional_bool,
+        default=None,
+    )
+    p.add_argument("--subtitle-type", dest="subtitle_type", choices=["word"], default=None)
+    p.set_defaults(func=cmd_sound_clone_audio)
+
     p = sub.add_parser("poll", help="Poll task status")
     _add_common_flags(p)
     p.add_argument("--task-id", required=True)
-    p.add_argument("--type", choices=["video", "image"], default="video")
+    p.add_argument("--type", choices=["video", "image", "audio"], default="video")
     p.add_argument("--interval", type=float, default=DEFAULT_POLL_INTERVAL)
     p.add_argument("--timeout", type=float, default=DEFAULT_POLL_TIMEOUT)
     p.add_argument("--download", help="Download result media to path")
@@ -1170,6 +1830,14 @@ def build_parser() -> argparse.ArgumentParser:
             "minimax-video",
             "kling-video",
             "remove-subtitle",
+            "video-translate",
+            "grok-video",
+            "digital-human",
+            "flux3-video",
+            "veo-frames",
+            "super-resolution",
+            "sound-clone",
+            "sound-clone-audio",
             "image",
         ],
         default="video",
@@ -1194,7 +1862,7 @@ def build_parser() -> argparse.ArgumentParser:
         dest="generate_audio",
         type=_parse_optional_bool,
         default=None,
-        help="Seedance 2.0 933 generate audio (true/false)",
+        help="Generate audio where supported (true/false)",
     )
     p.add_argument(
         "--reference-mode",
@@ -1204,11 +1872,70 @@ def build_parser() -> argparse.ArgumentParser:
         help="Seedance 2.0 933 reference mode",
     )
     p.add_argument("--image", action="append", help="Reference image URL (repeatable)")
+    p.add_argument("--image-url", dest="image_url", help="Flux 3 i2v image URL")
     p.add_argument("--video", action="append", help="Reference video URL (Seedance / Seedance 2.5 / Seedance 2.0 933 / GZ 2.0)")
-    p.add_argument("--video-url", dest="video_url", help="Source video URL (remove-subtitle)")
+    p.add_argument(
+        "--video-url",
+        dest="video_url",
+        help="Source video URL (remove-subtitle / video-translate / digital-human / super-resolution / flux3 extend)",
+    )
+    p.add_argument("--audio-url", dest="audio_url", help="Drive audio URL (digital-human)")
+    p.add_argument("--draft-cache-url", dest="draft_cache_url", help="Flux 3 enhance draft_cache_url")
+    p.add_argument("--keyframes-json", dest="keyframes_json", help="Flux 3 keyframes JSON")
+    p.add_argument("--safety-tolerance", dest="safety_tolerance", type=int, default=None)
+    p.add_argument("--model-version", dest="model_version", type=int, choices=[1, 2], default=None)
+    p.add_argument("--side-face", dest="side_face", type=int, choices=[0, 1], default=None)
+    p.add_argument("--tilted-face", dest="tilted_face", type=int, choices=[0, 1], default=None)
+    p.add_argument("--file-url", dest="file_url", help="SoundClone source audio/video URL")
+    p.add_argument("--content-text", dest="content_text", help="SoundClone script text")
+    p.add_argument("--model-id", dest="model_id", help="SoundClone modelId from preview")
+    p.add_argument("--sound-version", dest="sound_version", choices=["v1", "v2"], default=None)
+    p.add_argument("--language", default=None, help="SoundClone language")
+    p.add_argument("--emotion", default=None, help="SoundClone emotion")
+    p.add_argument("--speed", type=float, default=None, help="SoundClone speed")
+    p.add_argument("--vol", type=float, default=None, help="SoundClone volume")
+    p.add_argument("--pitch", type=int, default=None, help="SoundClone pitch")
+    p.add_argument(
+        "--subtitle-enable",
+        dest="subtitle_enable",
+        type=_parse_optional_bool,
+        default=None,
+        help="SoundClone subtitle enable",
+    )
+    p.add_argument("--subtitle-type", dest="subtitle_type", choices=["word"], default=None)
+    p.add_argument(
+        "--output-language",
+        dest="output_language",
+        help="Target language for video-translate (enum or alias)",
+    )
+    p.add_argument(
+        "--translate-audio-only",
+        dest="translate_audio_only",
+        type=_parse_optional_bool,
+        default=None,
+        help="video-translate: voice only (true/false)",
+    )
+    p.add_argument("--speaker-num", dest="speaker_num", type=int, default=None, help="video-translate speaker count")
+    p.add_argument(
+        "--enable-dynamic-duration",
+        dest="enable_dynamic_duration",
+        type=_parse_optional_bool,
+        default=None,
+        help="video-translate dynamic duration (true/false)",
+    )
+    p.add_argument(
+        "--enable-caption",
+        dest="enable_caption",
+        type=_parse_optional_bool,
+        default=None,
+        help="video-translate generate SRT (true/false)",
+    )
+    p.add_argument("--srt-url", dest="srt_url", help="video-translate custom SRT URL")
+    p.add_argument("--srt-role", dest="srt_role", choices=["input", "output"], help="video-translate SRT role")
+    p.add_argument("--brand-glossary-id", dest="brand_glossary_id", help="video-translate brand glossary ID")
     p.add_argument("--audio", action="append", help="Reference audio URL (MiniMax / Seedance / Seedance 2.5 / Seedance 2.0 933 / GZ 2.0)")
-    p.add_argument("--first-image", dest="first_image", help="First frame URL (Seedance / Seedance 2.5 SP / MiniMax / Kling)")
-    p.add_argument("--last-image", dest="last_image", help="Last frame URL (Seedance / Seedance 2.5 SP / MiniMax / Kling)")
+    p.add_argument("--first-image", dest="first_image", help="First frame URL (Seedance / VEO / Flux3 / MiniMax / Kling)")
+    p.add_argument("--last-image", dest="last_image", help="Last frame URL (Seedance / VEO / Flux3 / MiniMax / Kling)")
     p.add_argument("--interval", type=float, default=DEFAULT_POLL_INTERVAL)
     p.add_argument("--timeout", type=float, default=DEFAULT_POLL_TIMEOUT)
     p.add_argument("--download", help="Download result media to path")

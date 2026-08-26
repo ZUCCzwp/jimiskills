@@ -131,9 +131,7 @@ Result fields: `data.status`, `data.progress`, `data.result.video_url`, `data.er
 
 Poll via same `GET /api/open-api/v1/videos/{taskId}`.
 
-### VEO — create
-
-`POST /api/open-api/v1/veo/videos` — see https://docs.viraltok.ai/zh/api-reference/veo/create-video.md
+### VEO — create frames
 
 `POST /api/open-api/v1/veo/frames` — first/last frame or reference-image mode. Docs: https://docs.viraltok.ai/zh/api-reference/veo/create-frames.md
 
@@ -155,6 +153,34 @@ Billing is `per_task`. Fast vs Lite are product tiers (same endpoint):
 | `veo_3_1_lite` | `720p` only (default) | `veo_3_1_lite` |
 
 Lite rejects `1080p` / `4k`. You may pass `veo_3_1_fast-4k` as `model` for Fast 4K billing.
+
+### Grok 1.5 video
+
+`POST /api/open-api/v1/grok/videos` — poll `GET /api/open-api/v1/videos/{taskId}`.
+
+| Field | Required | Notes |
+|-------|----------|-------|
+| model | yes | `grok-imagine-video-1.5` (aliases `grok-1.5` / `grok_1_5` normalize) |
+| prompt | yes | max 4000 chars |
+| image_urls / images | yes | **exactly 1** reference image |
+| duration | no | `10` (default) or `15` |
+| ratio | no | `16:9` / `9:16` / `1:1` / `3:2` / `2:3` (default `16:9`) |
+
+Docs: https://docs.viraltok.ai/zh/api-reference/grok/create.md
+
+### Digital human
+
+`POST /api/open-api/v1/digital-human/videos` — poll `GET /api/open-api/v1/videos/{taskId}`.
+
+| Field | Required | Notes |
+|-------|----------|-------|
+| model | no | `digitalHuman` (default) |
+| video_url | yes | face video public URL |
+| audio_url | yes | drive audio public URL |
+| model_version | no | `1` clearer teeth; `2` better lip sync (recommended) |
+| side_face / tilted_face | no | `0`/`1` optimization flags |
+
+Billing: `per_second`, duration from `video_url` **ceiled**. Docs: https://docs.viraltok.ai/zh/api-reference/digital-human/create.md
 
 ### Seedance — create
 
@@ -295,6 +321,22 @@ Same `response_format` as generations: default `url`, optional `b64_json`. Form 
 
 `POST /api/open-api/v1/images/understand` — Gemini-powered analysis
 
+### Sync — image upscale
+
+`POST /api/open-api/v1/images/upscale`
+
+Synchronous. Charges immediately (billing model `viraltok-image-upscale`, × `pass_count`). Default `response_format=b64_json`. Timeout ≥ 180 s. Docs: https://docs.viraltok.ai/zh/api-reference/images/upscale.md
+
+| Field | Required | Notes |
+|-------|----------|-------|
+| image_url | yes | public source image URL |
+| upscale_mode | no | `factor` (default) or `target` |
+| upscale_factor | no | 1–20; factor mode (default ~2) |
+| target_resolution | no | `720p` / `1080p` / `1440p`/`2k` / `2160p`/`4k` |
+| noise_scale | no | 0–1, default `0.1` |
+| output_format | no | `jpg` (default) / `png` / `webp` |
+| response_format | no | `b64_json` (default) or `url` |
+
 ### Sync — remove background
 
 `POST /api/open-api/v1/images/remove-bg`
@@ -356,6 +398,50 @@ Billing: `per_second`, duration probed from `video_url` and **ceiled** (min 1s).
   "video_url": "https://example.com/input.mp4"
 }
 ```
+
+## Tools — video translate
+
+`POST /api/open-api/v1/video-translate/videos` — poll `GET /api/open-api/v1/videos/{taskId}`.
+
+| Field | Required | Notes |
+|-------|----------|-------|
+| model | no | `video-translate-precision` (default) or `video-translate-speed` |
+| video_url | yes | public source video URL; max **8 minutes**; keep reachable while the task runs |
+| output_language | yes | enum (e.g. `Chinese`, `English`) or short alias (`zh`, `en`, `ja`, …); full list in docs |
+| translate_audio_only | no | voice track only (no lip sync) |
+| speaker_num | no | integer ≥ 1 |
+| enable_dynamic_duration | no | default `true` |
+| enable_caption | no | when true, completed result may include `caption_url` |
+| srt_url / srt_role | no | custom SRT; role `input` or `output` |
+| brand_glossary_id | no | brand glossary id |
+
+Billing: `per_second`, duration probed from `video_url` and **ceiled** (min 1s). Docs: https://docs.viraltok.ai/zh/api-reference/video-translate/create.md
+
+```json
+{
+  "model": "video-translate-precision",
+  "video_url": "https://example.com/input.mp4",
+  "output_language": "Chinese",
+  "enable_caption": true
+}
+```
+
+## Tools — video understand (sync)
+
+`POST /api/open-api/v1/videos/understand` — Gemini analysis; token billing (`pay_as_you_go`). Default model `gemini-3.7-flash`. Pass `video_url` and/or inline base64 in `contents`. Docs: https://docs.viraltok.ai/zh/api-reference/videos/understand.md
+
+## Tools — SoundClone
+
+Preview: `POST /api/open-api/v1/soundCloning/clones` → poll `GET /api/open-api/v1/audios/{id}`.
+
+| Field | Required | Notes |
+|-------|----------|-------|
+| fileUrl | yes | source audio/video URL; speaking length **>15s and <60s** |
+| contentText | no | preview script (<270 chars) |
+| soundVersion | no | `v1` / `v2` |
+| language | no | e.g. `Chinese`, `English`, `auto` |
+
+Production: `POST /api/open-api/v1/soundCloning/audios` with `modelId` from preview + `contentText` (<10000). Poll same audio query path. Docs: https://docs.viraltok.ai/zh/api-reference/sound-clone/clone-create.md · https://docs.viraltok.ai/zh/api-reference/sound-clone/audio-create.md
 
 ## MiniMax H3 video
 

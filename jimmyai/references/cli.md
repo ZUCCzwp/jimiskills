@@ -34,11 +34,21 @@ export JIMMYAI_BASE_URL="https://api.viraltok.ai"
 | `create-seedance25-video` | Create Seedance 2.5 video task (async) |
 | `create-seedance20933-video` | Create Seedance 2.0 933 video task (async) |
 | `create-gemini-video` | Create Gemini Omni video task |
+| `create-grok-video` | Create Grok 1.5 video task (async) |
+| `create-digital-human` | Create digital-human lip-sync task (async) |
+| `create-flux3-video` | Create Flux 3 video task (async) |
+| `create-veo-frames` | Create VEO Fast/Lite frames task (async) |
 | `create-image` | Create async image task |
 | `generate-image` | Sync text-to-image (OpenAI-compatible) |
+| `upscale` | Sync image upscale |
 | `remove-bg` | Sync background removal |
 | `remove-subtitle` | Create video subtitle-removal task (async) |
-| `poll` | Query task status by ID |
+| `video-translate` | Create video translation task (async) |
+| `super-resolution` | Create video super-resolution task (async) |
+| `understand-video` | Sync video understanding |
+| `sound-clone` | Create SoundClone preview task (async) |
+| `sound-clone-audio` | Create SoundClone production audio (async) |
+| `poll` | Query task status by ID (`video` / `image` / `audio`) |
 | `user-balance` | Query user JimiCoin account balance |
 | `key-balance` | Query API key quota balance |
 | `upload-file` | Upload image/video/audio; returns URL |
@@ -291,11 +301,147 @@ python "$JIMMYAI_CLI" create-and-poll \
 
 Default model: `video_remove_subtitle`. Billing is `per_second` (duration probed from `video_url`, ceiled, min 1s).
 
+## video-translate (async)
+
+`POST /api/open-api/v1/video-translate/videos` — poll with `poll --type video`.
+
+```bash
+python "$JIMMYAI_CLI" video-translate \
+  --video-url "https://example.com/input.mp4" \
+  --output-language "Chinese" \
+  --model video-translate-precision \
+  --enable-caption true
+
+# Create + wait
+python "$JIMMYAI_CLI" create-and-poll \
+  --type video-translate \
+  --video-url "https://example.com/input.mp4" \
+  --output-language "zh" \
+  --model video-translate-speed \
+  --download output.mp4
+```
+
+| Flag | Notes |
+|------|-------|
+| `--video-url` | required; public URL; max 8 minutes |
+| `--output-language` | required; enum (e.g. `Chinese`) or alias (`zh`, `en`, …) |
+| `--model` | `video-translate-precision` (default) or `video-translate-speed` |
+| `--translate-audio-only` | optional true/false |
+| `--speaker-num` | optional integer ≥ 1 |
+| `--enable-dynamic-duration` | optional true/false (server default true) |
+| `--enable-caption` | optional; completed task may include `result.caption_url` |
+| `--srt-url` / `--srt-role` | optional custom SRT (`input` / `output`) |
+| `--brand-glossary-id` | optional |
+
+Billing is `per_second` (duration probed from `video_url`, ceiled, min 1s). Docs: https://docs.viraltok.ai/zh/api-reference/video-translate/create.md
+
+## create-grok-video (async)
+
+`POST /api/open-api/v1/grok/videos` — poll with `poll --type video`.
+
+```bash
+python "$JIMMYAI_CLI" create-and-poll \
+  --type grok-video \
+  --prompt "Hot tea pouring into a cup" \
+  --duration 10 \
+  --ratio "16:9" \
+  --image "https://example.com/cup.jpg"
+```
+
+Requires exactly one `--image`. Duration `10` or `15`.
+
+## create-digital-human (async)
+
+`POST /api/open-api/v1/digital-human/videos`
+
+```bash
+python "$JIMMYAI_CLI" create-and-poll \
+  --type digital-human \
+  --video-url "https://example.com/face.mp4" \
+  --audio-url "https://example.com/drive.mp3" \
+  --model-version 2
+```
+
+## upscale (sync)
+
+`POST /api/open-api/v1/images/upscale`
+
+```bash
+python "$JIMMYAI_CLI" upscale \
+  --image-url "https://example.com/photo.jpg" \
+  --upscale-mode factor \
+  --upscale-factor 2 \
+  --response-format url \
+  --output out.jpg
+```
+
+## create-flux3-video (async)
+
+`POST /api/open-api/v1/flux3/videos` — draft then enhance with `--draft-cache-url`.
+
+```bash
+python "$JIMMYAI_CLI" create-flux3-video \
+  --model flux-3-draft \
+  --prompt "A red panda on a mossy log" \
+  --duration 5
+
+python "$JIMMYAI_CLI" create-flux3-video \
+  --model flux-3-enhance \
+  --duration 5 \
+  --draft-cache-url "https://example.com/draft-cache.bin"
+```
+
+## create-veo-frames (async)
+
+`POST /api/open-api/v1/veo/frames`
+
+```bash
+python "$JIMMYAI_CLI" create-veo-frames \
+  --model veo_3_1_fast \
+  --prompt "Slow push-in" \
+  --resolution 720p \
+  --first-image "https://example.com/start.jpg" \
+  --last-image "https://example.com/end.jpg"
+```
+
+## super-resolution (async)
+
+```bash
+python "$JIMMYAI_CLI" super-resolution \
+  --model superResolution-1080p-lowfps \
+  --video-url "https://example.com/low-res.mp4"
+```
+
+## understand-video (sync)
+
+```bash
+python "$JIMMYAI_CLI" understand-video \
+  --video-url "https://example.com/sample.mp4" \
+  --prompt "Summarize this video"
+```
+
+## sound-clone / sound-clone-audio (async)
+
+Poll with `poll --type audio` (path `GET /audios/{id}`).
+
+```bash
+python "$JIMMYAI_CLI" sound-clone \
+  --file-url "https://example.com/source.mp3" \
+  --content-text "试听文案" \
+  --language Chinese
+
+python "$JIMMYAI_CLI" sound-clone-audio \
+  --model-id "model_xxx" \
+  --content-text "正式配音" \
+  --language Chinese
+```
+
 ## poll
 
 ```bash
 python "$JIMMYAI_CLI" poll --task-id "abc123" --type video
 python "$JIMMYAI_CLI" poll --task-id "abc123" --type image
+python "$JIMMYAI_CLI" poll --task-id "audio_xxx" --type audio
 ```
 
 ## create-and-poll
@@ -312,9 +458,19 @@ python "$JIMMYAI_CLI" create-and-poll \
   --download output.mp4
 ```
 
-`--type` values: `video`, `gemini-video`, `seedance-video`, `seedance25-video`, `seedance20933-video`, `minimax-video`, `remove-subtitle`, `image`
+`--type` values: `video`, `gemini-video`, `seedance-video`, `seedance25-video`, `seedance20933-video`, `minimax-video`, `kling-video`, `remove-subtitle`, `video-translate`, `grok-video`, `digital-human`, `flux3-video`, `veo-frames`, `super-resolution`, `sound-clone`, `sound-clone-audio`, `image`
 
 For `--type remove-subtitle`, pass `--video-url` (no `--prompt`). Model defaults to `video_remove_subtitle`.
+
+For `--type video-translate`, pass `--video-url` and `--output-language` (no `--prompt`). Model defaults to `video-translate-precision`.
+
+For `--type grok-video`, pass exactly one `--image`; duration must be `10` or `15`.
+
+For `--type digital-human`, pass `--video-url` and `--audio-url`.
+
+For `--type flux3-video` with `flux-3-enhance`, pass `--draft-cache-url` (no prompt).
+
+For `--type sound-clone` / `sound-clone-audio`, poll uses `--type audio`.
 
 Seedance example:
 
@@ -426,6 +582,8 @@ python "$JIMMYAI_CLI" create-video \
 
 ```bash
 python "$JIMMYAI_CLI" poll --task-id TASK_ID --type video
+python "$JIMMYAI_CLI" poll --task-id TASK_ID --type image
+python "$JIMMYAI_CLI" poll --task-id AUDIO_ID --type audio
 ```
 
 ## user-balance

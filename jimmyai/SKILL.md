@@ -1,6 +1,6 @@
 ---
 name: "jimmyai"
-description: "Integrate JimmyAI image and video generation APIs (Sora, VEO, Gemini Omni, Seedance including SP economy, Mini 特价版, Seedance 2.5 / 2.5 SP, MiniMax H3, Kling O3, Seedance 2.0 933, Seedance 2.0 GZ, Seedance 933 720p, GPT Image, Grok Imagine Image, remove-bg, remove-subtitle) via the bundled CLI (`scripts/jimmyai.py`). Use when the user asks to connect JimmyAI, generate AI images/videos, remove image backgrounds, remove video subtitles, poll async tasks, set up API keys, or integrate https://api.viraltok.ai — including zero-experience onboarding. Requires `JIMMYAI_API_KEY`."
+description: "Integrate JimmyAI image and video generation APIs (Sora, VEO, Gemini Omni, Seedance including SP economy, Mini 特价版, Seedance 2.5 / 2.5 SP, MiniMax H3, Kling O3, Seedance 2.0 933, Seedance 2.0 GZ, Seedance 933 720p, Flux 3, Grok 1.5 video, digital human, GPT Image, Grok Imagine Image, remove-bg, remove-subtitle, video-translate, upscale, super-resolution, SoundClone, video understand) via the bundled CLI (`scripts/jimmyai.py`). Use when the user asks to connect JimmyAI, generate AI images/videos, remove image backgrounds, remove video subtitles, translate videos, upscale images, clone voices, poll async tasks, set up API keys, or integrate https://api.viraltok.ai — including zero-experience onboarding. Requires `JIMMYAI_API_KEY`."
 ---
 
 # JimmyAI API Skill
@@ -12,10 +12,12 @@ This skill helps users integrate JimmyAI from zero — register, get a key, send
 ## When to use
 
 - First-time JimmyAI setup (account, API key, recharge, env var)
-- Generate a video (Sora / Gemini Omni / VEO / Seedance / Seedance 2.5 / MiniMax H3 / Kling O3 / Seedance 2.0 933 / Seedance 2.0 GZ / Seedance 933 720p)
-- Generate an image (sync or async)
+- Generate a video (Sora / Gemini Omni / VEO / Seedance / Seedance 2.5 / MiniMax H3 / Kling O3 / Flux 3 / Grok 1.5 / Seedance 2.0 933 / GZ / 933 720p)
+- Digital human lip-sync, video translate, super-resolution, SoundClone
+- Generate an image (sync or async); upscale images
 - Remove image background (sync `remove-bg`)
 - Remove video subtitles (async `remove-subtitle`)
+- Understand video content (sync `understand-video`)
 - Poll task status and download results
 - Debug auth, billing, or network errors
 - Build integration code (curl, Python, Node, etc.)
@@ -49,25 +51,32 @@ If `JIMMYAI_API_KEY` is missing, guide the user to set it locally and confirm wh
 |------------|-------------------|
 | Quick image, no polling | `generate-image` → `POST /images/generations` (sync) |
 | Image with more model options | `create-image` → poll `GET /images/{taskId}` |
+| Upscale image | `upscale` → `POST /images/upscale` (sync) |
 | Remove image background | `remove-bg` → `POST /images/remove-bg` (sync; default `b64_json`) |
 | Remove video subtitles | `remove-subtitle` → poll `GET /videos/{taskId}` |
+| Translate video speech | `video-translate` → poll `GET /videos/{taskId}` |
+| Video super-resolution | `super-resolution` → poll `GET /videos/{taskId}` |
+| Understand video (sync) | `understand-video` → `POST /videos/understand` |
 | Sora video | `create-video` → poll `GET /videos/{taskId}` |
 | Gemini Omni video | `create-gemini-video` → poll `GET /videos/{taskId}` |
 | Gemini Omni 10s (`omni-10s`) | same endpoint with `--model omni-10s` |
-| VEO frames (Fast / Lite) | `POST /api/open-api/v1/veo/frames` → poll `GET /videos/{taskId}` (see docs; CLI may need raw curl) |
-| Seedance video (SP economy / MD / Fast I2V / Mini 特价版 / GZ 2.0 / 933 720p / etc.) | `create-seedance-video` → poll `GET /videos/{taskId}` |
+| VEO frames (Fast / Lite) | `create-veo-frames` → poll `GET /videos/{taskId}` |
+| Grok 1.5 video | `create-grok-video` → poll `GET /videos/{taskId}` |
+| Digital human lip-sync | `create-digital-human` → poll `GET /videos/{taskId}` |
+| Seedance video (SP / MD / Fast I2V / Mini / GZ / 933 720p / etc.) | `create-seedance-video` → poll `GET /videos/{taskId}` |
 | MiniMax H3 video | `create-minimax-video` → poll `GET /videos/{taskId}` |
 | Kling O3 video | `create-kling-video` → poll `GET /videos/{taskId}` |
 | Seedance 2.5 / 2.5 SP video | `create-seedance25-video` → poll `GET /videos/{taskId}` |
-| Flux 3 video | `POST /api/open-api/v1/flux3/videos` → poll `GET /videos/{taskId}` |
+| Flux 3 video (draft → enhance) | `create-flux3-video` → poll `GET /videos/{taskId}` |
 | Seedance 2.0 933 video | `create-seedance20933-video` → poll `GET /videos/{taskId}` |
-| Just check task status | `poll --task-id <id> --type video\|image` |
+| SoundClone preview / audio | `sound-clone` / `sound-clone-audio` → poll `GET /audios/{id}` (`--type audio`) |
+| Just check task status | `poll --task-id <id> --type video\|image\|audio` |
 | Check user account balance | `user-balance` → `GET /user/balance` |
 | Check API key quota | `key-balance` → `GET /key/balance` |
 | Upload reference media (image/video/audio) | `upload-file` → `POST /files/upload` |
 | Create + wait in one step | `create-and-poll` |
 
-For VEO, Manxue Seedance, STD, image edits, image understanding, remove-bg, remove-subtitle, or **local file upload** (`POST /files/upload`), fetch the specific page from https://docs.viraltok.ai/llms.txt before calling. SP economy detail: https://docs.viraltok.ai/zh/api-reference/seedance/sp/create.md · Seedance 2.5: https://docs.viraltok.ai/zh/api-reference/seedance/25/create.md · Seedance 2.5 GZ: https://docs.viraltok.ai/zh/api-reference/seedance/25/create-gz.md · Flux 3: https://docs.viraltok.ai/zh/api-reference/flux3/create.md · MiniMax H3: https://docs.viraltok.ai/zh/api-reference/minimax/create.md · Kling O3: https://docs.viraltok.ai/zh/api-reference/kling/create.md · Seedance 2.0 933: https://docs.viraltok.ai/zh/api-reference/seedance/20933/create.md · Seedance 2.0 GZ: https://docs.viraltok.ai/zh/api-reference/seedance/gz720/create.md · Seedance 933 720p: https://docs.viraltok.ai/zh/api-reference/seedance/933720/create.md · Remove background: https://docs.viraltok.ai/zh/api-reference/images/remove-bg.md · Remove subtitle: https://docs.viraltok.ai/zh/api-reference/remove-subtitle/create.md
+For Manxue Seedance, STD, image edits, image understanding, SP assets, or balance webhooks, fetch the specific page from https://docs.viraltok.ai/llms.txt before calling. Key docs: SP https://docs.viraltok.ai/zh/api-reference/seedance/sp/create.md · Seedance 2.5 https://docs.viraltok.ai/zh/api-reference/seedance/25/create.md · Flux 3 https://docs.viraltok.ai/zh/api-reference/flux3/create.md · Grok video https://docs.viraltok.ai/zh/api-reference/grok/create.md · Digital human https://docs.viraltok.ai/zh/api-reference/digital-human/create.md · Upscale https://docs.viraltok.ai/zh/api-reference/images/upscale.md · VEO https://docs.viraltok.ai/zh/api-reference/veo/create-frames.md · SoundClone https://docs.viraltok.ai/zh/api-reference/sound-clone/clone-create.md · Video translate https://docs.viraltok.ai/zh/api-reference/video-translate/create.md
 
 ## Workflow
 
@@ -173,6 +182,147 @@ python "$JIMMYAI_CLI" poll --task-id "video_xxx" --type video --download output.
 ```
 
 Model: `video_remove_subtitle` (default). Billing: `per_second`, duration probed from `video_url` and **ceiled** (min 1s). Keep the source URL reachable while the task runs. Docs: https://docs.viraltok.ai/zh/api-reference/remove-subtitle/create.md
+
+### Translate video speech (async)
+
+```bash
+python "$JIMMYAI_CLI" create-and-poll \
+  --type video-translate \
+  --video-url "https://example.com/input.mp4" \
+  --output-language "Chinese" \
+  --enable-caption true \
+  --download output.mp4
+```
+
+Or create only, then poll:
+
+```bash
+python "$JIMMYAI_CLI" video-translate \
+  --video-url "https://example.com/input.mp4" \
+  --output-language "zh" \
+  --model video-translate-precision
+
+python "$JIMMYAI_CLI" poll --task-id "video_xxx" --type video --download output.mp4
+```
+
+Models: `video-translate-precision` (default), `video-translate-speed`. Required: `video_url`, `output_language` (enum or short alias like `zh`/`en`). Max source length **8 minutes**. Billing: `per_second`, duration probed and **ceiled** (min 1s). Optional captions → `result.caption_url`. Docs: https://docs.viraltok.ai/zh/api-reference/video-translate/create.md
+
+### Grok 1.5 video (async)
+
+```bash
+python "$JIMMYAI_CLI" create-and-poll \
+  --type grok-video \
+  --model grok-imagine-video-1.5 \
+  --prompt "Hot tea pouring into a cup, steam rising, macro cinematography" \
+  --duration 10 \
+  --ratio "16:9" \
+  --image "https://example.com/cup.jpg" \
+  --download output.mp4
+```
+
+Requires **exactly one** reference image. Duration `10` or `15` only. Docs: https://docs.viraltok.ai/zh/api-reference/grok/create.md
+
+### Digital human (async)
+
+```bash
+python "$JIMMYAI_CLI" create-and-poll \
+  --type digital-human \
+  --video-url "https://example.com/face.mp4" \
+  --audio-url "https://example.com/drive.mp3" \
+  --model-version 2 \
+  --download output.mp4
+```
+
+Billing `per_second` from face `video_url` (ceiled). Docs: https://docs.viraltok.ai/zh/api-reference/digital-human/create.md
+
+### Image upscale (sync)
+
+```bash
+python "$JIMMYAI_CLI" upscale \
+  --image-url "https://example.com/photo.jpg" \
+  --upscale-mode factor \
+  --upscale-factor 2 \
+  --response-format url \
+  --output upscaled.jpg
+```
+
+Or `--upscale-mode target --target-resolution 1080p`. Billing model `viraltok-image-upscale`. Timeout ≥ 180 s. Docs: https://docs.viraltok.ai/zh/api-reference/images/upscale.md
+
+### Flux 3 video (async)
+
+```bash
+# 1) Draft (720p) → keep result.draft_cache_url
+python "$JIMMYAI_CLI" create-and-poll \
+  --type flux3-video \
+  --model flux-3-draft \
+  --prompt "A red panda walking on a mossy log" \
+  --duration 5 \
+  --aspect-ratio "16:9"
+
+# 2) Enhance (1080p)
+python "$JIMMYAI_CLI" create-and-poll \
+  --type flux3-video \
+  --model flux-3-enhance \
+  --duration 5 \
+  --draft-cache-url "https://example.com/draft-cache.bin" \
+  --download output.mp4
+```
+
+Do **not** send `resolution`. Docs: https://docs.viraltok.ai/zh/api-reference/flux3/create.md
+
+### VEO frames (async)
+
+```bash
+python "$JIMMYAI_CLI" create-and-poll \
+  --type veo-frames \
+  --model veo_3_1_fast \
+  --prompt "Camera slowly pushes in" \
+  --resolution 720p \
+  --first-image "https://example.com/start.jpg" \
+  --last-image "https://example.com/end.jpg"
+```
+
+`--image` refs and first/last frames are mutually exclusive. Lite (`veo_3_1_lite`) is **720p only**. Docs: https://docs.viraltok.ai/zh/api-reference/veo/create-frames.md
+
+### Video super-resolution (async)
+
+```bash
+python "$JIMMYAI_CLI" create-and-poll \
+  --type super-resolution \
+  --model superResolution-1080p-lowfps \
+  --video-url "https://example.com/low-res.mp4" \
+  --download output.mp4
+```
+
+### Understand video (sync)
+
+```bash
+python "$JIMMYAI_CLI" understand-video \
+  --video-url "https://example.com/sample.mp4" \
+  --prompt "Summarize visuals, narration, and selling points"
+```
+
+### SoundClone (async)
+
+```bash
+# Preview → poll --type audio → read modelId + audioUrl
+python "$JIMMYAI_CLI" create-and-poll \
+  --type sound-clone \
+  --file-url "https://example.com/source.mp3" \
+  --content-text "一段用于试听的文案" \
+  --language Chinese \
+  --download preview.mp3
+
+# Production audio from modelId
+python "$JIMMYAI_CLI" create-and-poll \
+  --type sound-clone-audio \
+  --model-id "model_xxx" \
+  --content-text "正式配音文案" \
+  --language Chinese \
+  --download final.mp3
+```
+
+Source speaking length must be **>15s and <60s**. Docs: https://docs.viraltok.ai/zh/api-reference/sound-clone/clone-create.md
 
 ### Fast I2V video (Seedance, async)
 
