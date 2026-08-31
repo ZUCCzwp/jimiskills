@@ -281,7 +281,7 @@ Asset audit (Manxue routes only):
 
 **Grok Imagine Image** (`grok-imagine-image`): async `POST /api/open-api/v1/images`, poll `GET /api/open-api/v1/images/{taskId}`. Billing = unit price × `n` (`1`–`4`); no per-reference surcharge. Resolution `1k`/`2k` (default `1k`). `output_format`: `jpeg`/`png`/`webp`. With `images` (max 3) → edit mode (`ratio` default `auto`). Result: `image_url` + `image_urls`. Docs: https://docs.viraltok.ai/zh/api-reference/images/grok-imagine-image/create.md
 
-**Grok Imagine Image 2.0** (`grok-imagine-image-2`): Quality tier. Same fields; billing by resolution (`grok-imagine-image-2-1k` / `-2k`) × `n`. Image-to-image (with `images`) also bills `refs × grok-imagine-image-2` from the first reference. Docs: https://docs.viraltok.ai/zh/api-reference/images/grok-imagine-image-2/create.md
+**Grok Imagine Image 2.0** (`grok-imagine-image-2`): Quality tier with optional `quality` (`low` | `medium`, default `medium`). Billing by resolution+quality (`grok-imagine-image-2-{1k|2k}-{low|medium}`) × `n`, with fallback to `grok-imagine-image-2-{1k|2k}`. Image-to-image (with `images`) also bills `refs × grok-imagine-image-2` from the first reference. Docs: https://docs.viraltok.ai/zh/api-reference/images/grok-imagine-image-2/create.md
 
 ```json
 {
