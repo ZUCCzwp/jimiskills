@@ -522,7 +522,7 @@ Billing: `per_task`. Request `model` stays `kling-o3`. Billing key follows resol
 | resolution | no | Standard `480p` / `720p` (default `480p`); SP **720p only** |
 | first_image / last_image | no | **SP only**; mutually exclusive with `reference_images` / `images` |
 | reference_images / images | no | max **30** public URLs |
-| reference_videos / videos | no | max **10**; each and total ≤ **30.2** s |
+| reference_videos / videos | no | max **10**; each and total ≤ **30.2** s; frame rate ≤ **60** |
 | reference_audios / audios | no | max **10**; each ≤ **30** s |
 
 Billing:

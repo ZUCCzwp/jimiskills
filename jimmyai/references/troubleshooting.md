@@ -132,7 +132,7 @@
 - SP: `duration` 4–30 s; `resolution` **720p only**; optional `first_image` / `last_image` (cannot combine with `reference_images` / `images`).
 - GZ: `duration` 4–30 s or `-1` (default 5); `resolution` `480p` / `720p` (default `720p`); aspect ratios include `adaptive`; optional first/last frames.
 - `aspect_ratio`: `16:9` / `9:16` / `1:1` (default `9:16`). GZ also accepts `4:3` / `3:4` / `21:9` / `adaptive`.
-- `reference_images` max 30; `reference_videos` max 10 (each and total ≤ **30.2** s); `reference_audios` max 10 (each ≤ **30** s).
+- `reference_images` max 30; `reference_videos` max 10 (each and total ≤ **30.2** s, frame rate ≤ **60**); `reference_audios` max 10 (each ≤ **30** s).
 - Poll with `GET /api/open-api/v1/videos/{taskId}`.
 - Docs: https://docs.viraltok.ai/zh/api-reference/seedance/25/create.md · GZ: https://docs.viraltok.ai/zh/api-reference/seedance/25/create-gz.md
 
