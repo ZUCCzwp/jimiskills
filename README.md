@@ -7,6 +7,7 @@ Cursor / Codex Agent Skills for [JimmyAI](https://api.viraltok.ai) services.
 | Skill | Description |
 |-------|-------------|
 | [jimmyai](./jimmyai/) | JimmyAI image & video API integration — zero-experience onboarding, CLI, and docs |
+| [openapi-endpoint-routing](./openapi-endpoint-routing/) | Public model × create-endpoint map; diagnose customers hitting the wrong video path |
 
 ## Install (Codex)
 
@@ -15,6 +16,15 @@ Copy or symlink the skill into your Codex skills directory:
 ```bash
 mkdir -p ~/.codex/skills
 ln -s "$(pwd)/jimmyai" ~/.codex/skills/jimmyai
+ln -s "$(pwd)/openapi-endpoint-routing" ~/.codex/skills/openapi-endpoint-routing
+```
+
+## Install (Cursor)
+
+```bash
+mkdir -p ~/.cursor/skills
+ln -s "$(pwd)/jimmyai" ~/.cursor/skills/jimmyai
+ln -s "$(pwd)/openapi-endpoint-routing" ~/.cursor/skills/openapi-endpoint-routing
 ```
 
 Or install from GitHub when published:

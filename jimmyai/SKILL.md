@@ -63,18 +63,34 @@ If `JIMMYAI_API_KEY` is missing, guide the user to set it locally and confirm wh
 | VEO frames (Fast / Lite) | `create-veo-frames` → poll `GET /videos/{taskId}` |
 | Grok 1.5 video | `create-grok-video` → poll `GET /videos/{taskId}` |
 | Digital human lip-sync | `create-digital-human` → poll `GET /videos/{taskId}` |
-| Seedance video (SP / MD / Fast I2V / Mini / GZ / 933 720p / etc.) | `create-seedance-video` → poll `GET /videos/{taskId}` |
-| MiniMax H3 video | `create-minimax-video` → poll `GET /videos/{taskId}` |
-| Kling O3 video | `create-kling-video` → poll `GET /videos/{taskId}` |
-| Seedance 2.5 / 2.5 SP video | `create-seedance25-video` → poll `GET /videos/{taskId}` |
-| Flux 3 video (draft → enhance) | `create-flux3-video` → poll `GET /videos/{taskId}` |
-| Seedance 2.0 933 video | `create-seedance20933-video` → poll `GET /videos/{taskId}` |
+| Seedance video (SP / MD / Fast I2V / Mini / GZ / 933 720p / etc.) | `create-seedance-video` → `POST /seedance/videos` → poll `GET /videos/{taskId}` |
+| MiniMax H3 video | `create-minimax-video` → `POST /minimax/videos` → poll `GET /videos/{taskId}` |
+| Kling O3 video | `create-kling-video` → `POST /kling/videos` → poll `GET /videos/{taskId}` |
+| Seedance 2.5 / 2.5 SP video | `create-seedance25-video` → `POST /seedance25/videos` → poll `GET /videos/{taskId}` |
+| Flux 3 video (draft → enhance) | `create-flux3-video` → `POST /flux3/videos` → poll `GET /videos/{taskId}` |
+| Seedance 2.0 933 video | `create-seedance20933-video` → `POST /seedance/videos` → poll `GET /videos/{taskId}` |
 | SoundClone preview / audio | `sound-clone` / `sound-clone-audio` → poll `GET /audios/{id}` (`--type audio`) |
 | Just check task status | `poll --task-id <id> --type video\|image\|audio` |
 | Check user account balance | `user-balance` → `GET /user/balance` |
 | Check API key quota | `key-balance` → `GET /key/balance` |
 | Upload reference media (image/video/audio) | `upload-file` → `POST /files/upload` |
 | Create + wait in one step | `create-and-poll` |
+
+### Model × create path (do not mix)
+
+`model` is not enough — each family has its own create URL. The CLI refuses cross-family mixes before calling the API.
+
+| Models | Create path |
+|--------|-------------|
+| Seedance 2.0 (`seedance2.0-*`, `sd2_*`, …) | `POST /api/open-api/v1/seedance/videos` |
+| Seedance 2.5 (`seedance-2.5*`, `seedance2.5*`) | `POST /api/open-api/v1/seedance25/videos` |
+| `minimax-h3` / `minimax-h3-gz` | `POST /api/open-api/v1/minimax/videos` |
+| `kling-o3*` | `POST /api/open-api/v1/kling/videos` |
+| `wan3.0*` | `POST /api/open-api/v1/wan/videos` |
+| `flux-3-*` | `POST /api/open-api/v1/flux3/videos` |
+| `video-translate-*` | `POST /api/open-api/v1/video-translate/videos` |
+
+Common failure: `minimax-h3` or `seedance-2.5` posted to `/seedance/videos`. Full map: sibling skill `openapi-endpoint-routing`.
 
 For Manxue Seedance, STD, image edits, image understanding, SP assets, or balance webhooks, fetch the specific page from https://docs.viraltok.ai/llms.txt before calling. Key docs: SP https://docs.viraltok.ai/zh/api-reference/seedance/sp/create.md · Seedance 2.5 https://docs.viraltok.ai/zh/api-reference/seedance/25/create.md · Flux 3 https://docs.viraltok.ai/zh/api-reference/flux3/create.md · Grok video https://docs.viraltok.ai/zh/api-reference/grok/create.md · Digital human https://docs.viraltok.ai/zh/api-reference/digital-human/create.md · Upscale https://docs.viraltok.ai/zh/api-reference/images/upscale.md · VEO https://docs.viraltok.ai/zh/api-reference/veo/create-frames.md · SoundClone https://docs.viraltok.ai/zh/api-reference/sound-clone/clone-create.md · Video translate https://docs.viraltok.ai/zh/api-reference/video-translate/create.md
 

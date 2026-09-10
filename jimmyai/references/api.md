@@ -8,6 +8,26 @@ Auth: `Authorization: Bearer <JIMMYAI_API_KEY>`
 
 **Content boundary:** document only public OpenAPI models, fields, and billing. Do not name or link upstream channel vendors, private vendor portals, or internal routing mounts.
 
+## Model × create endpoint (required)
+
+Do **not** copy another family's create URL and only change `model`.
+
+| Models | Create path |
+|--------|-------------|
+| Seedance 2.0 (`seedance2.0-*`, `sd2_*`, …) | `POST /api/open-api/v1/seedance/videos` |
+| Seedance 2.5 (`seedance-2.5*`, `seedance2.5*`) | `POST /api/open-api/v1/seedance25/videos` |
+| `minimax-h3` / `minimax-h3-gz` | `POST /api/open-api/v1/minimax/videos` |
+| `kling-o3*` | `POST /api/open-api/v1/kling/videos` |
+| `wan3.0*` | `POST /api/open-api/v1/wan/videos` |
+| `flux-3-*` | `POST /api/open-api/v1/flux3/videos` |
+| `video-translate-*` | `POST /api/open-api/v1/video-translate/videos` |
+| Sora / generic video | `POST /api/open-api/v1/videos` |
+| Gemini Omni | `POST /api/open-api/v1/gemini/omni/videos` |
+| Grok video | `POST /api/open-api/v1/grok/videos` |
+| Digital human | `POST /api/open-api/v1/digital-human/videos` |
+
+Poll video tasks with `GET /api/open-api/v1/videos/{taskId}` (create path ≠ query path).
+
 ## Response codes
 
 | code | meaning |
