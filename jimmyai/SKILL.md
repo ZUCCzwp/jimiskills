@@ -1,6 +1,6 @@
 ---
 name: "jimmyai"
-description: "Integrate JimmyAI image and video generation APIs (Sora, VEO, Gemini Omni, Seedance including SP economy, Mini 特价版, Seedance 2.5 / 2.5 SP, MiniMax H3, Kling O3, Seedance 2.0 933, Seedance 2.0 GZ, Seedance 933 720p, Flux 3, Grok 1.5 video, digital human, GPT Image, Grok Imagine Image, remove-bg, remove-subtitle, video-translate, upscale, super-resolution, SoundClone, video understand) via the bundled CLI (`scripts/jimmyai.py`). Use when the user asks to connect JimmyAI, generate AI images/videos, remove image backgrounds, remove video subtitles, translate videos, upscale images, clone voices, poll async tasks, set up API keys, or integrate https://api.viraltok.ai — including zero-experience onboarding. Requires `JIMMYAI_API_KEY`."
+description: "Integrate JimmyAI image and video generation APIs (Sora, VEO, Gemini Omni, Seedance including SP economy, Mini 特价版, Seedance 2.5 / 2.5 SP, MiniMax H3, Kling O3, Seedance 2.0 GZ, Flux 3, Grok 1.5 video, digital human, GPT Image, Grok Imagine Image, remove-bg, remove-subtitle, video-translate, upscale, super-resolution, SoundClone, video understand) via the bundled CLI (`scripts/jimmyai.py`). Use when the user asks to connect JimmyAI, list available models/pricing from the catalog API, generate AI images/videos, remove image backgrounds, remove video subtitles, translate videos, upscale images, clone voices, poll async tasks, set up API keys, or integrate https://api.viraltok.ai — including zero-experience onboarding. Requires `JIMMYAI_API_KEY` for most calls; `list-models` works without a key."
 ---
 
 # JimmyAI API Skill
@@ -73,6 +73,7 @@ If `JIMMYAI_API_KEY` is missing, guide the user to set it locally and confirm wh
 | Just check task status | `poll --task-id <id> --type video\|image\|audio` |
 | Check user account balance | `user-balance` → `GET /user/balance` |
 | Check API key quota | `key-balance` → `GET /key/balance` |
+| List available models / pricing | `list-models` → `GET /api/openapi/model/catalog` (no API key required) |
 | Upload reference media (image/video/audio) | `upload-file` → `POST /files/upload` |
 | Create + wait in one step | `create-and-poll` |
 
@@ -606,6 +607,16 @@ python "$JIMMYAI_CLI" poll --task-id "abc123" --type video
 python "$JIMMYAI_CLI" user-balance
 python "$JIMMYAI_CLI" key-balance
 ```
+
+### List available models
+
+```bash
+python "$JIMMYAI_CLI" list-models
+python "$JIMMYAI_CLI" list-models --search seedance
+python "$JIMMYAI_CLI" list-models --type video
+```
+
+Catalog is public (`GET /api/openapi/model/catalog`); no API key required.
 
 ### Upload reference file
 

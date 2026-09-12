@@ -14,10 +14,11 @@ import os
 import sys
 import time
 import urllib.error
+import urllib.parse
 import urllib.request
 import uuid
 from pathlib import Path
-from typing import Any, Callable, Dict, Optional, Tuple
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 DEFAULT_BASE_URL = "https://api.viraltok.ai"
 DEFAULT_POLL_INTERVAL = 10.0
@@ -219,10 +220,11 @@ def _request(
     dry_run: bool = False,
 ) -> Dict[str, Any]:
     headers = {
-        "Authorization": f"Bearer {api_key}",
         "Content-Type": "application/json",
         "Accept": "application/json",
     }
+    if api_key:
+        headers["Authorization"] = f"Bearer {api_key}"
     data = json.dumps(body).encode("utf-8") if body is not None else None
     if dry_run:
         print(json.dumps({"method": method, "url": url, "headers": headers, "body": body}, indent=2))
@@ -1586,6 +1588,59 @@ def cmd_key_balance(args: argparse.Namespace) -> None:
     _cmd_balance(args, "/api/open-api/v1/key/balance")
 
 
+def cmd_list_models(args: argparse.Namespace) -> None:
+    """List available billing models via GET /api/openapi/model/catalog (no API key required)."""
+    base = _base_url(args.base_url)
+    params: Dict[str, str] = {}
+    search = (args.search or "").strip()
+    if search:
+        params["search"] = search
+    url = f"{base}/api/openapi/model/catalog"
+    if params:
+        url = f"{url}?{urllib.parse.urlencode(params)}"
+
+    api_key = os.getenv("JIMMYAI_API_KEY", "").strip()
+    if not api_key and args.dry_run:
+        _warn("JIMMYAI_API_KEY is not set; catalog needs no key (dry-run).")
+    elif api_key:
+        print("JIMMYAI_API_KEY is set.", file=sys.stderr)
+
+    if args.dry_run:
+        print(json.dumps({"method": "GET", "url": url, "headers": {"Accept": "application/json"}, "body": None}, indent=2))
+        return
+
+    payload = _request("GET", url, api_key, dry_run=False)
+    _check_code(payload)
+
+    model_type = (args.type or "").strip().lower()
+    if model_type:
+        data = payload.get("data") if isinstance(payload.get("data"), dict) else {}
+        items: List[Any] = list(data.get("list") or []) if isinstance(data, dict) else []
+
+        def _type_match(raw: Any) -> bool:
+            mt = str(raw or "").strip().lower()
+            if not mt:
+                return False
+            if mt == model_type:
+                return True
+            # Catalog often uses plural forms (videos/images/audios).
+            if model_type in {"video", "image", "audio"} and mt == f"{model_type}s":
+                return True
+            if model_type.endswith("s") and mt == model_type[:-1]:
+                return True
+            return False
+
+        filtered = [item for item in items if isinstance(item, dict) and _type_match(item.get("model_type"))]
+        payload = {
+            **payload,
+            "data": {**(data if isinstance(data, dict) else {}), "list": filtered},
+        }
+
+    if args.json_out:
+        Path(args.json_out).write_text(json.dumps(payload, indent=2, ensure_ascii=False), encoding="utf-8")
+    print(json.dumps(payload, indent=2, ensure_ascii=False))
+
+
 def cmd_upload_file(args: argparse.Namespace) -> None:
     api_key = _api_key(args.dry_run)
     base = _base_url(args.base_url)
@@ -1970,6 +2025,16 @@ def build_parser() -> argparse.ArgumentParser:
     p = sub.add_parser("key-balance", help="Query API key quota balance")
     _add_common_flags(p)
     p.set_defaults(func=cmd_key_balance)
+
+    p = sub.add_parser("list-models", help="List available models from catalog API")
+    _add_common_flags(p)
+    p.add_argument("--search", help="Substring filter (model_name / display_name / type / remark)")
+    p.add_argument(
+        "--type",
+        dest="type",
+        help="Client-side filter by model_type (video/videos, image/images, audio/audios, llm, ...)",
+    )
+    p.set_defaults(func=cmd_list_models)
 
     p = sub.add_parser("upload-file", help="Upload image/video/audio file")
     _add_common_flags(p)

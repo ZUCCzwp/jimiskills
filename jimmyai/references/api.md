@@ -67,6 +67,29 @@ Returns per-key quota (separate from account balance).
 
 Docs: https://docs.viraltok.ai/zh/api-reference/common/user-balance.md
 
+## Model catalog
+
+`GET /api/openapi/model/catalog`
+
+Public probe of enabled billing models (platform default unit prices). **No API key required.** Optional `?search=` substring filter.
+
+Each item in `data.list`:
+
+| Field | Description |
+|-------|-------------|
+| `model_name` | Public OpenAPI `model` ID to pass on create |
+| `display_name` | Display name |
+| `model_type` | e.g. `video`, `image`, `audio`, `llm` |
+| `price_mode` | `per_task` / `per_second` / `per_million_tokens` / `per_10k_char` / `pay_as_you_go` |
+| `unit_price` | Platform default unit price (JimiCoin) |
+| `official_price` | Optional reference list price |
+| `remark` | Optional note |
+| `group` | Optional grouping label |
+
+CLI: `python "$JIMMYAI_CLI" list-models [--search ...] [--type video|image|audio|llm]`
+
+Docs: https://docs.viraltok.ai/zh/api-reference/common/model-catalog.md
+
 ## File upload
 
 `POST /api/open-api/v1/files/upload` (multipart/form-data)

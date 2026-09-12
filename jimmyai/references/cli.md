@@ -51,6 +51,7 @@ export JIMMYAI_BASE_URL="https://api.viraltok.ai"
 | `poll` | Query task status by ID (`video` / `image` / `audio`) |
 | `user-balance` | Query user JimiCoin account balance |
 | `key-balance` | Query API key quota balance |
+| `list-models` | List available models from catalog API |
 | `upload-file` | Upload image/video/audio; returns URL |
 | `create-and-poll` | Create task and wait for completion |
 
@@ -605,6 +606,23 @@ python "$JIMMYAI_CLI" key-balance
 ```
 
 `GET /api/open-api/v1/key/balance` — fields: `name`, `total_quota`, `used_quota`, `available_quota`, `unlimited`.
+
+## list-models
+
+List enabled OpenAPI billing models (public catalog; **API key not required**).
+
+```bash
+python "$JIMMYAI_CLI" list-models
+python "$JIMMYAI_CLI" list-models --search seedance
+python "$JIMMYAI_CLI" list-models --type video
+python "$JIMMYAI_CLI" list-models --search grok --type image
+```
+
+`GET /api/openapi/model/catalog` — optional `?search=`; each item in `data.list` has `model_name`, `display_name`, `model_type`, `price_mode`, `unit_price`, optional `official_price` / `remark` / `group`.
+
+`--type` filters `model_type` client-side after the response (e.g. `video`, `image`, `audio`, `llm`).
+
+Docs: https://docs.viraltok.ai/zh/api-reference/common/model-catalog.md
 
 ## upload-file
 
