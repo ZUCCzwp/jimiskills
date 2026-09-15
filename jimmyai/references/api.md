@@ -238,8 +238,8 @@ Poll via `GET /api/open-api/v1/videos/{taskId}` (same as Sora / Gemini Omni).
 | SP official | `seedance2.0-of-sp`, `seedance2.0-of-fast-sp` | per second × resolution | 4–15 s | see SP doc |
 | Mini | `seedance2.0-mini`, `seedance2.0-mini-video` | per second × resolution | 4–15 s | billing names `seedance2.0-mini-{resolution}` / `seedance2.0-mini-{resolution}-video` also accepted as `model` (omit `resolution`) |
 | **Mini 特价版** | `seedance2.0-mini-sp` | per second × resolution | 4–15 s | `480p` / `720p` only; same endpoint as other Seedance routes |
-| MD standard | `seedance2.0-md` | per task | 4–15 s | direct `https://` URLs; max 4 images |
-| MD fast | `seedance2.0-fast-md` | per task | 4–15 s | same as MD |
+| MD standard | `seedance2.0-md` | per task | 5 / 10 / 15 s | max 9 images; no video/audio/first-last frame |
+| MD fast | `seedance2.0-fast-md` | per task | 10 or 15 s | same endpoint; max 4 images |
 | **Fast I2V** | `seedance2.0-fast-i2v` | per task | 1–15 s | image refs only, max 9; no video/audio refs |
 | STD | `seedance2.0-std` | per task | 4–15 s | max 9 images, max 3 audio refs |
 | **GZ 2.0** | `seedance2.0-gz*` | per million tokens | 4–15 s | standard `480p/720p/1080p`; fast/mini `480p/720p`; video refs use `-video` billing names; max 9 images / 3 videos / 3 audios; public URLs auto asset-reviewed; **direct upstream result URL** |
@@ -254,14 +254,14 @@ GZ 2.0 detail: https://docs.viraltok.ai/zh/api-reference/seedance/gz720/create.m
 | Field | Required | Notes |
 |-------|----------|-------|
 | model | yes | e.g. `seedance2.0-fast-i2v`, `seedance2.0-mini-sp` (request model = billing model) |
-| prompt | yes | max 5000 chars for MD / Fast I2V |
-| duration | yes | Fast I2V: 1–15; MD / Mini 特价版: 4–15 |
+| prompt | yes | max 6000 chars for `seedance2.0-md`; max 5000 chars for MD fast / Fast I2V |
+| duration | yes | Fast I2V: 1–15; `seedance2.0-md`: 5/10/15; MD fast: 10 or 15; Mini 特价版: 4–15 |
 | resolution | no | SP economy: `720p` (default) or `1080p` only; Mini 特价版: `480p` or `720p`; Mini: `480p` / `720p` / `1080p` |
-| ratio | no | Fast I2V / MD: `16:9`, `9:16`, `1:1` |
+| ratio | no | `seedance2.0-md`: `1:1`, `3:4`, `4:3`, `9:16`, `16:9`, `21:9`; Fast I2V / MD fast: `16:9`, `9:16`, `1:1` |
 | images | no | reference image URLs |
-| first_image / last_image | no | frame mode; mutually exclusive with `images` |
-| reference_videos | no | not supported on `seedance2.0-fast-i2v` |
-| reference_audios | no | not supported on MD / Fast I2V |
+| first_image / last_image | no | `seedance2.0-fast-md` frame mode; not supported on `seedance2.0-md` |
+| reference_videos | no | not supported on `seedance2.0-md` / `seedance2.0-fast-i2v` |
+| reference_audios | no | not supported on `seedance2.0-md` / Fast I2V |
 
 **SP economy** (`seedance2.0-sp`, `seedance2.0-fast-sp`): unified `POST /api/open-api/v1/seedance/videos`. Poll via `GET /api/open-api/v1/videos/{taskId}`. `resolution` must be `720p` (default) or `1080p` — **`480p` is not supported**. Duration 4–15 s. Supports `images`, `first_image` / `last_image`, `reference_videos` (not on `seedance2.0-fast-sp`), and `reference_audios` (audio requires image/video/frame refs). Materials: public `https://` URLs or `asset://` after `POST /api/open-api/v1/seedance/sp/assets/upload`. Detail: https://docs.viraltok.ai/zh/api-reference/seedance/sp/create.md
 
