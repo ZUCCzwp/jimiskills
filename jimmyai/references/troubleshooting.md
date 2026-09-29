@@ -1,5 +1,29 @@
 # Troubleshooting
 
+## Wrong create path (model × endpoint)
+
+Most common integration bug: reuse another family's URL and only change `model`.
+
+| Symptom | Likely cause |
+|---------|----------------|
+| `不支持的模型参数: minimax-h3` / Kling / Wan / Flux | Model posted to the wrong create path |
+| Seedance 2.5 billed/routed like 2.0 Full | `seedance-2.5*` sent to `/seedance/videos` instead of `/seedance25/videos` |
+| Channel mounts look ignored | Request never hit that model's dedicated handler |
+
+Required create paths:
+
+| Models | Path |
+|--------|------|
+| Seedance 2.0 | `POST /api/open-api/v1/seedance/videos` |
+| Seedance 2.5 | `POST /api/open-api/v1/seedance25/videos` |
+| MiniMax H3 | `POST /api/open-api/v1/minimax/videos` |
+| Kling O3 | `POST /api/open-api/v1/kling/videos` |
+| Wan 3.0 | `POST /api/open-api/v1/wan/videos` |
+| Flux 3 | `POST /api/open-api/v1/flux3/videos` |
+| Video translate | `POST /api/open-api/v1/video-translate/videos` |
+
+Fix: match path to the table (or use the matching CLI command). The CLI exits before the request if you pass a foreign `model`. See skill `openapi-endpoint-routing`.
+
 ## code 20001 — auth failure
 
 - Cause: missing, wrong, or expired API key.

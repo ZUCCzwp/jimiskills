@@ -14,10 +14,11 @@ import os
 import sys
 import time
 import urllib.error
+import urllib.parse
 import urllib.request
 import uuid
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 DEFAULT_BASE_URL = "https://api.viraltok.ai"
 DEFAULT_POLL_INTERVAL = 10.0
@@ -35,6 +36,148 @@ def _die(message: str, code: int = 1) -> None:
 
 def _warn(message: str) -> None:
     print(f"Warning: {message}", file=sys.stderr)
+
+
+def _norm_model_key(model: str) -> str:
+    return (model or "").strip().lower().replace("_", "-")
+
+
+def _is_seedance25_model(model: str) -> bool:
+    m = _norm_model_key(model)
+    if not m:
+        return False
+    return (
+        "seedance-2.5" in m
+        or "seedance2.5" in m
+        or m.startswith("seedance25")
+    )
+
+
+def _is_minimax_h3_model(model: str) -> bool:
+    m = _norm_model_key(model)
+    return m == "minimax-h3" or m.startswith("minimax-h3-")
+
+
+def _is_kling_o3_model(model: str) -> bool:
+    m = _norm_model_key(model)
+    return m == "kling-o3" or m.startswith("kling-o3-") or m in ("klingo3", "kling-o3")
+
+
+def _is_wan30_model(model: str) -> bool:
+    m = _norm_model_key(model)
+    return m.startswith("wan3.0") or m.startswith("wan-3.0") or m.startswith("wan30")
+
+
+def _is_flux3_model(model: str) -> bool:
+    m = _norm_model_key(model)
+    return m.startswith("flux-3") or m.startswith("flux3")
+
+
+def _is_video_translate_model(model: str) -> bool:
+    m = _norm_model_key(model)
+    return m.startswith("video-translate")
+
+
+def _is_seedance20_family_model(model: str) -> bool:
+    """Seedance 2.0 line (not 2.5). Used only to tip wrong dedicated endpoints."""
+    if _is_seedance25_model(model):
+        return False
+    m = _norm_model_key(model)
+    if not m:
+        return False
+    if m.startswith("seedance2.0") or m.startswith("seedance-2.0") or m.startswith("seedance20"):
+        return True
+    if m.startswith("sd2-") or m.startswith("sd2mx") or m.startswith("sd2-sp") or m.startswith("sd2sp"):
+        return True
+    return False
+
+
+# Dedicated create paths: foreign models must not be posted here.
+_DEDICATED_VIDEO_ENDPOINTS: Tuple[Tuple[str, Callable[[str], bool], str], ...] = (
+    (
+        "/api/open-api/v1/seedance25/videos",
+        _is_seedance25_model,
+        "create-seedance25-video",
+    ),
+    (
+        "/api/open-api/v1/minimax/videos",
+        _is_minimax_h3_model,
+        "create-minimax-video",
+    ),
+    (
+        "/api/open-api/v1/kling/videos",
+        _is_kling_o3_model,
+        "create-kling-video",
+    ),
+    (
+        "/api/open-api/v1/wan/videos",
+        _is_wan30_model,
+        "POST /api/open-api/v1/wan/videos",
+    ),
+    (
+        "/api/open-api/v1/flux3/videos",
+        _is_flux3_model,
+        "create-flux3-video",
+    ),
+    (
+        "/api/open-api/v1/video-translate/videos",
+        _is_video_translate_model,
+        "video-translate",
+    ),
+    (
+        "/api/open-api/v1/seedance/videos",
+        _is_seedance20_family_model,
+        "create-seedance-video",
+    ),
+)
+
+
+def _endpoint_path(url_or_path: str) -> str:
+    """Return `/api/open-api/v1/...` path from a full URL or path."""
+    s = (url_or_path or "").strip()
+    idx = s.find("/api/open-api/v1/")
+    if idx >= 0:
+        path = s[idx:]
+        q = path.find("?")
+        return path if q < 0 else path[:q]
+    return s
+
+
+def _assert_model_matches_endpoint(model: Optional[str], url_or_path: str) -> None:
+    """Refuse cross-family model×path before calling the API (customers often mix paths)."""
+    model_s = (model or "").strip()
+    if not model_s:
+        return
+    path = _endpoint_path(url_or_path)
+    # Find which dedicated family this model belongs to.
+    owner_path = ""
+    owner_hint = ""
+    for ep_path, matcher, hint in _DEDICATED_VIDEO_ENDPOINTS:
+        if matcher(model_s):
+            owner_path = ep_path
+            owner_hint = hint
+            break
+    if not owner_path:
+        return
+    if path == owner_path or path.endswith(owner_path):
+        return
+    # Only enforce when current call is also a known create endpoint (or seedance/minimax/…).
+    known = {ep[0] for ep in _DEDICATED_VIDEO_ENDPOINTS} | {
+        "/api/open-api/v1/videos",
+        "/api/open-api/v1/gemini/omni/videos",
+        "/api/open-api/v1/grok/videos",
+        "/api/open-api/v1/digital-human/videos",
+        "/api/open-api/v1/remove-subtitle/videos",
+        "/api/open-api/v1/super-resolution/videos",
+        "/api/open-api/v1/veo/frames",
+    }
+    if path not in known and not any(path.endswith(k) for k in known):
+        return
+    hint = owner_hint if owner_hint.startswith("POST ") else f"CLI `{owner_hint}` or POST {owner_path}"
+    _die(
+        f"model {model_s} must use POST {owner_path} ({hint}); "
+        f"current path is {path}. Do not reuse another family's URL and only change model."
+    )
 
 
 def _base_url(override: Optional[str]) -> str:
@@ -77,10 +220,11 @@ def _request(
     dry_run: bool = False,
 ) -> Dict[str, Any]:
     headers = {
-        "Authorization": f"Bearer {api_key}",
         "Content-Type": "application/json",
         "Accept": "application/json",
     }
+    if api_key:
+        headers["Authorization"] = f"Bearer {api_key}"
     data = json.dumps(body).encode("utf-8") if body is not None else None
     if dry_run:
         print(json.dumps({"method": method, "url": url, "headers": headers, "body": body}, indent=2))
@@ -303,9 +447,11 @@ def cmd_create_video(args: argparse.Namespace) -> None:
     if args.image:
         body["images"] = [args.image]
 
+    url = f"{base}/api/open-api/v1/videos"
+    _assert_model_matches_endpoint(args.model, url)
     payload = _request(
         "POST",
-        f"{base}/api/open-api/v1/videos",
+        url,
         api_key,
         body,
         dry_run=args.dry_run,
@@ -345,9 +491,11 @@ def cmd_create_seedance_video(args: argparse.Namespace) -> None:
     if args.last_image:
         body["last_image"] = args.last_image
 
+    url = f"{base}/api/open-api/v1/seedance/videos"
+    _assert_model_matches_endpoint(args.model, url)
     payload = _request(
         "POST",
-        f"{base}/api/open-api/v1/seedance/videos",
+        url,
         api_key,
         body,
         dry_run=args.dry_run,
@@ -382,9 +530,11 @@ def cmd_create_gemini_video(args: argparse.Namespace) -> None:
     if args.image:
         body["image_urls"] = [args.image]
 
+    url = f"{base}/api/open-api/v1/gemini/omni/videos"
+    _assert_model_matches_endpoint(args.model, url)
     payload = _request(
         "POST",
-        f"{base}/api/open-api/v1/gemini/omni/videos",
+        url,
         api_key,
         body,
         dry_run=args.dry_run,
@@ -419,9 +569,11 @@ def cmd_create_minimax_video(args: argparse.Namespace) -> None:
     if args.last_image:
         body["last_image"] = args.last_image
 
+    url = f"{base}/api/open-api/v1/minimax/videos"
+    _assert_model_matches_endpoint(args.model, url)
     payload = _request(
         "POST",
-        f"{base}/api/open-api/v1/minimax/videos",
+        url,
         api_key,
         body,
         dry_run=args.dry_run,
@@ -461,9 +613,11 @@ def cmd_create_kling_video(args: argparse.Namespace) -> None:
     if getattr(args, "reference_mode", None):
         body["reference_mode"] = args.reference_mode
 
+    url = f"{base}/api/open-api/v1/kling/videos"
+    _assert_model_matches_endpoint(args.model, url)
     payload = _request(
         "POST",
-        f"{base}/api/open-api/v1/kling/videos",
+        url,
         api_key,
         body,
         dry_run=args.dry_run,
@@ -569,9 +723,11 @@ def cmd_create_seedance25_video(args: argparse.Namespace) -> None:
     if getattr(args, "last_image", None):
         body["last_image"] = args.last_image
 
+    url = f"{base}/api/open-api/v1/seedance25/videos"
+    _assert_model_matches_endpoint(args.model, url)
     payload = _request(
         "POST",
-        f"{base}/api/open-api/v1/seedance25/videos",
+        url,
         api_key,
         body,
         dry_run=args.dry_run,
@@ -622,9 +778,11 @@ def cmd_create_seedance20933_video(args: argparse.Namespace) -> None:
     if args.audio:
         body["reference_audios"] = args.audio
 
+    url = f"{base}/api/open-api/v1/seedance/videos"
+    _assert_model_matches_endpoint(args.model, url)
     payload = _request(
         "POST",
-        f"{base}/api/open-api/v1/seedance/videos",
+        url,
         api_key,
         body,
         dry_run=args.dry_run,
@@ -821,9 +979,11 @@ def cmd_video_translate(args: argparse.Namespace) -> None:
     base = _base_url(args.base_url)
     body = _video_translate_body(args, default_model="video-translate-precision")
 
+    url = f"{base}/api/open-api/v1/video-translate/videos"
+    _assert_model_matches_endpoint(body.get("model"), url)
     payload = _request(
         "POST",
-        f"{base}/api/open-api/v1/video-translate/videos",
+        url,
         api_key,
         body,
         dry_run=args.dry_run,
@@ -1047,9 +1207,11 @@ def cmd_create_flux3_video(args: argparse.Namespace) -> None:
     api_key = _api_key(args.dry_run)
     base = _base_url(args.base_url)
     body = _flux3_video_body(args, default_model="flux-3-draft")
+    url = f"{base}/api/open-api/v1/flux3/videos"
+    _assert_model_matches_endpoint(body.get("model"), url)
     payload = _request(
         "POST",
-        f"{base}/api/open-api/v1/flux3/videos",
+        url,
         api_key,
         body,
         dry_run=args.dry_run,
@@ -1452,6 +1614,7 @@ def cmd_create_and_poll(args: argparse.Namespace) -> None:
     else:
         _die(f"Unknown --type: {args.type}")
 
+    _assert_model_matches_endpoint(body.get("model") if isinstance(body, dict) else None, url)
     created = _request("POST", url, api_key, body, dry_run=args.dry_run)
     if args.dry_run:
         task_id = "dry-run-task"
@@ -1493,6 +1656,59 @@ def cmd_user_balance(args: argparse.Namespace) -> None:
 
 def cmd_key_balance(args: argparse.Namespace) -> None:
     _cmd_balance(args, "/api/open-api/v1/key/balance")
+
+
+def cmd_list_models(args: argparse.Namespace) -> None:
+    """List available billing models via GET /api/openapi/model/catalog (no API key required)."""
+    base = _base_url(args.base_url)
+    params: Dict[str, str] = {}
+    search = (args.search or "").strip()
+    if search:
+        params["search"] = search
+    url = f"{base}/api/openapi/model/catalog"
+    if params:
+        url = f"{url}?{urllib.parse.urlencode(params)}"
+
+    api_key = os.getenv("JIMMYAI_API_KEY", "").strip()
+    if not api_key and args.dry_run:
+        _warn("JIMMYAI_API_KEY is not set; catalog needs no key (dry-run).")
+    elif api_key:
+        print("JIMMYAI_API_KEY is set.", file=sys.stderr)
+
+    if args.dry_run:
+        print(json.dumps({"method": "GET", "url": url, "headers": {"Accept": "application/json"}, "body": None}, indent=2))
+        return
+
+    payload = _request("GET", url, api_key, dry_run=False)
+    _check_code(payload)
+
+    model_type = (args.type or "").strip().lower()
+    if model_type:
+        data = payload.get("data") if isinstance(payload.get("data"), dict) else {}
+        items: List[Any] = list(data.get("list") or []) if isinstance(data, dict) else []
+
+        def _type_match(raw: Any) -> bool:
+            mt = str(raw or "").strip().lower()
+            if not mt:
+                return False
+            if mt == model_type:
+                return True
+            # Catalog often uses plural forms (videos/images/audios).
+            if model_type in {"video", "image", "audio"} and mt == f"{model_type}s":
+                return True
+            if model_type.endswith("s") and mt == model_type[:-1]:
+                return True
+            return False
+
+        filtered = [item for item in items if isinstance(item, dict) and _type_match(item.get("model_type"))]
+        payload = {
+            **payload,
+            "data": {**(data if isinstance(data, dict) else {}), "list": filtered},
+        }
+
+    if args.json_out:
+        Path(args.json_out).write_text(json.dumps(payload, indent=2, ensure_ascii=False), encoding="utf-8")
+    print(json.dumps(payload, indent=2, ensure_ascii=False))
 
 
 def cmd_upload_file(args: argparse.Namespace) -> None:
@@ -1895,6 +2111,16 @@ def build_parser() -> argparse.ArgumentParser:
     p = sub.add_parser("key-balance", help="Query API key quota balance")
     _add_common_flags(p)
     p.set_defaults(func=cmd_key_balance)
+
+    p = sub.add_parser("list-models", help="List available models from catalog API")
+    _add_common_flags(p)
+    p.add_argument("--search", help="Substring filter (model_name / display_name / type / remark)")
+    p.add_argument(
+        "--type",
+        dest="type",
+        help="Client-side filter by model_type (video/videos, image/images, audio/audios, llm, ...)",
+    )
+    p.set_defaults(func=cmd_list_models)
 
     p = sub.add_parser("upload-file", help="Upload image/video/audio file")
     _add_common_flags(p)

@@ -1,6 +1,6 @@
 ---
 name: "jimmyai"
-description: "Integrate JimmyAI image and video generation APIs (Sora, VEO, Gemini Omni, Seedance including SP economy, Mini 特价版, Seedance 2.5 / 2.5 SP, MiniMax H3, Kling O3, Wan 3.0 / Wan 3.0 GZ, Seedance 2.0 933, Seedance 2.0 GZ, Seedance 933 720p, Flux 3, Grok 1.5 video, digital human, GPT Image, Grok Imagine Image, remove-bg, remove-subtitle, video-translate, upscale, super-resolution, SoundClone, video understand) via the bundled CLI (`scripts/jimmyai.py`). Use when the user asks to connect JimmyAI, generate AI images/videos, remove image backgrounds, remove video subtitles, translate videos, upscale images, clone voices, poll async tasks, set up API keys, or integrate https://api.viraltok.ai — including zero-experience onboarding. Requires `JIMMYAI_API_KEY`."
+description: "Integrate JimmyAI image and video generation APIs (Sora, VEO, Gemini Omni, Seedance including SP economy, Mini 特价版, Seedance 2.5 / 2.5 SP, MiniMax H3, Kling O3, Wan 3.0 / Wan 3.0 GZ, Seedance 2.0 GZ, Flux 3, Grok 1.5 video, digital human, GPT Image, Grok Imagine Image, remove-bg, remove-subtitle, video-translate, upscale, super-resolution, SoundClone, video understand) via the bundled CLI (`scripts/jimmyai.py`). Use when the user asks to connect JimmyAI, list available models/pricing from the catalog API, generate AI images/videos, remove image backgrounds, remove video subtitles, translate videos, upscale images, clone voices, poll async tasks, set up API keys, or integrate https://api.viraltok.ai — including zero-experience onboarding. Requires `JIMMYAI_API_KEY` for most calls; `list-models` works without a key."
 ---
 
 # JimmyAI API Skill
@@ -63,19 +63,36 @@ If `JIMMYAI_API_KEY` is missing, guide the user to set it locally and confirm wh
 | VEO frames (Fast / Lite) | `create-veo-frames` → poll `GET /videos/{taskId}` |
 | Grok 1.5 video | `create-grok-video` → poll `GET /videos/{taskId}` |
 | Digital human lip-sync | `create-digital-human` → poll `GET /videos/{taskId}` |
-| Seedance video (SP / MD / Fast I2V / Mini / GZ / 933 720p / etc.) | `create-seedance-video` → poll `GET /videos/{taskId}` |
-| MiniMax H3 video | `create-minimax-video` → poll `GET /videos/{taskId}` |
-| Kling O3 video | `create-kling-video` → poll `GET /videos/{taskId}` |
-| Wan 3.0 / Wan 3.0 GZ video | `create-wan-video` → poll `GET /videos/{taskId}` |
-| Seedance 2.5 / 2.5 SP video | `create-seedance25-video` → poll `GET /videos/{taskId}` |
-| Flux 3 video (draft → enhance) | `create-flux3-video` → poll `GET /videos/{taskId}` |
-| Seedance 2.0 933 video | `create-seedance20933-video` → poll `GET /videos/{taskId}` |
+| Seedance video (SP / MD / Fast I2V / Mini / GZ / 933 720p / etc.) | `create-seedance-video` → `POST /seedance/videos` → poll `GET /videos/{taskId}` |
+| MiniMax H3 video | `create-minimax-video` → `POST /minimax/videos` → poll `GET /videos/{taskId}` |
+| Kling O3 video | `create-kling-video` → `POST /kling/videos` → poll `GET /videos/{taskId}` |
+| Wan 3.0 / Wan 3.0 GZ video | `create-wan-video` → `POST /wan/videos` → poll `GET /videos/{taskId}` |
+| Seedance 2.5 / 2.5 SP video | `create-seedance25-video` → `POST /seedance25/videos` → poll `GET /videos/{taskId}` |
+| Flux 3 video (draft → enhance) | `create-flux3-video` → `POST /flux3/videos` → poll `GET /videos/{taskId}` |
+| Seedance 2.0 933 video | `create-seedance20933-video` → `POST /seedance/videos` → poll `GET /videos/{taskId}` |
 | SoundClone preview / audio | `sound-clone` / `sound-clone-audio` → poll `GET /audios/{id}` (`--type audio`) |
 | Just check task status | `poll --task-id <id> --type video\|image\|audio` |
 | Check user account balance | `user-balance` → `GET /user/balance` |
 | Check API key quota | `key-balance` → `GET /key/balance` |
+| List available models / pricing | `list-models` → `GET /api/openapi/model/catalog` (no API key required) |
 | Upload reference media (image/video/audio) | `upload-file` → `POST /files/upload` |
 | Create + wait in one step | `create-and-poll` |
+
+### Model × create path (do not mix)
+
+`model` is not enough — each family has its own create URL. The CLI refuses cross-family mixes before calling the API.
+
+| Models | Create path |
+|--------|-------------|
+| Seedance 2.0 (`seedance2.0-*`, `sd2_*`, …) | `POST /api/open-api/v1/seedance/videos` |
+| Seedance 2.5 (`seedance-2.5*`, `seedance2.5*`) | `POST /api/open-api/v1/seedance25/videos` |
+| `minimax-h3` / `minimax-h3-gz` | `POST /api/open-api/v1/minimax/videos` |
+| `kling-o3*` | `POST /api/open-api/v1/kling/videos` |
+| `wan3.0*` | `POST /api/open-api/v1/wan/videos` |
+| `flux-3-*` | `POST /api/open-api/v1/flux3/videos` |
+| `video-translate-*` | `POST /api/open-api/v1/video-translate/videos` |
+
+Common failure: `minimax-h3` or `seedance-2.5` posted to `/seedance/videos`. Full map: sibling skill `openapi-endpoint-routing`.
 
 For Manxue Seedance, STD, image edits, image understanding, SP assets, or balance webhooks, fetch the specific page from https://docs.viraltok.ai/llms.txt before calling. Key docs: SP https://docs.viraltok.ai/zh/api-reference/seedance/sp/create.md · Seedance 2.5 https://docs.viraltok.ai/zh/api-reference/seedance/25/create.md · Flux 3 https://docs.viraltok.ai/zh/api-reference/flux3/create.md · Wan 3.0 https://docs.viraltok.ai/zh/api-reference/wan/create.md · Wan 3.0 GZ https://docs.viraltok.ai/zh/api-reference/wan/create-gz.md · Grok video https://docs.viraltok.ai/zh/api-reference/grok/create.md · Digital human https://docs.viraltok.ai/zh/api-reference/digital-human/create.md · Upscale https://docs.viraltok.ai/zh/api-reference/images/upscale.md · VEO https://docs.viraltok.ai/zh/api-reference/veo/create-frames.md · SoundClone https://docs.viraltok.ai/zh/api-reference/sound-clone/clone-create.md · Video translate https://docs.viraltok.ai/zh/api-reference/video-translate/create.md
 
@@ -635,6 +652,16 @@ python "$JIMMYAI_CLI" poll --task-id "abc123" --type video
 python "$JIMMYAI_CLI" user-balance
 python "$JIMMYAI_CLI" key-balance
 ```
+
+### List available models
+
+```bash
+python "$JIMMYAI_CLI" list-models
+python "$JIMMYAI_CLI" list-models --search seedance
+python "$JIMMYAI_CLI" list-models --type video
+```
+
+Catalog is public (`GET /api/openapi/model/catalog`); no API key required.
 
 ### Upload reference file
 
