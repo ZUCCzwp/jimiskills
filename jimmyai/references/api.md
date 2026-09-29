@@ -509,6 +509,42 @@ Billing: `per_task`. Request `model` stays `kling-o3`. Billing key follows resol
 }
 ```
 
+## Wan 3.0 video
+
+`POST /api/open-api/v1/wan/videos` — poll `GET /api/open-api/v1/videos/{taskId}`.
+
+| Field | Required | Notes |
+|-------|----------|-------|
+| model | yes | `wan3.0` or `wan3.0-gz` (separate billing; same endpoint). Aliases `wan3` / `wan30` → `wan3.0`; `wan30-gz` → `wan3.0-gz`. Resolution billing models (e.g. `wan3.0-gz-720p`) also accepted |
+| prompt | depends | Required for `wan3.0`; `wan3.0-gz` needs prompt **or** any input (frames / references / file / link). Refer to media as 图1 / 视频1 / 音频1 |
+| duration | no | `wan3.0`: 4–30, default `4`. `wan3.0-gz`: 2–30, default `5` |
+| aspect_ratio / ratio | no | `9:16` / `16:9` / `3:4` / `4:3` / `1:1`, default `16:9`; `wan3.0-gz` also `adaptive` |
+| resolution | no | `480P` / `720P` / `1080P` (case-insensitive). Default `480P` for `wan3.0`, `720P` for `wan3.0-gz` |
+| reference_images / images | no | max **10** public URLs |
+| reference_videos / videos | no | max **5**, total ≤15 s; on `wan3.0-gz` reference seconds + `duration` ≤ 30 |
+| reference_audios | no | max **5**, total ≤15 s |
+| first_image / last_image | no | `wan3.0-gz` only. First(+last) frame URL; `last_image` requires `first_image`; cannot mix with references / `file_url` / `link_url` |
+| file_url | no | `wan3.0-gz` only. Reference document (docx/pptx/pdf/xlsx/txt/md…, ≤100MB, ≤50 pages); prompt optional |
+| link_url | no | `wan3.0-gz` only. Public, no-login webpage; mutually exclusive with `file_url` |
+
+Billing: `per_second` = unit price × `duration`, unit price by resolution.
+
+- `wan3.0` → `wan3.0-480p` / `wan3.0-720p` / `wan3.0-1080p`, falling back to `wan3.0`.
+- `wan3.0-gz` → `wan3.0-gz-480p` / `wan3.0-gz-720p` / `wan3.0-gz-1080p` (no bare fallback).
+
+Docs: Wan 3.0 https://docs.viraltok.ai/zh/api-reference/wan/create.md · Wan 3.0 GZ https://docs.viraltok.ai/zh/api-reference/wan/create-gz.md
+
+```json
+{
+  "model": "wan3.0-gz",
+  "prompt": "图1 中的人物在海边奔跑，电影感运镜",
+  "duration": 5,
+  "aspect_ratio": "9:16",
+  "resolution": "720P",
+  "reference_images": ["https://example.com/person.png"]
+}
+```
+
 ## Seedance 2.5 video
 
 `POST /api/open-api/v1/seedance25/videos` — poll `GET /api/open-api/v1/videos/{taskId}`.

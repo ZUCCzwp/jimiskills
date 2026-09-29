@@ -479,6 +479,72 @@ def cmd_create_kling_video(args: argparse.Namespace) -> None:
         print(task_id)
 
 
+def _wan_video_body(args: argparse.Namespace, *, default_model: str = "wan3.0") -> Dict[str, Any]:
+    model = args.model if args.model and args.model != "sora2-12s" else default_model
+    is_gz = model.strip().lower().replace("_", "-").startswith("wan3.0-gz")
+    prompt = ""
+    if args.prompt or args.prompt_file:
+        prompt = _read_prompt(args.prompt, args.prompt_file)
+    first_image = getattr(args, "first_image", None)
+    last_image = getattr(args, "last_image", None)
+    file_url = getattr(args, "file_url", None)
+    link_url = getattr(args, "link_url", None)
+    has_inputs = bool(
+        args.image or getattr(args, "video", None) or getattr(args, "audio", None)
+        or first_image or last_image or file_url or link_url
+    )
+    if not prompt and not (is_gz and has_inputs):
+        _die("Missing prompt. Use --prompt or --prompt-file (wan3.0-gz may omit it when media/file/link is given).")
+    if not is_gz and (first_image or last_image or file_url or link_url):
+        _die("--first-image / --last-image / --file-url / --link-url require --model wan3.0-gz.")
+    body: Dict[str, Any] = {"model": model}
+    if prompt:
+        body["prompt"] = prompt
+    if args.duration:
+        body["duration"] = args.duration
+    if args.aspect_ratio:
+        body["aspect_ratio"] = args.aspect_ratio
+    if args.resolution:
+        body["resolution"] = args.resolution
+    if args.image:
+        body["reference_images"] = args.image
+    if getattr(args, "video", None):
+        body["reference_videos"] = args.video
+    if getattr(args, "audio", None):
+        body["reference_audios"] = args.audio
+    if first_image:
+        body["first_image"] = first_image
+    if last_image:
+        body["last_image"] = last_image
+    if file_url:
+        body["file_url"] = file_url
+    if link_url:
+        body["link_url"] = link_url
+    return body
+
+
+def cmd_create_wan_video(args: argparse.Namespace) -> None:
+    api_key = _api_key(args.dry_run)
+    base = _base_url(args.base_url)
+    body = _wan_video_body(args)
+    payload = _request(
+        "POST",
+        f"{base}/api/open-api/v1/wan/videos",
+        api_key,
+        body,
+        dry_run=args.dry_run,
+    )
+    if args.dry_run:
+        return
+    _check_code(payload)
+    if args.json_out:
+        Path(args.json_out).write_text(json.dumps(payload, indent=2), encoding="utf-8")
+    print(json.dumps(payload, indent=2, ensure_ascii=False))
+    task_id = (payload.get("data") or {}).get("task_id")
+    if task_id:
+        print(task_id)
+
+
 def cmd_create_seedance25_video(args: argparse.Namespace) -> None:
     api_key = _api_key(args.dry_run)
     base = _base_url(args.base_url)
@@ -1322,6 +1388,10 @@ def cmd_create_and_poll(args: argparse.Namespace) -> None:
             body["reference_mode"] = args.reference_mode
         url = f"{base}/api/open-api/v1/kling/videos"
         poll_type = "video"
+    elif args.type == "wan-video":
+        body = _wan_video_body(args)
+        url = f"{base}/api/open-api/v1/wan/videos"
+        poll_type = "video"
     elif args.type == "seedance25-video":
         prompt = _read_prompt(args.prompt, args.prompt_file)
         body = {
@@ -1525,6 +1595,22 @@ def build_parser() -> argparse.ArgumentParser:
     )
     p.add_argument("--reference-mode", dest="reference_mode", help="Optional reference mode")
     p.set_defaults(func=cmd_create_kling_video)
+
+    p = sub.add_parser("create-wan-video", help="Create Wan 3.0 / Wan 3.0 GZ video task")
+    _add_common_flags(p)
+    _add_prompt_flags(p)
+    p.add_argument("--model", default="wan3.0", help="wan3.0 or wan3.0-gz")
+    p.add_argument("--duration", type=int, default=None, help="wan3.0: 4-30 (default 4); wan3.0-gz: 2-30 (default 5)")
+    p.add_argument("--aspect-ratio", dest="aspect_ratio", help="9:16 / 16:9 / 3:4 / 4:3 / 1:1 (wan3.0-gz also adaptive)")
+    p.add_argument("--resolution", default=None, help="480p / 720p / 1080p (wan3.0 default 480p, wan3.0-gz default 720p)")
+    p.add_argument("--image", action="append", help="Reference image URL (repeatable, max 10)")
+    p.add_argument("--video", action="append", help="Reference video URL (repeatable, max 5, total <=15s)")
+    p.add_argument("--audio", action="append", help="Reference audio URL (repeatable, max 5, total <=15s)")
+    p.add_argument("--first-image", dest="first_image", help="wan3.0-gz first frame URL (not with references)")
+    p.add_argument("--last-image", dest="last_image", help="wan3.0-gz last frame URL (requires --first-image)")
+    p.add_argument("--file-url", dest="file_url", help="wan3.0-gz reference document URL (pdf/pptx/docx/...)")
+    p.add_argument("--link-url", dest="link_url", help="wan3.0-gz reference webpage URL (public, no login)")
+    p.set_defaults(func=cmd_create_wan_video)
 
     p = sub.add_parser("create-seedance25-video", help="Create Seedance 2.5 video task")
     _add_common_flags(p)
@@ -1829,6 +1915,7 @@ def build_parser() -> argparse.ArgumentParser:
             "seedance20933-video",
             "minimax-video",
             "kling-video",
+            "wan-video",
             "remove-subtitle",
             "video-translate",
             "grok-video",
@@ -1873,7 +1960,7 @@ def build_parser() -> argparse.ArgumentParser:
     )
     p.add_argument("--image", action="append", help="Reference image URL (repeatable)")
     p.add_argument("--image-url", dest="image_url", help="Flux 3 i2v image URL")
-    p.add_argument("--video", action="append", help="Reference video URL (Seedance / Seedance 2.5 / Seedance 2.0 933 / GZ 2.0)")
+    p.add_argument("--video", action="append", help="Reference video URL (Seedance / Seedance 2.5 / Seedance 2.0 933 / GZ 2.0 / Wan 3.0)")
     p.add_argument(
         "--video-url",
         dest="video_url",
@@ -1886,7 +1973,8 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--model-version", dest="model_version", type=int, choices=[1, 2], default=None)
     p.add_argument("--side-face", dest="side_face", type=int, choices=[0, 1], default=None)
     p.add_argument("--tilted-face", dest="tilted_face", type=int, choices=[0, 1], default=None)
-    p.add_argument("--file-url", dest="file_url", help="SoundClone source audio/video URL")
+    p.add_argument("--file-url", dest="file_url", help="SoundClone source audio/video URL; Wan 3.0 GZ reference document URL")
+    p.add_argument("--link-url", dest="link_url", help="Wan 3.0 GZ reference webpage URL")
     p.add_argument("--content-text", dest="content_text", help="SoundClone script text")
     p.add_argument("--model-id", dest="model_id", help="SoundClone modelId from preview")
     p.add_argument("--sound-version", dest="sound_version", choices=["v1", "v2"], default=None)
@@ -1933,9 +2021,9 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--srt-url", dest="srt_url", help="video-translate custom SRT URL")
     p.add_argument("--srt-role", dest="srt_role", choices=["input", "output"], help="video-translate SRT role")
     p.add_argument("--brand-glossary-id", dest="brand_glossary_id", help="video-translate brand glossary ID")
-    p.add_argument("--audio", action="append", help="Reference audio URL (MiniMax / Seedance / Seedance 2.5 / Seedance 2.0 933 / GZ 2.0)")
-    p.add_argument("--first-image", dest="first_image", help="First frame URL (Seedance / VEO / Flux3 / MiniMax / Kling)")
-    p.add_argument("--last-image", dest="last_image", help="Last frame URL (Seedance / VEO / Flux3 / MiniMax / Kling)")
+    p.add_argument("--audio", action="append", help="Reference audio URL (MiniMax / Seedance / Seedance 2.5 / Seedance 2.0 933 / GZ 2.0 / Wan 3.0)")
+    p.add_argument("--first-image", dest="first_image", help="First frame URL (Seedance / VEO / Flux3 / MiniMax / Kling / Wan 3.0 GZ)")
+    p.add_argument("--last-image", dest="last_image", help="Last frame URL (Seedance / VEO / Flux3 / MiniMax / Kling / Wan 3.0 GZ)")
     p.add_argument("--interval", type=float, default=DEFAULT_POLL_INTERVAL)
     p.add_argument("--timeout", type=float, default=DEFAULT_POLL_TIMEOUT)
     p.add_argument("--download", help="Download result media to path")

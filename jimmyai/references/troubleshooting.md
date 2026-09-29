@@ -121,6 +121,19 @@
 - Poll with `GET /api/open-api/v1/videos/{taskId}`.
 - Docs: https://docs.viraltok.ai/zh/api-reference/kling/create.md
 
+## Wan 3.0 (`wan3.0` / `wan3.0-gz`)
+
+- Use `POST /api/open-api/v1/wan/videos`; both models share the endpoint but bill separately.
+- Billing is `per_second` by resolution: `wan3.0-{480p|720p|1080p}` or `wan3.0-gz-{480p|720p|1080p}`. `模型配置不存在或已禁用` means that resolution's billing model is not enabled — try another resolution or contact support.
+- `wan3.0`: `prompt` required; `duration` 4–30 (default 4); `resolution` default `480P`.
+- `wan3.0-gz`: `prompt` or reference media required; `duration` 2–30 (default 5); `aspect_ratio` also allows `adaptive`; `resolution` default `720P`.
+- `时长仅支持 …` / `比例仅支持 …` errors: fix `duration` / `aspect_ratio` for the chosen model (`adaptive` is `wan3.0-gz` only).
+- Reference limits: images ≤10, videos ≤5 (total ≤15 s), audios ≤5 (total ≤15 s). On `wan3.0-gz`, reference video seconds + `duration` must be ≤ 30.
+- `first_image` / `last_image` / `file_url` / `link_url` are `wan3.0-gz` only; on `wan3.0` they return `不支持首尾帧` / `不支持参考文件/网页`.
+- `首尾帧不能与参考…同时使用`: frames and references/file/link are different modes — send one. `file_url 与 link_url 只能二选一`: pick one. `传 last_image 时必须同时传 first_image`: add the first frame.
+- Poll with `GET /api/open-api/v1/videos/{taskId}`.
+- Docs: Wan 3.0 https://docs.viraltok.ai/zh/api-reference/wan/create.md · Wan 3.0 GZ https://docs.viraltok.ai/zh/api-reference/wan/create-gz.md
+
 ## Seedance 2.5 (`seedance-2.5` / `seedance-2.5-sp` / `seedance2.5-gz`)
 
 - Use `POST /api/open-api/v1/seedance25/videos` with `"model": "seedance-2.5"`, `"seedance-2.5-sp"`, or `"seedance2.5-gz"`.

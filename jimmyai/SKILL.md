@@ -1,6 +1,6 @@
 ---
 name: "jimmyai"
-description: "Integrate JimmyAI image and video generation APIs (Sora, VEO, Gemini Omni, Seedance including SP economy, Mini 特价版, Seedance 2.5 / 2.5 SP, MiniMax H3, Kling O3, Seedance 2.0 933, Seedance 2.0 GZ, Seedance 933 720p, Flux 3, Grok 1.5 video, digital human, GPT Image, Grok Imagine Image, remove-bg, remove-subtitle, video-translate, upscale, super-resolution, SoundClone, video understand) via the bundled CLI (`scripts/jimmyai.py`). Use when the user asks to connect JimmyAI, generate AI images/videos, remove image backgrounds, remove video subtitles, translate videos, upscale images, clone voices, poll async tasks, set up API keys, or integrate https://api.viraltok.ai — including zero-experience onboarding. Requires `JIMMYAI_API_KEY`."
+description: "Integrate JimmyAI image and video generation APIs (Sora, VEO, Gemini Omni, Seedance including SP economy, Mini 特价版, Seedance 2.5 / 2.5 SP, MiniMax H3, Kling O3, Wan 3.0 / Wan 3.0 GZ, Seedance 2.0 933, Seedance 2.0 GZ, Seedance 933 720p, Flux 3, Grok 1.5 video, digital human, GPT Image, Grok Imagine Image, remove-bg, remove-subtitle, video-translate, upscale, super-resolution, SoundClone, video understand) via the bundled CLI (`scripts/jimmyai.py`). Use when the user asks to connect JimmyAI, generate AI images/videos, remove image backgrounds, remove video subtitles, translate videos, upscale images, clone voices, poll async tasks, set up API keys, or integrate https://api.viraltok.ai — including zero-experience onboarding. Requires `JIMMYAI_API_KEY`."
 ---
 
 # JimmyAI API Skill
@@ -12,7 +12,7 @@ This skill helps users integrate JimmyAI from zero — register, get a key, send
 ## When to use
 
 - First-time JimmyAI setup (account, API key, recharge, env var)
-- Generate a video (Sora / Gemini Omni / VEO / Seedance / Seedance 2.5 / MiniMax H3 / Kling O3 / Flux 3 / Grok 1.5 / Seedance 2.0 933 / GZ / 933 720p)
+- Generate a video (Sora / Gemini Omni / VEO / Seedance / Seedance 2.5 / MiniMax H3 / Kling O3 / Wan 3.0 / Flux 3 / Grok 1.5 / Seedance 2.0 933 / GZ / 933 720p)
 - Digital human lip-sync, video translate, super-resolution, SoundClone
 - Generate an image (sync or async); upscale images
 - Remove image background (sync `remove-bg`)
@@ -66,6 +66,7 @@ If `JIMMYAI_API_KEY` is missing, guide the user to set it locally and confirm wh
 | Seedance video (SP / MD / Fast I2V / Mini / GZ / 933 720p / etc.) | `create-seedance-video` → poll `GET /videos/{taskId}` |
 | MiniMax H3 video | `create-minimax-video` → poll `GET /videos/{taskId}` |
 | Kling O3 video | `create-kling-video` → poll `GET /videos/{taskId}` |
+| Wan 3.0 / Wan 3.0 GZ video | `create-wan-video` → poll `GET /videos/{taskId}` |
 | Seedance 2.5 / 2.5 SP video | `create-seedance25-video` → poll `GET /videos/{taskId}` |
 | Flux 3 video (draft → enhance) | `create-flux3-video` → poll `GET /videos/{taskId}` |
 | Seedance 2.0 933 video | `create-seedance20933-video` → poll `GET /videos/{taskId}` |
@@ -76,7 +77,7 @@ If `JIMMYAI_API_KEY` is missing, guide the user to set it locally and confirm wh
 | Upload reference media (image/video/audio) | `upload-file` → `POST /files/upload` |
 | Create + wait in one step | `create-and-poll` |
 
-For Manxue Seedance, STD, image edits, image understanding, SP assets, or balance webhooks, fetch the specific page from https://docs.viraltok.ai/llms.txt before calling. Key docs: SP https://docs.viraltok.ai/zh/api-reference/seedance/sp/create.md · Seedance 2.5 https://docs.viraltok.ai/zh/api-reference/seedance/25/create.md · Flux 3 https://docs.viraltok.ai/zh/api-reference/flux3/create.md · Grok video https://docs.viraltok.ai/zh/api-reference/grok/create.md · Digital human https://docs.viraltok.ai/zh/api-reference/digital-human/create.md · Upscale https://docs.viraltok.ai/zh/api-reference/images/upscale.md · VEO https://docs.viraltok.ai/zh/api-reference/veo/create-frames.md · SoundClone https://docs.viraltok.ai/zh/api-reference/sound-clone/clone-create.md · Video translate https://docs.viraltok.ai/zh/api-reference/video-translate/create.md
+For Manxue Seedance, STD, image edits, image understanding, SP assets, or balance webhooks, fetch the specific page from https://docs.viraltok.ai/llms.txt before calling. Key docs: SP https://docs.viraltok.ai/zh/api-reference/seedance/sp/create.md · Seedance 2.5 https://docs.viraltok.ai/zh/api-reference/seedance/25/create.md · Flux 3 https://docs.viraltok.ai/zh/api-reference/flux3/create.md · Wan 3.0 https://docs.viraltok.ai/zh/api-reference/wan/create.md · Wan 3.0 GZ https://docs.viraltok.ai/zh/api-reference/wan/create-gz.md · Grok video https://docs.viraltok.ai/zh/api-reference/grok/create.md · Digital human https://docs.viraltok.ai/zh/api-reference/digital-human/create.md · Upscale https://docs.viraltok.ai/zh/api-reference/images/upscale.md · VEO https://docs.viraltok.ai/zh/api-reference/veo/create-frames.md · SoundClone https://docs.viraltok.ai/zh/api-reference/sound-clone/clone-create.md · Video translate https://docs.viraltok.ai/zh/api-reference/video-translate/create.md
 
 ## Workflow
 
@@ -423,6 +424,50 @@ python "$JIMMYAI_CLI" create-kling-video \
 ```
 
 `kling-o3`: billed `per_task` (flat per request; `duration` does not change cost). Duration 3–15 s (default 6); resolution `720p`/`1080p`; max 3 reference images; optional `--first-image` / `--last-image` / `--generate-audio`. Docs: https://docs.viraltok.ai/zh/api-reference/kling/create.md
+
+### Wan 3.0 / Wan 3.0 GZ video (async)
+
+```bash
+python "$JIMMYAI_CLI" create-and-poll \
+  --type wan-video \
+  --model wan3.0-gz \
+  --prompt "图1 中的人物在海边奔跑，电影感运镜" \
+  --duration 5 \
+  --aspect-ratio "9:16" \
+  --resolution 720p \
+  --image "https://example.com/person.png" \
+  --download output.mp4
+```
+
+Or create only:
+
+```bash
+python "$JIMMYAI_CLI" create-wan-video \
+  --model wan3.0 \
+  --prompt "A cinematic product shot with natural lighting" \
+  --duration 4 \
+  --resolution 480p \
+  --image "https://example.com/reference.png" \
+  --video "https://example.com/reference.mp4" \
+  --audio "https://example.com/reference.mp3"
+```
+
+Both models use `POST /api/open-api/v1/wan/videos`, are billed `per_second` by resolution, and accept max 10 `--image`, 5 `--video` (total ≤15 s), 5 `--audio` (total ≤15 s).
+
+- `wan3.0`: prompt required; duration 4–30 s (default 4); ratio `9:16`/`16:9`/`3:4`/`4:3`/`1:1`; resolution default `480p`; billing `wan3.0-{480p|720p|1080p}`.
+- `wan3.0-gz`: prompt optional when any input is given; duration 2–30 s (default 5); also `adaptive` ratio; resolution default `720p`; billing `wan3.0-gz-{480p|720p|1080p}`. With reference videos, reference seconds + `duration` ≤ 30.
+- `wan3.0-gz` only: `--first-image` / `--last-image` (first-and-last frame; last requires first), `--file-url` (reference document: pdf/pptx/docx/xlsx/txt/md…), `--link-url` (public webpage). Frames cannot mix with references/file/link; file and link are mutually exclusive.
+
+```bash
+python "$JIMMYAI_CLI" create-wan-video --model wan3.0-gz \
+  --prompt "从微笑逐渐变为大笑" \
+  --first-image "https://example.com/first.png" --last-image "https://example.com/last.png"
+
+python "$JIMMYAI_CLI" create-wan-video --model wan3.0-gz \
+  --file-url "https://example.com/product.pptx" --resolution 480p --duration 10
+```
+
+Docs: Wan 3.0 https://docs.viraltok.ai/zh/api-reference/wan/create.md · Wan 3.0 GZ https://docs.viraltok.ai/zh/api-reference/wan/create-gz.md
 
 ### Seedance 2.5 video (async)
 

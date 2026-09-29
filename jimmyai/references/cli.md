@@ -31,6 +31,7 @@ export JIMMYAI_BASE_URL="https://api.viraltok.ai"
 | `create-seedance-video` | Create Seedance video task (async) |
 | `create-minimax-video` | Create MiniMax H3 video task (async) |
 | `create-kling-video` | Create Kling O3 video task (async) |
+| `create-wan-video` | Create Wan 3.0 / Wan 3.0 GZ video task (async) |
 | `create-seedance25-video` | Create Seedance 2.5 video task (async) |
 | `create-seedance20933-video` | Create Seedance 2.0 933 video task (async) |
 | `create-gemini-video` | Create Gemini Omni video task |
@@ -177,6 +178,34 @@ python "$JIMMYAI_CLI" create-kling-video \
 ```
 
 `kling-o3`: billed `per_task` (flat per request). Duration 3–15 s (default 6); resolution `720p`/`1080p`; max 3 `--image`; optional first/last frames and `--generate-audio`. Docs: https://docs.viraltok.ai/zh/api-reference/kling/create.md
+
+## create-wan-video
+
+`POST /api/open-api/v1/wan/videos` — poll with `poll --type video`.
+
+```bash
+python "$JIMMYAI_CLI" create-wan-video \
+  --model wan3.0-gz \
+  --prompt "图1 中的人物在海边奔跑，电影感运镜" \
+  --duration 5 \
+  --aspect-ratio "9:16" \
+  --resolution 720p \
+  --image "https://example.com/person.png"
+```
+
+| Flag | Notes |
+|------|-------|
+| `--model` | `wan3.0` (default) or `wan3.0-gz` |
+| `--prompt` / `--prompt-file` | Required for `wan3.0`; optional for `wan3.0-gz` when `--image` / `--video` / `--audio` is given |
+| `--duration` | `wan3.0` 4–30 (default 4); `wan3.0-gz` 2–30 (default 5). Omit to use the server default |
+| `--aspect-ratio` | `9:16` / `16:9` / `3:4` / `4:3` / `1:1`; `wan3.0-gz` also `adaptive` |
+| `--resolution` | `480p` / `720p` / `1080p`. Omit for server default (`wan3.0` 480p, `wan3.0-gz` 720p) |
+| `--image` / `--video` / `--audio` | Repeatable references: max 10 / 5 / 5; videos and audios each total ≤15 s |
+| `--first-image` / `--last-image` | `wan3.0-gz` only. First(+last) frame; last requires first; not combinable with references / file / link |
+| `--file-url` | `wan3.0-gz` only. Reference document URL (pdf/pptx/docx/xlsx/txt/md…) |
+| `--link-url` | `wan3.0-gz` only. Public webpage URL; mutually exclusive with `--file-url` |
+
+Billing `per_second` by resolution: `wan3.0-{res}` or `wan3.0-gz-{res}`. Docs: Wan 3.0 https://docs.viraltok.ai/zh/api-reference/wan/create.md · Wan 3.0 GZ https://docs.viraltok.ai/zh/api-reference/wan/create-gz.md
 
 ## create-seedance25-video
 
@@ -458,7 +487,7 @@ python "$JIMMYAI_CLI" create-and-poll \
   --download output.mp4
 ```
 
-`--type` values: `video`, `gemini-video`, `seedance-video`, `seedance25-video`, `seedance20933-video`, `minimax-video`, `kling-video`, `remove-subtitle`, `video-translate`, `grok-video`, `digital-human`, `flux3-video`, `veo-frames`, `super-resolution`, `sound-clone`, `sound-clone-audio`, `image`
+`--type` values: `video`, `gemini-video`, `seedance-video`, `seedance25-video`, `seedance20933-video`, `minimax-video`, `kling-video`, `wan-video`, `remove-subtitle`, `video-translate`, `grok-video`, `digital-human`, `flux3-video`, `veo-frames`, `super-resolution`, `sound-clone`, `sound-clone-audio`, `image`
 
 For `--type remove-subtitle`, pass `--video-url` (no `--prompt`). Model defaults to `video_remove_subtitle`.
 
@@ -523,6 +552,20 @@ python "$JIMMYAI_CLI" create-and-poll \
   --aspect-ratio "16:9" \
   --resolution 720p \
   --image "https://example.com/ref.jpg" \
+  --download output.mp4
+```
+
+Wan 3.0 GZ example (`--type wan-video` sends `--duration` / `--resolution` from the shared defaults `12` / `720p` unless overridden):
+
+```bash
+python "$JIMMYAI_CLI" create-and-poll \
+  --type wan-video \
+  --model wan3.0-gz \
+  --prompt "图1 中的人物在海边奔跑，电影感运镜" \
+  --duration 5 \
+  --aspect-ratio "9:16" \
+  --resolution 720p \
+  --image "https://example.com/person.png" \
   --download output.mp4
 ```
 
