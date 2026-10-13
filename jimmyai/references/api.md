@@ -15,7 +15,7 @@ Do **not** copy another family's create URL and only change `model`.
 | Models | Create path |
 |--------|-------------|
 | Seedance 2.0 (`seedance2.0-*`, `sd2_*`, …) | `POST /api/open-api/v1/seedance/videos` |
-| Seedance 2.5 (`seedance-2.5*`, `seedance2.5*`) | `POST /api/open-api/v1/seedance25/videos` |
+| Seedance 2.5 (`seedance-2.5*`, `seedance2.5*`, `sd2.5-*`) | `POST /api/open-api/v1/seedance25/videos` |
 | `minimax-h3` / `minimax-h3-gz` | `POST /api/open-api/v1/minimax/videos` |
 | `kling-o3*` | `POST /api/open-api/v1/kling/videos` |
 | `wan3.0*` | `POST /api/open-api/v1/wan/videos` |
@@ -315,12 +315,14 @@ Asset audit (Manxue routes only):
 
 | Field | Required | Notes |
 |-------|----------|-------|
-| model | yes | `gpt-image-2`, `nano-banana`, `nano-banana-2`, `nano-banana-pro`, `doubao-seedream-5-0-pro`, `grok-imagine-image`, `grok-imagine-image-2` |
+| model | yes | `gpt-image-2`, `nano-banana`, `nano-banana-2`, `nano-banana-2.1`, `nano-banana-pro`, `doubao-seedream-5-0-pro`, `grok-imagine-image`, `grok-imagine-image-2` |
 | prompt | yes | text description |
 | ratio | no | `auto`, `1:1`, `16:9`, `9:16`, etc. |
 | resolution | no | `1k`, `2k`, `4k` (Seedream 5.0 Pro / Grok Imagine Image: `1k`/`2k` only) |
 | quality | no | `low`, `medium`, `high` (gpt-image-2) |
 | images | no | reference URLs or base64 (Seedream: max 10; Grok Imagine Image edit: max 3; per image limits vary by model) |
+
+**Nano Banana 2.1** (`nano-banana-2.1`): async `POST /api/open-api/v1/images`; `resolution` is `1k`, `2k`, or `4k` (default `1k`); at most 8 reference images. Poll `GET /api/open-api/v1/images/{taskId}`. Docs: https://docs.viraltok.ai/zh/api-reference/images/nano-banana/create.md
 
 **Seedream 5.0 Pro** (`doubao-seedream-5-0-pro`): async `POST /api/open-api/v1/images`, poll `GET /api/open-api/v1/images/{taskId}`. Billing = resolution base (`doubao-seedream-5-0-pro-1k` / `-2k`) + `max(0, refs - 1) × doubao-seedream-5-0-pro-ref` (first reference free). Resolution `1k`/`2k` (default `2k`). Ratios: `1:1`, `4:3`, `3:4`, `16:9`, `9:16`, `3:2`, `2:3`, `21:9`, `auto`. Docs: https://docs.viraltok.ai/zh/api-reference/images/seedream-5-0-pro/create.md
 
@@ -596,7 +598,7 @@ Docs: Wan 3.0 https://docs.viraltok.ai/zh/api-reference/wan/create.md · Wan 3.0
 
 | Field | Required | Notes |
 |-------|----------|-------|
-| model | yes | `seedance-2.5` (aliases `seedance2.5` / `seedance_2.5` / `seedance25`), `seedance-2.5-sp`, or `seedance2.5-gz` |
+| model | yes | `seedance-2.5` (aliases `seedance2.5` / `seedance_2.5` / `seedance25`), `seedance-2.5-sp`, `seedance2.5-gz`, `seedance2.5-md`, `sd2.5-720p`, or `sd2.5-720p-ac` |
 | prompt | yes | 1–5000 chars |
 | duration | no | Standard / SP 4–30 (default `4`) |
 | aspect_ratio / ratio | no | `16:9` / `9:16` / `1:1`, default `9:16` |
@@ -611,8 +613,11 @@ Billing:
 - `seedance-2.5`: `per_second` by resolution (`seedance-2.5-480p` / `seedance-2.5-720p`; `unit_price × duration`). Request `model` stays `seedance-2.5`.
 - `seedance-2.5-sp`: `per_second` fixed **0.5**/s (`seedance-2.5-sp`; `0.5 × duration`).
 - `seedance2.5-gz`: precharged `per_second` by resolution (`seedance2.5-gz-480p` / `seedance2.5-gz-720p`). With reference videos: `seedance2.5-gz-video-*` and precharged seconds = output + ref video duration. `duration=-1` precharges 30s. After success, settled from `completion_tokens` (one refund or extra-charge row). Query returns `data.usage.completion_tokens` / `data.usage.total_tokens`.
+- `seedance2.5-md`: fixed 15 s and `per_task`; `16:9` / `9:16`; at most 9 reference images; no resolution, video, audio, or frame fields.
+- `sd2.5-720p`: fixed 720p, duration 4–30 s, `per_second`; at most 30 images / 10 videos / 10 audios; no frame fields.
+- `sd2.5-720p-ac`: same fixed-720p request contract, but `per_task`; duration does not change price.
 
-Docs: https://docs.viraltok.ai/zh/api-reference/seedance/25/create.md · GZ: https://docs.viraltok.ai/zh/api-reference/seedance/25/create-gz.md
+Docs: https://docs.viraltok.ai/zh/api-reference/seedance/25/create.md · MD: https://docs.viraltok.ai/zh/api-reference/seedance/25/create-ar.md · 720p: https://docs.viraltok.ai/zh/api-reference/seedance/25/create-sd25-720p.md · 720p AC: https://docs.viraltok.ai/zh/api-reference/seedance/25/create-sd25-720p-ac.md · GZ: https://docs.viraltok.ai/zh/api-reference/seedance/25/create-gz.md
 
 Standard:
 

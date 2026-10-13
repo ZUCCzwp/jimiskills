@@ -50,6 +50,7 @@ def _is_seedance25_model(model: str) -> bool:
         "seedance-2.5" in m
         or "seedance2.5" in m
         or m.startswith("seedance25")
+        or m.startswith("sd2.5-")
     )
 
 
@@ -187,12 +188,15 @@ def _base_url(override: Optional[str]) -> str:
 
 def _api_key(dry_run: bool) -> str:
     key = os.getenv("JIMMYAI_API_KEY", "").strip()
+    if dry_run:
+        if key:
+            print("JIMMYAI_API_KEY is set; dry-run output is redacted.", file=sys.stderr)
+        else:
+            _warn("JIMMYAI_API_KEY is not set; dry-run only.")
+        return "dry-run-key"
     if key:
         print("JIMMYAI_API_KEY is set.", file=sys.stderr)
         return key
-    if dry_run:
-        _warn("JIMMYAI_API_KEY is not set; dry-run only.")
-        return "dry-run-key"
     _die("JIMMYAI_API_KEY is not set. Export it before running.")
     return ""
 
@@ -702,26 +706,7 @@ def cmd_create_wan_video(args: argparse.Namespace) -> None:
 def cmd_create_seedance25_video(args: argparse.Namespace) -> None:
     api_key = _api_key(args.dry_run)
     base = _base_url(args.base_url)
-    prompt = _read_prompt(args.prompt, args.prompt_file)
-    body: Dict[str, Any] = {
-        "model": args.model,
-        "prompt": prompt,
-        "duration": args.duration,
-    }
-    if args.aspect_ratio:
-        body["aspect_ratio"] = args.aspect_ratio
-    if args.resolution:
-        body["resolution"] = args.resolution
-    if args.image:
-        body["reference_images"] = args.image
-    if getattr(args, "video", None):
-        body["reference_videos"] = args.video
-    if args.audio:
-        body["reference_audios"] = args.audio
-    if getattr(args, "first_image", None):
-        body["first_image"] = args.first_image
-    if getattr(args, "last_image", None):
-        body["last_image"] = args.last_image
+    body = _seedance25_video_body(args)
 
     url = f"{base}/api/open-api/v1/seedance25/videos"
     _assert_model_matches_endpoint(args.model, url)
@@ -741,6 +726,41 @@ def cmd_create_seedance25_video(args: argparse.Namespace) -> None:
     task_id = (payload.get("data") or {}).get("task_id")
     if task_id:
         print(task_id)
+
+
+def _seedance25_video_body(args: argparse.Namespace) -> Dict[str, Any]:
+    prompt = _read_prompt(args.prompt, args.prompt_file)
+    model_key = _norm_model_key(args.model)
+    is_md = model_key in {"seedance2.5-md", "seedance-2.5-md", "seedance25-md"}
+    is_fixed_720p = model_key in {"sd2.5-720p", "sd2.5-720p-ac"}
+    body: Dict[str, Any] = {
+        "model": args.model,
+        "prompt": prompt,
+    }
+    if not is_md:
+        body["duration"] = args.duration
+    if args.aspect_ratio:
+        body["aspect_ratio"] = args.aspect_ratio
+    if args.resolution and not (is_md or is_fixed_720p):
+        body["resolution"] = args.resolution
+    if args.image:
+        body["reference_images"] = args.image
+    if getattr(args, "video", None):
+        body["reference_videos"] = args.video
+    if args.audio:
+        body["reference_audios"] = args.audio
+    if getattr(args, "first_image", None):
+        body["first_image"] = args.first_image
+    if getattr(args, "last_image", None):
+        body["last_image"] = args.last_image
+    if is_md:
+        if args.video or args.audio or getattr(args, "first_image", None) or getattr(args, "last_image", None):
+            _die("seedance2.5-md supports prompt and up to 9 reference images; video, audio, and frame inputs are not supported.")
+        if len(args.image or []) > 9:
+            _die("seedance2.5-md supports at most 9 --image values.")
+    if is_fixed_720p and (getattr(args, "first_image", None) or getattr(args, "last_image", None)):
+        _die(f"{args.model} does not support --first-image or --last-image.")
+    return body
 
 
 def _parse_optional_bool(value: str) -> bool:
@@ -798,20 +818,32 @@ def cmd_create_seedance20933_video(args: argparse.Namespace) -> None:
         print(task_id)
 
 
-def cmd_create_image(args: argparse.Namespace) -> None:
-    api_key = _api_key(args.dry_run)
-    base = _base_url(args.base_url)
+def _async_image_body(args: argparse.Namespace) -> Dict[str, Any]:
     prompt = _read_prompt(args.prompt, args.prompt_file)
+    resolution = args.resolution
+    if getattr(args, "type", None) == "image" and resolution == "720p":
+        resolution = None
     body: Dict[str, Any] = {
         "model": args.model,
         "prompt": prompt,
     }
     if args.ratio:
         body["ratio"] = args.ratio
-    if args.resolution:
-        body["resolution"] = args.resolution
+    if resolution:
+        body["resolution"] = resolution
     if args.quality:
         body["quality"] = args.quality
+    if args.image:
+        body["images"] = args.image
+    if _norm_model_key(args.model) == "nano-banana-2.1" and len(args.image or []) > 8:
+        _die("nano-banana-2.1 supports at most 8 --image values.")
+    return body
+
+
+def cmd_create_image(args: argparse.Namespace) -> None:
+    api_key = _api_key(args.dry_run)
+    base = _base_url(args.base_url)
+    body = _async_image_body(args)
 
     payload = _request(
         "POST",
@@ -1555,26 +1587,7 @@ def cmd_create_and_poll(args: argparse.Namespace) -> None:
         url = f"{base}/api/open-api/v1/wan/videos"
         poll_type = "video"
     elif args.type == "seedance25-video":
-        prompt = _read_prompt(args.prompt, args.prompt_file)
-        body = {
-            "model": args.model,
-            "prompt": prompt,
-            "duration": args.duration,
-        }
-        if args.aspect_ratio:
-            body["aspect_ratio"] = args.aspect_ratio
-        if args.resolution:
-            body["resolution"] = args.resolution
-        if args.image:
-            body["reference_images"] = args.image
-        if getattr(args, "video", None):
-            body["reference_videos"] = args.video
-        if getattr(args, "audio", None):
-            body["reference_audios"] = args.audio
-        if getattr(args, "first_image", None):
-            body["first_image"] = args.first_image
-        if getattr(args, "last_image", None):
-            body["last_image"] = args.last_image
+        body = _seedance25_video_body(args)
         url = f"{base}/api/open-api/v1/seedance25/videos"
         poll_type = "video"
     elif args.type == "seedance20933-video":
@@ -1603,12 +1616,7 @@ def cmd_create_and_poll(args: argparse.Namespace) -> None:
         url = f"{base}/api/open-api/v1/seedance/videos"
         poll_type = "video"
     elif args.type == "image":
-        prompt = _read_prompt(args.prompt, args.prompt_file)
-        body = {"model": args.model, "prompt": prompt}
-        if args.ratio:
-            body["ratio"] = args.ratio
-        if args.quality:
-            body["quality"] = args.quality
+        body = _async_image_body(args)
         url = f"{base}/api/open-api/v1/images"
         poll_type = "image"
     else:
@@ -1834,7 +1842,7 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument(
         "--model",
         default="seedance-2.5",
-        help="seedance-2.5 (standard) or seedance-2.5-sp (SP, 0.5/s, 720p only)",
+        help="Seedance 2.5 model ID, including seedance2.5-md and sd2.5-720p variants",
     )
     p.add_argument("--duration", type=int, default=4)
     p.add_argument("--aspect-ratio", dest="aspect_ratio", default="9:16")
@@ -1886,6 +1894,7 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--ratio", default="auto")
     p.add_argument("--resolution", default="1k")
     p.add_argument("--quality", default="low")
+    p.add_argument("--image", action="append", help="Reference image URL or base64 data URI (repeatable)")
     p.set_defaults(func=cmd_create_image)
 
     p = sub.add_parser("generate-image", help="Sync text-to-image")

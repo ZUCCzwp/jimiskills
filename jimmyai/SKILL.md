@@ -1,6 +1,6 @@
 ---
 name: "jimmyai"
-description: "Integrate JimmyAI image and video generation APIs (Sora, VEO, Gemini Omni, Seedance including SP economy, Mini 特价版, Seedance 2.5 / 2.5 SP, MiniMax H3, Kling O3, Wan 3.0 / Wan 3.0 GZ, Seedance 2.0 GZ, Flux 3, Grok 1.5 video, digital human, GPT Image, Grok Imagine Image, remove-bg, remove-subtitle, video-translate, upscale, super-resolution, SoundClone, video understand) via the bundled CLI (`scripts/jimmyai.py`). Use when the user asks to connect JimmyAI, list available models/pricing from the catalog API, generate AI images/videos, remove image backgrounds, remove video subtitles, translate videos, upscale images, clone voices, poll async tasks, set up API keys, or integrate https://api.viraltok.ai — including zero-experience onboarding. Requires `JIMMYAI_API_KEY` for most calls; `list-models` works without a key."
+description: "Integrate JimmyAI image and video generation APIs (Sora, VEO, Gemini Omni, Seedance including SP economy, Mini 特价版 and Seedance 2.5 variants, MiniMax H3, Kling O3, Wan 3.0 / Wan 3.0 GZ, Seedance 2.0 GZ, Flux 3, Grok 1.5 video, digital human, GPT Image, Nano Banana, Grok Imagine Image, remove-bg, remove-subtitle, video-translate, upscale, super-resolution, SoundClone, video understand) via the bundled CLI (`scripts/jimmyai.py`). Use when the user asks to connect JimmyAI, list available models/pricing from the catalog API, generate AI images/videos, remove image backgrounds, remove video subtitles, translate videos, upscale images, clone voices, poll async tasks, set up API keys, or integrate https://api.viraltok.ai — including zero-experience onboarding. Requires `JIMMYAI_API_KEY` for most calls; `list-models` works without a key."
 ---
 
 # JimmyAI API Skill
@@ -67,7 +67,7 @@ If `JIMMYAI_API_KEY` is missing, guide the user to set it locally and confirm wh
 | MiniMax H3 video | `create-minimax-video` → `POST /minimax/videos` → poll `GET /videos/{taskId}` |
 | Kling O3 video | `create-kling-video` → `POST /kling/videos` → poll `GET /videos/{taskId}` |
 | Wan 3.0 / Wan 3.0 GZ video | `create-wan-video` → `POST /wan/videos` → poll `GET /videos/{taskId}` |
-| Seedance 2.5 / 2.5 SP video | `create-seedance25-video` → `POST /seedance25/videos` → poll `GET /videos/{taskId}` |
+| Seedance 2.5 (standard / SP / MD / fixed 720p) | `create-seedance25-video` → `POST /seedance25/videos` → poll `GET /videos/{taskId}` |
 | Flux 3 video (draft → enhance) | `create-flux3-video` → `POST /flux3/videos` → poll `GET /videos/{taskId}` |
 | Seedance 2.0 933 video | `create-seedance20933-video` → `POST /seedance/videos` → poll `GET /videos/{taskId}` |
 | SoundClone preview / audio | `sound-clone` / `sound-clone-audio` → poll `GET /audios/{id}` (`--type audio`) |
@@ -85,7 +85,7 @@ If `JIMMYAI_API_KEY` is missing, guide the user to set it locally and confirm wh
 | Models | Create path |
 |--------|-------------|
 | Seedance 2.0 (`seedance2.0-*`, `sd2_*`, …) | `POST /api/open-api/v1/seedance/videos` |
-| Seedance 2.5 (`seedance-2.5*`, `seedance2.5*`) | `POST /api/open-api/v1/seedance25/videos` |
+| Seedance 2.5 (`seedance-2.5*`, `seedance2.5*`, `sd2.5-*`) | `POST /api/open-api/v1/seedance25/videos` |
 | `minimax-h3` / `minimax-h3-gz` | `POST /api/open-api/v1/minimax/videos` |
 | `kling-o3*` | `POST /api/open-api/v1/kling/videos` |
 | `wan3.0*` | `POST /api/open-api/v1/wan/videos` |
@@ -133,6 +133,7 @@ Response `code`: `20000` = success, `20001` = auth failure, `20002` = bad params
 - Sync image response: default `response_format=url` (returns `data[].url`); use `b64_json` for base64
 - Sync image timeout: set client timeout ≥ 180 s (generation takes 30–120 s)
 - Generated URLs valid ~3 days — copy to own storage
+- `--dry-run` never prints the real API key; the displayed bearer value is a placeholder
 - Prefer bundled CLI; do not modify `scripts/jimmyai.py` unless the user asks
 - For full API params, see `references/api.md`
 - For step-by-step beginner guide, see `references/quickstart.md`
@@ -166,6 +167,21 @@ python "$JIMMYAI_CLI" generate-image \
   --prompt "Cyberpunk city at night, neon signs" \
   --quality high
 ```
+
+### Nano Banana 2.1 image (async)
+
+```bash
+python "$JIMMYAI_CLI" create-and-poll \
+  --type image \
+  --model nano-banana-2.1 \
+  --prompt "Keep the product design and place it on a marble table" \
+  --ratio "16:9" \
+  --resolution 4k \
+  --image "https://example.com/product.png" \
+  --download output.png
+```
+
+Resolution is `1k`, `2k`, or `4k` (default `1k`); use at most 8 reference images. Docs: https://docs.viraltok.ai/zh/api-reference/images/nano-banana/create.md
 
 ### Remove background (sync)
 
@@ -528,6 +544,21 @@ python "$JIMMYAI_CLI" create-seedance25-video \
 `seedance-2.5`: billed `per_second` by resolution (`seedance-2.5-480p` / `seedance-2.5-720p`). Duration 4–30 s (default 4); aspect_ratio `16:9|9:16|1:1`; resolution `480p|720p`; max 30 images / 10 videos (each & total ≤30.2s, fps ≤60) / 10 audios (each ≤30s). Docs: https://docs.viraltok.ai/zh/api-reference/seedance/25/create.md
 
 `seedance-2.5-sp`: billed `per_second` at fixed **0.5**/s (`seedance-2.5-sp`). Duration 4–30 s; aspect_ratio `16:9|9:16|1:1`; resolution **720p only**; same media limits as standard; optional `--first-image` / `--last-image` (mutually exclusive with `--image`). Same endpoint and docs.
+
+Additional public models on the same endpoint:
+
+- `seedance2.5-md`: fixed 15 s, `per_task`; `16:9` / `9:16`; prompt plus at most 9 reference images. Do not send duration, resolution, video, audio, or frame fields. Docs: https://docs.viraltok.ai/zh/api-reference/seedance/25/create-ar.md
+- `sd2.5-720p`: fixed 720p, 4–30 s, `per_second`; up to 30 images, 10 videos, and 10 audios; no first/last frames. Faces in references are preserved. Docs: https://docs.viraltok.ai/zh/api-reference/seedance/25/create-sd25-720p.md
+- `sd2.5-720p-ac`: same request limits and fixed 720p output, but `per_task`; duration changes output length, not price. Docs: https://docs.viraltok.ai/zh/api-reference/seedance/25/create-sd25-720p-ac.md
+
+```bash
+python "$JIMMYAI_CLI" create-seedance25-video \
+  --model sd2.5-720p \
+  --prompt "A runner crossing the finish line, tracking shot" \
+  --duration 8 \
+  --aspect-ratio "16:9" \
+  --image "https://example.com/person.png"
+```
 
 GZ (`seedance2.5-gz`, precharged per-second `seedance2.5-gz-480p` / `seedance2.5-gz-720p`; with reference videos uses `seedance2.5-gz-video-*` and precharged seconds = output + ref video duration; settled from `completion_tokens` after success; query returns `data.usage`):
 

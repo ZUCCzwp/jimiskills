@@ -57,6 +57,7 @@ export JIMMYAI_BASE_URL="https://api.viraltok.ai"
 | `create-and-poll` | Create task and wait for completion |
 
 All commands support `--dry-run` (prints request, no network).
+When an API key is already set, dry-run output replaces it with `dry-run-key` instead of printing the credential.
 
 ## create-video
 
@@ -242,6 +243,29 @@ python "$JIMMYAI_CLI" create-seedance25-video \
 
 `seedance2.5-gz`: precharged `per_second` by resolution (`seedance2.5-gz-480p` / `seedance2.5-gz-720p`). With `--video`, precharge uses `seedance2.5-gz-video-*` and seconds = output + ref video duration; after success the task is settled to actual usage. Duration 4–30 s or `-1`; default 5; ratios include `adaptive`; max 30 `--image` / 10 `--video` / 10 `--audio`. Docs: https://docs.viraltok.ai/zh/api-reference/seedance/25/create-gz.md
 
+New fixed-contract models use the same command and endpoint. The CLI omits its default `--resolution` for these models because the API rejects that field:
+
+| Model | Contract | Billing |
+|-------|----------|---------|
+| `seedance2.5-md` | fixed 15 s; `16:9` / `9:16`; max 9 images; no video/audio/frames/resolution | per task |
+| `sd2.5-720p` | fixed 720p; 4–30 s; max 30 images / 10 videos / 10 audios; no frames | per second |
+| `sd2.5-720p-ac` | same request limits as `sd2.5-720p` | per task |
+
+```bash
+python "$JIMMYAI_CLI" create-seedance25-video \
+  --model seedance2.5-md \
+  --prompt "A cinematic product reveal" \
+  --aspect-ratio 16:9 \
+  --image "https://example.com/product.png"
+
+python "$JIMMYAI_CLI" create-seedance25-video \
+  --model sd2.5-720p-ac \
+  --prompt "A runner crossing the finish line" \
+  --duration 8 \
+  --aspect-ratio 9:16 \
+  --image "https://example.com/person.png"
+```
+
 ## create-seedance20933-video
 
 `POST /api/open-api/v1/seedance/videos` — poll with `poll --type video`.
@@ -278,11 +302,14 @@ python "$JIMMYAI_CLI" create-gemini-video \
 
 ```bash
 python "$JIMMYAI_CLI" create-image \
-  --model gpt-image-2 \
-  --prompt "A watercolor landscape" \
+  --model nano-banana-2.1 \
+  --prompt "Keep the product design and place it on a marble table" \
   --ratio "16:9" \
-  --quality high
+  --resolution 4k \
+  --image "https://example.com/product.png"
 ```
+
+`nano-banana-2.1` supports `1k` / `2k` / `4k` (default `1k`) and at most 8 repeatable `--image` references.
 
 ## generate-image (sync)
 

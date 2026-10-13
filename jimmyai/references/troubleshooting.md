@@ -158,9 +158,9 @@ Fix: match path to the table (or use the matching CLI command). The CLI exits be
 - Poll with `GET /api/open-api/v1/videos/{taskId}`.
 - Docs: Wan 3.0 https://docs.viraltok.ai/zh/api-reference/wan/create.md · Wan 3.0 GZ https://docs.viraltok.ai/zh/api-reference/wan/create-gz.md
 
-## Seedance 2.5 (`seedance-2.5` / `seedance-2.5-sp` / `seedance2.5-gz`)
+## Seedance 2.5 (`seedance-2.5` / `seedance-2.5-sp` / `seedance2.5-gz` / MD / fixed 720p)
 
-- Use `POST /api/open-api/v1/seedance25/videos` with `"model": "seedance-2.5"`, `"seedance-2.5-sp"`, or `"seedance2.5-gz"`.
+- Use `POST /api/open-api/v1/seedance25/videos` for `seedance-2.5*`, `seedance2.5*`, and `sd2.5-*` models.
 - **Do not** use `/api/open-api/v1/seedance/videos` for these models — that endpoint is Seedance 2.0 (including Full/Manxue). Wrong path routes onto the Full line.
 - Standard billing is `per_second` by resolution (`seedance-2.5-480p` / `seedance-2.5-720p`; `unit_price × duration`). Request `model` stays `seedance-2.5`; billing key follows `resolution`.
 - SP billing is `per_second` at fixed **0.5**/s (`seedance-2.5-sp`; `0.5 × duration`).
@@ -168,10 +168,12 @@ Fix: match path to the table (or use the matching CLI command). The CLI exits be
 - Standard: `duration` 4–30 s (default 4); `resolution` `480p` / `720p` (default `480p`).
 - SP: `duration` 4–30 s; `resolution` **720p only**; optional `first_image` / `last_image` (cannot combine with `reference_images` / `images`).
 - GZ: `duration` 4–30 s or `-1` (default 5); `resolution` `480p` / `720p` (default `720p`); aspect ratios include `adaptive`; optional first/last frames.
+- `seedance2.5-md`: fixed 15 s and fixed contract. Remove `duration` / `resolution` / video / audio / frame fields; use at most 9 reference images.
+- `sd2.5-720p` / `sd2.5-720p-ac`: output is fixed 720p. Remove `resolution` and first/last frames; duration is 4–30 s. The former bills per second, the latter per task.
 - `aspect_ratio`: `16:9` / `9:16` / `1:1` (default `9:16`). GZ also accepts `4:3` / `3:4` / `21:9` / `adaptive`.
 - `reference_images` max 30; `reference_videos` max 10 (each and total ≤ **30.2** s, frame rate ≤ **60**); `reference_audios` max 10 (each ≤ **30** s).
 - Poll with `GET /api/open-api/v1/videos/{taskId}`.
-- Docs: https://docs.viraltok.ai/zh/api-reference/seedance/25/create.md · GZ: https://docs.viraltok.ai/zh/api-reference/seedance/25/create-gz.md
+- Docs: https://docs.viraltok.ai/zh/api-reference/seedance/25/create.md · MD: https://docs.viraltok.ai/zh/api-reference/seedance/25/create-ar.md · 720p: https://docs.viraltok.ai/zh/api-reference/seedance/25/create-sd25-720p.md · 720p AC: https://docs.viraltok.ai/zh/api-reference/seedance/25/create-sd25-720p-ac.md · GZ: https://docs.viraltok.ai/zh/api-reference/seedance/25/create-gz.md
 
 ## Seedance 2.0 933 (`seedance2.0-933`)
 

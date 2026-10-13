@@ -21,7 +21,7 @@ Wrong path → wrong product line, generic「不支持的模型参数」, or (hi
 | Models (request `model`) | Create path | CLI |
 |--------------------------|-------------|-----|
 | Seedance **2.0** (`seedance2.0-*`, `sd2_*`, Manxue/SP/Mini/GZ/933…) | `POST /api/open-api/v1/seedance/videos` | `create-seedance-video` / `create-seedance20933-video` |
-| Seedance **2.5** (`seedance-2.5*`, `seedance2.5*`, `seedance-2.5-sp`, `seedance2.5-gz*`) | `POST /api/open-api/v1/seedance25/videos` | `create-seedance25-video` |
+| Seedance **2.5** (`seedance-2.5*`, `seedance2.5*`, `sd2.5-*`) | `POST /api/open-api/v1/seedance25/videos` | `create-seedance25-video` |
 | MiniMax H3 (`minimax-h3`, `minimax-h3-gz`) | `POST /api/open-api/v1/minimax/videos` | `create-minimax-video` |
 | Kling O3 (`kling-o3*`) | `POST /api/open-api/v1/kling/videos` | `create-kling-video` |
 | Wan 3.0 (`wan3.0*`) | `POST /api/open-api/v1/wan/videos` | (API only) |
@@ -39,7 +39,7 @@ Poll almost all video tasks with `GET /api/open-api/v1/videos/{taskId}` (create 
 | Wrong | Right |
 |-------|-------|
 | `minimax-h3` on `/seedance/videos` | `/minimax/videos` |
-| `seedance-2.5` / `seedance2.5-gz` on `/seedance/videos` | `/seedance25/videos` |
+| `seedance-2.5` / `seedance2.5-gz` / `sd2.5-720p*` on `/seedance/videos` | `/seedance25/videos` |
 | `kling-o3` on `/seedance/videos` | `/kling/videos` |
 | Seedance 2.0 on `/minimax/videos` or `/seedance25/videos` | `/seedance/videos` |
 
