@@ -96,37 +96,37 @@ def _is_seedance20_family_model(model: str) -> bool:
 # Dedicated create paths: foreign models must not be posted here.
 _DEDICATED_VIDEO_ENDPOINTS: Tuple[Tuple[str, Callable[[str], bool], str], ...] = (
     (
-        "/api/open-api/v1/seedance25/videos",
+        "/api/v1/videos",
         _is_seedance25_model,
         "create-seedance25-video",
     ),
     (
-        "/api/open-api/v1/minimax/videos",
+        "/api/v1/videos",
         _is_minimax_h3_model,
         "create-minimax-video",
     ),
     (
-        "/api/open-api/v1/kling/videos",
+        "/api/v1/videos",
         _is_kling_o3_model,
         "create-kling-video",
     ),
     (
-        "/api/open-api/v1/wan/videos",
+        "/api/v1/videos",
         _is_wan30_model,
-        "POST /api/open-api/v1/wan/videos",
+        "POST /api/v1/videos",
     ),
     (
-        "/api/open-api/v1/flux3/videos",
+        "/api/v1/videos",
         _is_flux3_model,
         "create-flux3-video",
     ),
     (
-        "/api/open-api/v1/video-translate/videos",
+        "/api/v1/videos",
         _is_video_translate_model,
         "video-translate",
     ),
     (
-        "/api/open-api/v1/seedance/videos",
+        "/api/v1/videos",
         _is_seedance20_family_model,
         "create-seedance-video",
     ),
@@ -134,9 +134,9 @@ _DEDICATED_VIDEO_ENDPOINTS: Tuple[Tuple[str, Callable[[str], bool], str], ...] =
 
 
 def _endpoint_path(url_or_path: str) -> str:
-    """Return `/api/open-api/v1/...` path from a full URL or path."""
+    """Return `/api/v1/...` path from a full URL or path."""
     s = (url_or_path or "").strip()
-    idx = s.find("/api/open-api/v1/")
+    idx = s.find("/api/v1/")
     if idx >= 0:
         path = s[idx:]
         q = path.find("?")
@@ -164,13 +164,13 @@ def _assert_model_matches_endpoint(model: Optional[str], url_or_path: str) -> No
         return
     # Only enforce when current call is also a known create endpoint (or seedance/minimax/…).
     known = {ep[0] for ep in _DEDICATED_VIDEO_ENDPOINTS} | {
-        "/api/open-api/v1/videos",
-        "/api/open-api/v1/gemini/omni/videos",
-        "/api/open-api/v1/grok/videos",
-        "/api/open-api/v1/digital-human/videos",
-        "/api/open-api/v1/remove-subtitle/videos",
-        "/api/open-api/v1/super-resolution/videos",
-        "/api/open-api/v1/veo/frames",
+        "/api/v1/videos",
+        "/api/v1/videos",
+        "/api/v1/videos",
+        "/api/v1/videos",
+        "/api/v1/videos",
+        "/api/v1/videos",
+        "/api/v1/videos",
     }
     if path not in known and not any(path.endswith(k) for k in known):
         return
@@ -329,7 +329,7 @@ def _upload_file(
     timeout: float = 300.0,
     dry_run: bool = False,
 ) -> Dict[str, Any]:
-    url = f"{base}/api/open-api/v1/files/upload"
+    url = f"{base}/api/v1/files/upload"
     if dry_run:
         print(
             json.dumps(
@@ -398,11 +398,11 @@ def _poll_task(
     dry_run: bool,
 ) -> Dict[str, Any]:
     if task_type == "image":
-        path = f"/api/open-api/v1/images/{task_id}"
+        path = f"/api/v1/images/{task_id}"
     elif task_type == "audio":
-        path = f"/api/open-api/v1/audios/{task_id}"
+        path = f"/api/v1/audios/{task_id}"
     else:
-        path = f"/api/open-api/v1/videos/{task_id}"
+        path = f"/api/v1/videos/{task_id}"
 
     deadline = time.time() + timeout
     last: Dict[str, Any] = {}
@@ -451,7 +451,7 @@ def cmd_create_video(args: argparse.Namespace) -> None:
     if args.image:
         body["images"] = [args.image]
 
-    url = f"{base}/api/open-api/v1/videos"
+    url = f"{base}/api/v1/videos"
     _assert_model_matches_endpoint(args.model, url)
     payload = _request(
         "POST",
@@ -495,7 +495,7 @@ def cmd_create_seedance_video(args: argparse.Namespace) -> None:
     if args.last_image:
         body["last_image"] = args.last_image
 
-    url = f"{base}/api/open-api/v1/seedance/videos"
+    url = f"{base}/api/v1/videos"
     _assert_model_matches_endpoint(args.model, url)
     payload = _request(
         "POST",
@@ -534,7 +534,7 @@ def cmd_create_gemini_video(args: argparse.Namespace) -> None:
     if args.image:
         body["image_urls"] = [args.image]
 
-    url = f"{base}/api/open-api/v1/gemini/omni/videos"
+    url = f"{base}/api/v1/videos"
     _assert_model_matches_endpoint(args.model, url)
     payload = _request(
         "POST",
@@ -573,7 +573,7 @@ def cmd_create_minimax_video(args: argparse.Namespace) -> None:
     if args.last_image:
         body["last_image"] = args.last_image
 
-    url = f"{base}/api/open-api/v1/minimax/videos"
+    url = f"{base}/api/v1/videos"
     _assert_model_matches_endpoint(args.model, url)
     payload = _request(
         "POST",
@@ -617,7 +617,7 @@ def cmd_create_kling_video(args: argparse.Namespace) -> None:
     if getattr(args, "reference_mode", None):
         body["reference_mode"] = args.reference_mode
 
-    url = f"{base}/api/open-api/v1/kling/videos"
+    url = f"{base}/api/v1/videos"
     _assert_model_matches_endpoint(args.model, url)
     payload = _request(
         "POST",
@@ -687,7 +687,7 @@ def cmd_create_wan_video(args: argparse.Namespace) -> None:
     body = _wan_video_body(args)
     payload = _request(
         "POST",
-        f"{base}/api/open-api/v1/wan/videos",
+        f"{base}/api/v1/videos",
         api_key,
         body,
         dry_run=args.dry_run,
@@ -708,7 +708,7 @@ def cmd_create_seedance25_video(args: argparse.Namespace) -> None:
     base = _base_url(args.base_url)
     body = _seedance25_video_body(args)
 
-    url = f"{base}/api/open-api/v1/seedance25/videos"
+    url = f"{base}/api/v1/videos"
     _assert_model_matches_endpoint(args.model, url)
     payload = _request(
         "POST",
@@ -798,7 +798,7 @@ def cmd_create_seedance20933_video(args: argparse.Namespace) -> None:
     if args.audio:
         body["reference_audios"] = args.audio
 
-    url = f"{base}/api/open-api/v1/seedance/videos"
+    url = f"{base}/api/v1/videos"
     _assert_model_matches_endpoint(args.model, url)
     payload = _request(
         "POST",
@@ -847,7 +847,7 @@ def cmd_create_image(args: argparse.Namespace) -> None:
 
     payload = _request(
         "POST",
-        f"{base}/api/open-api/v1/images",
+        f"{base}/api/v1/images",
         api_key,
         body,
         dry_run=args.dry_run,
@@ -874,7 +874,7 @@ def cmd_generate_image(args: argparse.Namespace) -> None:
 
     payload = _request(
         "POST",
-        f"{base}/api/open-api/v1/images/generations",
+        f"{base}/api/v1/images/generations",
         api_key,
         body,
         timeout=args.timeout,
@@ -916,7 +916,7 @@ def cmd_remove_bg(args: argparse.Namespace) -> None:
 
     payload = _request(
         "POST",
-        f"{base}/api/open-api/v1/images/remove-bg",
+        f"{base}/api/v1/images/remove-bg",
         api_key,
         body,
         timeout=args.timeout,
@@ -954,7 +954,7 @@ def cmd_remove_subtitle(args: argparse.Namespace) -> None:
 
     payload = _request(
         "POST",
-        f"{base}/api/open-api/v1/remove-subtitle/videos",
+        f"{base}/api/v1/videos",
         api_key,
         body,
         dry_run=args.dry_run,
@@ -1011,7 +1011,7 @@ def cmd_video_translate(args: argparse.Namespace) -> None:
     base = _base_url(args.base_url)
     body = _video_translate_body(args, default_model="video-translate-precision")
 
-    url = f"{base}/api/open-api/v1/video-translate/videos"
+    url = f"{base}/api/v1/videos"
     _assert_model_matches_endpoint(body.get("model"), url)
     payload = _request(
         "POST",
@@ -1072,7 +1072,7 @@ def cmd_create_grok_video(args: argparse.Namespace) -> None:
     body = _grok_video_body(args, default_model="grok-imagine-video-1.5")
     payload = _request(
         "POST",
-        f"{base}/api/open-api/v1/grok/videos",
+        f"{base}/api/v1/videos",
         api_key,
         body,
         dry_run=args.dry_run,
@@ -1113,7 +1113,7 @@ def cmd_create_digital_human(args: argparse.Namespace) -> None:
     body = _digital_human_body(args, default_model="digitalHuman")
     payload = _request(
         "POST",
-        f"{base}/api/open-api/v1/digital-human/videos",
+        f"{base}/api/v1/videos",
         api_key,
         body,
         dry_run=args.dry_run,
@@ -1149,7 +1149,7 @@ def cmd_upscale(args: argparse.Namespace) -> None:
 
     payload = _request(
         "POST",
-        f"{base}/api/open-api/v1/images/upscale",
+        f"{base}/api/v1/images/upscale",
         api_key,
         body,
         timeout=args.timeout,
@@ -1239,7 +1239,7 @@ def cmd_create_flux3_video(args: argparse.Namespace) -> None:
     api_key = _api_key(args.dry_run)
     base = _base_url(args.base_url)
     body = _flux3_video_body(args, default_model="flux-3-draft")
-    url = f"{base}/api/open-api/v1/flux3/videos"
+    url = f"{base}/api/v1/videos"
     _assert_model_matches_endpoint(body.get("model"), url)
     payload = _request(
         "POST",
@@ -1284,7 +1284,7 @@ def cmd_create_veo_frames(args: argparse.Namespace) -> None:
     body = _veo_frames_body(args, default_model="veo_3_1_fast")
     payload = _request(
         "POST",
-        f"{base}/api/open-api/v1/veo/frames",
+        f"{base}/api/v1/videos",
         api_key,
         body,
         dry_run=args.dry_run,
@@ -1311,7 +1311,7 @@ def cmd_super_resolution(args: argparse.Namespace) -> None:
     body = _super_resolution_body(args, default_model="superResolution-1080p-lowfps")
     payload = _request(
         "POST",
-        f"{base}/api/open-api/v1/super-resolution/videos",
+        f"{base}/api/v1/videos",
         api_key,
         body,
         dry_run=args.dry_run,
@@ -1336,7 +1336,7 @@ def cmd_understand_video(args: argparse.Namespace) -> None:
     }
     payload = _request(
         "POST",
-        f"{base}/api/open-api/v1/videos/understand",
+        f"{base}/api/v1/videos/understand",
         api_key,
         body,
         timeout=args.timeout,
@@ -1371,7 +1371,7 @@ def cmd_sound_clone(args: argparse.Namespace) -> None:
     body = _sound_clone_body(args)
     payload = _request(
         "POST",
-        f"{base}/api/open-api/v1/soundCloning/clones",
+        f"{base}/api/v1/soundCloning/clones",
         api_key,
         body,
         dry_run=args.dry_run,
@@ -1415,7 +1415,7 @@ def cmd_sound_clone_audio(args: argparse.Namespace) -> None:
     body = _sound_clone_audio_body(args)
     payload = _request(
         "POST",
-        f"{base}/api/open-api/v1/soundCloning/audios",
+        f"{base}/api/v1/soundCloning/audios",
         api_key,
         body,
         dry_run=args.dry_run,
@@ -1452,39 +1452,39 @@ def cmd_create_and_poll(args: argparse.Namespace) -> None:
         # create-and-poll defaults --model to sora2-12s; remap for this type
         model = args.model if args.model and args.model != "sora2-12s" else "video_remove_subtitle"
         body: Dict[str, Any] = {"video_url": video_url, "model": model}
-        url = f"{base}/api/open-api/v1/remove-subtitle/videos"
+        url = f"{base}/api/v1/videos"
         poll_type = "video"
     elif args.type == "video-translate":
         body = _video_translate_body(args, default_model="video-translate-precision")
-        url = f"{base}/api/open-api/v1/video-translate/videos"
+        url = f"{base}/api/v1/videos"
         poll_type = "video"
     elif args.type == "grok-video":
         body = _grok_video_body(args, default_model="grok-imagine-video-1.5")
-        url = f"{base}/api/open-api/v1/grok/videos"
+        url = f"{base}/api/v1/videos"
         poll_type = "video"
     elif args.type == "digital-human":
         body = _digital_human_body(args, default_model="digitalHuman")
-        url = f"{base}/api/open-api/v1/digital-human/videos"
+        url = f"{base}/api/v1/videos"
         poll_type = "video"
     elif args.type == "flux3-video":
         body = _flux3_video_body(args, default_model="flux-3-draft")
-        url = f"{base}/api/open-api/v1/flux3/videos"
+        url = f"{base}/api/v1/videos"
         poll_type = "video"
     elif args.type == "veo-frames":
         body = _veo_frames_body(args, default_model="veo_3_1_fast")
-        url = f"{base}/api/open-api/v1/veo/frames"
+        url = f"{base}/api/v1/videos"
         poll_type = "video"
     elif args.type == "super-resolution":
         body = _super_resolution_body(args, default_model="superResolution-1080p-lowfps")
-        url = f"{base}/api/open-api/v1/super-resolution/videos"
+        url = f"{base}/api/v1/videos"
         poll_type = "video"
     elif args.type == "sound-clone":
         body = _sound_clone_body(args)
-        url = f"{base}/api/open-api/v1/soundCloning/clones"
+        url = f"{base}/api/v1/soundCloning/clones"
         poll_type = "audio"
     elif args.type == "sound-clone-audio":
         body = _sound_clone_audio_body(args)
-        url = f"{base}/api/open-api/v1/soundCloning/audios"
+        url = f"{base}/api/v1/soundCloning/audios"
         poll_type = "audio"
     elif args.type == "video":
         prompt = _read_prompt(args.prompt, args.prompt_file)
@@ -1497,7 +1497,7 @@ def cmd_create_and_poll(args: argparse.Namespace) -> None:
             body["orientation"] = args.orientation
         if args.image:
             body["images"] = args.image
-        url = f"{base}/api/open-api/v1/videos"
+        url = f"{base}/api/v1/videos"
         poll_type = "video"
     elif args.type == "gemini-video":
         prompt = _read_prompt(args.prompt, args.prompt_file)
@@ -1512,7 +1512,7 @@ def cmd_create_and_poll(args: argparse.Namespace) -> None:
             body["orientation"] = args.orientation
         if args.image:
             body["image_urls"] = args.image
-        url = f"{base}/api/open-api/v1/gemini/omni/videos"
+        url = f"{base}/api/v1/videos"
         poll_type = "video"
     elif args.type == "seedance-video":
         prompt = _read_prompt(args.prompt, args.prompt_file)
@@ -1535,7 +1535,7 @@ def cmd_create_and_poll(args: argparse.Namespace) -> None:
             body["first_image"] = args.first_image
         if getattr(args, "last_image", None):
             body["last_image"] = args.last_image
-        url = f"{base}/api/open-api/v1/seedance/videos"
+        url = f"{base}/api/v1/videos"
         poll_type = "video"
     elif args.type == "minimax-video":
         prompt = _read_prompt(args.prompt, args.prompt_file)
@@ -1556,7 +1556,7 @@ def cmd_create_and_poll(args: argparse.Namespace) -> None:
             body["first_image"] = args.first_image
         if getattr(args, "last_image", None):
             body["last_image"] = args.last_image
-        url = f"{base}/api/open-api/v1/minimax/videos"
+        url = f"{base}/api/v1/videos"
         poll_type = "video"
     elif args.type == "kling-video":
         prompt = _read_prompt(args.prompt, args.prompt_file)
@@ -1580,15 +1580,15 @@ def cmd_create_and_poll(args: argparse.Namespace) -> None:
             body["generate_audio"] = args.generate_audio
         if getattr(args, "reference_mode", None):
             body["reference_mode"] = args.reference_mode
-        url = f"{base}/api/open-api/v1/kling/videos"
+        url = f"{base}/api/v1/videos"
         poll_type = "video"
     elif args.type == "wan-video":
         body = _wan_video_body(args)
-        url = f"{base}/api/open-api/v1/wan/videos"
+        url = f"{base}/api/v1/videos"
         poll_type = "video"
     elif args.type == "seedance25-video":
         body = _seedance25_video_body(args)
-        url = f"{base}/api/open-api/v1/seedance25/videos"
+        url = f"{base}/api/v1/videos"
         poll_type = "video"
     elif args.type == "seedance20933-video":
         prompt = _read_prompt(args.prompt, args.prompt_file)
@@ -1613,11 +1613,11 @@ def cmd_create_and_poll(args: argparse.Namespace) -> None:
             body["reference_videos"] = args.video
         if getattr(args, "audio", None):
             body["reference_audios"] = args.audio
-        url = f"{base}/api/open-api/v1/seedance/videos"
+        url = f"{base}/api/v1/videos"
         poll_type = "video"
     elif args.type == "image":
         body = _async_image_body(args)
-        url = f"{base}/api/open-api/v1/images"
+        url = f"{base}/api/v1/images"
         poll_type = "image"
     else:
         _die(f"Unknown --type: {args.type}")
@@ -1659,21 +1659,21 @@ def _cmd_balance(args: argparse.Namespace, path: str) -> None:
 
 
 def cmd_user_balance(args: argparse.Namespace) -> None:
-    _cmd_balance(args, "/api/open-api/v1/user/balance")
+    _cmd_balance(args, "/api/v1/user/balance")
 
 
 def cmd_key_balance(args: argparse.Namespace) -> None:
-    _cmd_balance(args, "/api/open-api/v1/key/balance")
+    _cmd_balance(args, "/api/v1/key/balance")
 
 
 def cmd_list_models(args: argparse.Namespace) -> None:
-    """List available billing models via GET /api/openapi/model/catalog (no API key required)."""
+    """List available billing models via GET /api/v1/models (no API key required)."""
     base = _base_url(args.base_url)
     params: Dict[str, str] = {}
     search = (args.search or "").strip()
     if search:
         params["search"] = search
-    url = f"{base}/api/openapi/model/catalog"
+    url = f"{base}/api/v1/models"
     if params:
         url = f"{url}?{urllib.parse.urlencode(params)}"
 
@@ -1724,7 +1724,7 @@ def cmd_upload_file(args: argparse.Namespace) -> None:
     base = _base_url(args.base_url)
     file_path = Path(args.file)
     payload = _multipart_upload(
-        f"{base}/api/open-api/v1/files/upload",
+        f"{base}/api/v1/files/upload",
         api_key,
         file_path,
         timeout=args.timeout,
