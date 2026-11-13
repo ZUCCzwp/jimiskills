@@ -174,6 +174,22 @@ Result fields: `data.status`, `data.progress`, `data.result.video_url`, `data.er
 
 Poll via same `GET /api/open-api/v1/videos/{taskId}`.
 
+### Gemini Omni 1.2 — create
+
+`POST /api/v1/videos` with `model` = `gemini-omni-1.2`. Docs: https://docs.viraltok.ai/zh/api-reference/gemini-omni/create-1.2.md
+
+| Field | Required | Notes |
+|-------|----------|-------|
+| model | yes | `gemini-omni-1.2` |
+| prompt | yes | required in every mode |
+| duration | no | default 10. Text / first frame / reference: 3–15. First+last and extend: 3–10. Do not send it for edit |
+| resolution | no | `360p`, `720p` (default), `1080p`, `4k` (`2160p` → `4k`) |
+| aspect_ratio | no | `16:9` (default) or `9:16` |
+| omni_reference_task_type | with video | `edit`, `extend`, `reference`, `text_to_video`, `image_to_video`, `reference_to_video`, `auto` (`auto` + video = edit). Do not send with `generation_type` |
+| video_urls | edit/extend | one public video, ≤15s and ≤64MB. Mutually exclusive with `extend_from_task_id` |
+
+Billing is per second: `gemini-omni-1.2-360p` / `720p` / `1080p` / `4k`. Edit bills the source length (subtract 0.15s, round up, minimum 1s). Extend bills only the new segment.
+
 ### VEO — create frames
 
 `POST /api/open-api/v1/veo/frames` — first/last frame or reference-image mode. Docs: https://docs.viraltok.ai/zh/api-reference/veo/create-frames.md
